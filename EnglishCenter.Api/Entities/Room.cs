@@ -1,0 +1,15 @@
+using EnglishCenter.Api.Enums;
+
+namespace EnglishCenter.Api.Entities;
+
+public class Room
+{
+    public int Id { get; set; }
+    public string RoomCode { get; set; } = string.Empty;
+    public string? RoomName { get; set; }
+    public int Capacity { get; set; }
+    public RoomStatus Status { get; set; }
+
+    // Navigation properties
+    public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+}
