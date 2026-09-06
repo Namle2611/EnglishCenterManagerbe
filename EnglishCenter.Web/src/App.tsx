@@ -11,6 +11,10 @@ import { StudentCreatePage } from './pages/students/StudentCreatePage';
 import { StudentDetailPage } from './pages/students/StudentDetailPage';
 import { StudentEditPage } from './pages/students/StudentEditPage';
 import { StudentListPage } from './pages/students/StudentListPage';
+import { TeacherCreatePage } from './pages/teachers/TeacherCreatePage';
+import { TeacherDetailPage } from './pages/teachers/TeacherDetailPage';
+import { TeacherEditPage } from './pages/teachers/TeacherEditPage';
+import { TeacherListPage } from './pages/teachers/TeacherListPage';
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
@@ -56,6 +60,10 @@ export const App: React.FC = () => {
               <Route path="/admin/students/new" element={<StudentCreatePage />} />
               <Route path="/admin/students/:id" element={<StudentDetailPage />} />
               <Route path="/admin/students/:id/edit" element={<StudentEditPage />} />
+              <Route path="/admin/teachers" element={<TeacherListPage />} />
+              <Route path="/admin/teachers/new" element={<TeacherCreatePage />} />
+              <Route path="/admin/teachers/:id" element={<TeacherDetailPage />} />
+              <Route path="/admin/teachers/:id/edit" element={<TeacherEditPage />} />
             </Route>
 
             {/* Staff only */}

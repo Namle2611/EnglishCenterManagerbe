@@ -32,6 +32,13 @@ export const AdminDashboard: React.FC = () => {
               Xem danh sách, tìm kiếm, tạo mới và quản lý trạng thái học viên
             </p>
           </Link>
+          <Link to="/admin/teachers" style={navCardStyle}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>👨‍🏫</div>
+            <h3 style={{ margin: '0 0 0.25rem 0', color: '#1e293b' }}>Quản lý giáo viên</h3>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
+              Xem danh sách, tìm kiếm, tạo mới và quản lý trạng thái giáo viên
+            </p>
+          </Link>
         </div>
 
         <div style={cardStyle}>
