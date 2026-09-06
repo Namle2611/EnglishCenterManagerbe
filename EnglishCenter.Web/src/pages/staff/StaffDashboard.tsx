@@ -68,6 +68,24 @@ export const StaffDashboard: React.FC = () => {
               Xem danh sách, tìm kiếm, tạo mới và quản lý trạng thái học viên
             </p>
           </Link>
+          <Link
+            to="/staff/courses"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '0.5rem',
+              padding: '1.5rem',
+              textDecoration: 'none',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0',
+              display: 'block'
+            }}
+          >
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📚</div>
+            <h3 style={{ margin: '0 0 0.25rem 0', color: '#1e293b' }}>Quản lý khóa học</h3>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
+              Xem danh sách, tìm kiếm, tạo mới và quản lý trạng thái khóa học
+            </p>
+          </Link>
         </div>
 
         <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>

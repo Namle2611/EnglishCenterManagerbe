@@ -11,6 +11,10 @@ import { StudentCreatePage } from './pages/students/StudentCreatePage';
 import { StudentDetailPage } from './pages/students/StudentDetailPage';
 import { StudentEditPage } from './pages/students/StudentEditPage';
 import { StudentListPage } from './pages/students/StudentListPage';
+import { CourseCreatePage } from './pages/courses/CourseCreatePage';
+import { CourseDetailPage } from './pages/courses/CourseDetailPage';
+import { CourseEditPage } from './pages/courses/CourseEditPage';
+import { CourseListPage } from './pages/courses/CourseListPage';
 import { TeacherCreatePage } from './pages/teachers/TeacherCreatePage';
 import { TeacherDetailPage } from './pages/teachers/TeacherDetailPage';
 import { TeacherEditPage } from './pages/teachers/TeacherEditPage';
@@ -64,6 +68,10 @@ export const App: React.FC = () => {
               <Route path="/admin/teachers/new" element={<TeacherCreatePage />} />
               <Route path="/admin/teachers/:id" element={<TeacherDetailPage />} />
               <Route path="/admin/teachers/:id/edit" element={<TeacherEditPage />} />
+              <Route path="/admin/courses" element={<CourseListPage />} />
+              <Route path="/admin/courses/new" element={<CourseCreatePage />} />
+              <Route path="/admin/courses/:id" element={<CourseDetailPage />} />
+              <Route path="/admin/courses/:id/edit" element={<CourseEditPage />} />
             </Route>
 
             {/* Staff only */}
@@ -73,6 +81,10 @@ export const App: React.FC = () => {
               <Route path="/staff/students/new" element={<StudentCreatePage />} />
               <Route path="/staff/students/:id" element={<StudentDetailPage />} />
               <Route path="/staff/students/:id/edit" element={<StudentEditPage />} />
+              <Route path="/staff/courses" element={<CourseListPage />} />
+              <Route path="/staff/courses/new" element={<CourseCreatePage />} />
+              <Route path="/staff/courses/:id" element={<CourseDetailPage />} />
+              <Route path="/staff/courses/:id/edit" element={<CourseEditPage />} />
             </Route>
 
             {/* Teacher only */}
