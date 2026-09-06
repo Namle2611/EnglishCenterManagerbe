@@ -61,4 +61,11 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .AnyAsync(u => u.Email == trimmedEmail, cancellationToken);
     }
+
+    public async Task<bool> EmailExistsExceptUserAsync(string email, int userId, CancellationToken cancellationToken = default)
+    {
+        var trimmedEmail = email.Trim();
+        return await _context.Users
+            .AnyAsync(u => u.Email == trimmedEmail && u.Id != userId, cancellationToken);
+    }
 }
