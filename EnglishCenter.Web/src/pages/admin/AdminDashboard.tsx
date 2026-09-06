@@ -23,8 +23,19 @@ export const AdminDashboard: React.FC = () => {
       </header>
 
       <main style={mainStyle}>
+        {/* Navigation Grid */}
+        <div style={navGridStyle}>
+          <Link to="/admin/students" style={navCardStyle}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎓</div>
+            <h3 style={{ margin: '0 0 0.25rem 0', color: '#1e293b' }}>Quản lý học viên</h3>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
+              Xem danh sách, tìm kiếm, tạo mới và quản lý trạng thái học viên
+            </p>
+          </Link>
+        </div>
+
         <div style={cardStyle}>
-          <h3>Administrator Overview (Phase 3 Placeholder)</h3>
+          <h3>Administrator Overview</h3>
           <p>Authentication and Role-based authorization verified successfully.</p>
           <div style={infoBoxStyle}>
             <div><strong>User ID:</strong> {user?.id}</div>
@@ -56,7 +67,27 @@ const headerStyle: React.CSSProperties = {
 const mainStyle: React.CSSProperties = {
   padding: '2rem',
   maxWidth: '900px',
-  margin: '0 auto'
+  margin: '0 auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1.5rem'
+};
+
+const navGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+  gap: '1rem'
+};
+
+const navCardStyle: React.CSSProperties = {
+  backgroundColor: '#ffffff',
+  borderRadius: '0.5rem',
+  padding: '1.5rem',
+  textDecoration: 'none',
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+  border: '1px solid #e2e8f0',
+  transition: 'transform 0.15s, box-shadow 0.15s',
+  display: 'block'
 };
 
 const cardStyle: React.CSSProperties = {
