@@ -10,4 +10,5 @@ public interface IUserRepository
     Task<User?> GetWithRolesByEmailAsync(string email);
     Task AddAsync(User user);
     Task UpdateAsync(User user);
+    Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default);
 }

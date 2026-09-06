@@ -1,0 +1,7 @@
+namespace EnglishCenter.Api.Security;
+
+public static class PolicyNames
+{
+    public const string ManageStudents = "ManageStudents";
+    public const string ManageTeachers = "ManageTeachers";
+}

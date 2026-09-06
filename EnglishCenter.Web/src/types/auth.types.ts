@@ -8,12 +8,7 @@ export interface User {
   isActive: boolean;
 }
 
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data: T;
-  errors: string[];
-}
+export type { ApiResponse } from './common.types';
 
 export interface LoginResponseData {
   accessToken: string;

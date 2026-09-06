@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using System.Text;
 using EnglishCenter.Api.Data;
+using EnglishCenter.Api.DTOs.Common;
+using EnglishCenter.Api.Middleware;
 using EnglishCenter.Api.Repositories;
 using EnglishCenter.Api.Repositories.Interfaces;
 using EnglishCenter.Api.Security;
@@ -8,6 +10,7 @@ using EnglishCenter.Api.Seeders;
 using EnglishCenter.Api.Services;
 using EnglishCenter.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -75,7 +78,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PolicyNames.ManageStudents, policy =>
+        policy.RequireRole(RoleNames.Admin, RoleNames.Staff));
+    options.AddPolicy(PolicyNames.ManageTeachers, policy =>
+        policy.RequireRole(RoleNames.Admin));
+});
 
 // Register DI services
 builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
@@ -83,6 +92,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 builder.Services.AddScoped<IdentitySeeder>();
 
 // Configure CORS
@@ -98,10 +108,24 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? "Invalid input." : e.ErrorMessage)
+            .ToList();
+        var response = ApiResponse.Fail("Validation failed", errors);
+        return new BadRequestObjectResult(response);
+    };
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // Seed identity roles and development admin
 using (var scope = app.Services.CreateScope())

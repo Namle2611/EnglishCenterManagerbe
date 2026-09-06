@@ -54,4 +54,11 @@ public class UserRepository : IUserRepository
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var trimmedEmail = email.Trim();
+        return await _context.Users
+            .AnyAsync(u => u.Email == trimmedEmail, cancellationToken);
+    }
 }
