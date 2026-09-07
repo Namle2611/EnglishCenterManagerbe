@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     if (!email.trim() || !password) {
-      setError('Please enter both email and password.');
+      setError('Vui lòng nhập đầy đủ email và mật khẩu.');
       return;
     }
 
@@ -30,7 +30,7 @@ export const LoginPage: React.FC = () => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Login failed. Please check your credentials.');
+        setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
       }
     } finally {
       setIsSubmitting(false);
@@ -40,46 +40,53 @@ export const LoginPage: React.FC = () => {
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <h1 style={{ margin: 0, fontSize: '1.75rem', color: '#1e293b' }}>English Center Manager</h1>
-          <p style={{ margin: '0.5rem 0 0', color: '#64748b', fontSize: '0.9rem' }}>
-            Sign in to access your portal
+        {/* Brand Header */}
+        <div style={headerStyle}>
+          <div style={brandLockupStyle}>
+            <span style={{ fontSize: '1.75rem', lineHeight: 1 }} aria-hidden="true">🏛️</span>
+            <h1 style={titleStyle}>English Center Manager</h1>
+          </div>
+          <p style={subtitleStyle}>
+            Hệ thống quản lý trung tâm Anh ngữ chuyên nghiệp
           </p>
         </div>
 
+        {/* Error Alert */}
         {error && (
-          <div style={alertErrorStyle}>
-            {error}
+          <div style={alertErrorStyle} role="alert">
+            <span style={{ fontSize: '1rem', lineHeight: 1 }}>⚠️</span>
+            <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
+        {/* Form */}
+        <form onSubmit={handleSubmit} noValidate>
+          <div style={formGroupStyle}>
             <label style={labelStyle} htmlFor="email-input">
-              Email Address
+              Địa chỉ Email <span style={{ color: 'var(--status-danger-text)' }}>*</span>
             </label>
             <input
               id="email-input"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
+              placeholder="admin@englishcenter.local"
               disabled={isSubmitting}
               required
               style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={formGroupStyle}>
             <label style={labelStyle} htmlFor="password-input">
-              Password
+              Mật khẩu <span style={{ color: 'var(--status-danger-text)' }}>*</span>
             </label>
             <input
               id="password-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="Nhập mật khẩu"
               disabled={isSubmitting}
               required
               style={inputStyle}
@@ -96,7 +103,7 @@ export const LoginPage: React.FC = () => {
               cursor: isSubmitting ? 'not-allowed' : 'pointer'
             }}
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
       </div>
@@ -109,56 +116,94 @@ const containerStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: '#f8fafc',
-  padding: '1rem',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+  backgroundColor: 'var(--color-canvas)',
+  padding: '1.5rem'
 };
 
 const cardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '0.75rem',
-  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  boxShadow: 'var(--shadow-lg)',
+  border: '1px solid var(--color-border)',
   width: '100%',
-  maxWidth: '400px',
-  padding: '2rem'
+  maxWidth: '420px',
+  padding: '2.5rem 2rem'
+};
+
+const headerStyle: React.CSSProperties = {
+  marginBottom: '2rem'
+};
+
+const brandLockupStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '0.75rem',
+  marginBottom: '0.5rem'
+};
+
+const titleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '1.375rem',
+  fontWeight: 700,
+  color: 'var(--color-text-primary)',
+  letterSpacing: '-0.02em'
+};
+
+const subtitleStyle: React.CSSProperties = {
+  margin: '0.5rem 0 0',
+  color: 'var(--color-text-secondary)',
+  fontSize: '0.875rem',
+  lineHeight: 1.4
+};
+
+const formGroupStyle: React.CSSProperties = {
+  marginBottom: '1.25rem'
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  fontSize: '0.875rem',
+  fontSize: '0.8125rem',
   fontWeight: 600,
-  color: '#334155',
-  marginBottom: '0.25rem'
+  color: 'var(--color-text-primary)',
+  marginBottom: '0.375rem'
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  padding: '0.625rem 0.75rem',
-  borderRadius: '0.375rem',
-  border: '1px solid #cbd5e1',
-  fontSize: '0.95rem',
+  padding: '0.625rem 0.875rem',
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--color-border-strong)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
+  fontSize: '0.875rem',
   boxSizing: 'border-box',
-  outline: 'none'
+  transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
 };
 
 const buttonStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.75rem',
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
   fontWeight: 600,
-  fontSize: '0.95rem',
+  fontSize: '0.875rem',
   border: 'none',
-  borderRadius: '0.375rem',
-  transition: 'background-color 0.2s'
+  borderRadius: 'var(--radius-md)',
+  marginTop: '0.5rem',
+  transition: 'background-color 0.15s ease'
 };
 
 const alertErrorStyle: React.CSSProperties = {
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  color: '#b91c1c',
-  padding: '0.75rem',
-  borderRadius: '0.375rem',
-  fontSize: '0.875rem',
-  marginBottom: '1rem'
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.625rem',
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  color: 'var(--status-danger-text)',
+  padding: '0.75rem 1rem',
+  borderRadius: 'var(--radius-md)',
+  fontSize: '0.8125rem',
+  marginBottom: '1.25rem',
+  lineHeight: 1.4
 };

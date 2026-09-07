@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingState } from '../../components/common/LoadingState';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { StudentForm } from '../../components/students/StudentForm';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/student.service';
 import type { StudentDetail, UpdateStudentPayload } from '../../types/student.types';
+import { getRoleHomeRoute } from '../../utils/roleHelper';
 import { getApiErrorMessage, getStudentBasePath } from '../../utils/studentHelper';
 
 export const StudentEditPage: React.FC = () => {
@@ -14,6 +17,7 @@ export const StudentEditPage: React.FC = () => {
   const { user } = useAuth();
 
   const basePath = getStudentBasePath(location.pathname, user?.roles);
+  const homeRoute = user ? getRoleHomeRoute(user.roles) : '/login';
 
   const [student, setStudent] = useState<StudentDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState<boolean>(true);
@@ -84,21 +88,21 @@ export const StudentEditPage: React.FC = () => {
 
   if (isLoadingDetail) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <LoadingState message="Đang tải dữ liệu học viên..." />
-      </div>
+      </AppShell>
     );
   }
 
   if (isNotFound) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <div style={notFoundCardStyle}>
-          <h3 style={{ margin: '0 0 0.5rem 0', color: '#1e293b' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>
             Không tìm thấy học viên
-          </h3>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-            Học viên với mã định danh #{id} không tồn tại hoặc đã bị xóa.
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            Học viên với mã định danh #{id} không tồn tại hoặc đã bị xóa khỏi hệ thống.
           </p>
           <button
             type="button"
@@ -108,15 +112,15 @@ export const StudentEditPage: React.FC = () => {
             &larr; Quay lại danh sách
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   if (!student) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <div style={errorCardStyle}>
-          <p>
+          <p style={{ margin: '0 0 1rem 0', fontWeight: 500 }}>
             <strong>Lỗi tải dữ liệu:</strong> {serverError}
           </p>
           <button
@@ -127,111 +131,100 @@ export const StudentEditPage: React.FC = () => {
             Thử lại
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div style={pageContainerStyle}>
-      <div style={headerStyle}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>
-            Chỉnh sửa học viên: {student.fullName}
-          </h1>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-            Cập nhật thông tin liên hệ và học tập của học viên.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate(`${basePath}/${student.id}`)}
-          style={backButtonStyle}
-          title="Hủy và quay lại chi tiết"
-        >
-          &larr; Quay lại hồ sơ
-        </button>
-      </div>
-
-      <StudentForm
-        mode="edit"
-        initialValues={{
-          email: student.email,
-          fullName: student.fullName,
-          phone: student.phone || '',
-          avatarUrl: student.avatarUrl || '',
-          dateOfBirth: student.dateOfBirth || '',
-          gender: student.gender || '',
-          address: student.address || '',
-          currentLevel: student.currentLevel || ''
-        }}
-        readOnlyData={{
-          studentCode: student.studentCode,
-          enrollmentDate: student.enrollmentDate,
-          status: student.status
-        }}
-        onSubmit={handleSubmit}
-        isLoading={isSubmitting}
-        serverError={serverError}
-        onCancel={() => navigate(`${basePath}/${student.id}`)}
+    <AppShell>
+      <PageHeader
+        title={`Chỉnh sửa: ${student.fullName}`}
+        subtitle="Cập nhật thông tin liên hệ và học vụ của học viên."
+        breadcrumbs={[
+          { label: 'Trang chủ', path: homeRoute },
+          { label: 'Quản lý học viên', path: basePath },
+          { label: student.fullName, path: `${basePath}/${student.id}` },
+          { label: 'Chỉnh sửa' }
+        ]}
+        actions={
+          <button
+            type="button"
+            onClick={() => navigate(`${basePath}/${student.id}`)}
+            style={backButtonStyle}
+            title="Hủy và quay lại hồ sơ chi tiết"
+          >
+            &larr; Quay lại hồ sơ
+          </button>
+        }
       />
-    </div>
+
+      <div style={{ maxWidth: '900px' }}>
+        <StudentForm
+          mode="edit"
+          initialValues={{
+            email: student.email,
+            fullName: student.fullName,
+            phone: student.phone || '',
+            avatarUrl: student.avatarUrl || '',
+            dateOfBirth: student.dateOfBirth || '',
+            gender: student.gender || '',
+            address: student.address || '',
+            currentLevel: student.currentLevel || ''
+          }}
+          readOnlyData={{
+            studentCode: student.studentCode,
+            enrollmentDate: student.enrollmentDate,
+            status: student.status
+          }}
+          onSubmit={handleSubmit}
+          isLoading={isSubmitting}
+          serverError={serverError}
+          onCancel={() => navigate(`${basePath}/${student.id}`)}
+        />
+      </div>
+    </AppShell>
   );
-};
-
-const pageContainerStyle: React.CSSProperties = {
-  maxWidth: '860px',
-  margin: '0 auto',
-  padding: '1.5rem 1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.5rem',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: '1rem'
 };
 
 const backButtonStyle: React.CSSProperties = {
   padding: '0.45rem 0.85rem',
-  fontSize: '0.85rem',
+  fontSize: '0.8125rem',
   fontWeight: 500,
-  backgroundColor: '#f1f5f9',
-  color: '#475569',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-secondary)',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer'
 };
 
 const notFoundCardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  padding: '3rem 1.5rem',
-  borderRadius: '8px',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  padding: '2.5rem 2rem',
   textAlign: 'center',
-  border: '1px dashed #cbd5e1'
+  maxWidth: '480px',
+  margin: '2rem auto'
 };
 
 const errorCardStyle: React.CSSProperties = {
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  borderRadius: 'var(--radius-lg)',
   padding: '1.5rem',
-  backgroundColor: '#fef2f2',
-  color: '#b91c1c',
-  borderRadius: '8px',
-  border: '1px solid #fecaca',
+  color: 'var(--status-danger-text)',
+  maxWidth: '600px',
+  margin: '2rem auto',
   textAlign: 'center'
 };
 
 const primaryButtonStyle: React.CSSProperties = {
-  marginTop: '1rem',
   padding: '0.5rem 1rem',
   fontSize: '0.875rem',
-  fontWeight: 500,
-  backgroundColor: '#3b82f6',
-  color: '#ffffff',
+  fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
   border: 'none',
-  borderRadius: '6px',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer'
 };

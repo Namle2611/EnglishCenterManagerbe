@@ -4,13 +4,13 @@ interface LoadingStateProps {
   message?: string;
 }
 
-export const LoadingState: React.FC<LoadingStateProps> = ({ message = 'Loading...' }) => {
+export const LoadingState: React.FC<LoadingStateProps> = ({ message = 'Đang tải dữ liệu...' }) => {
   return (
     <div style={containerStyle} role="status" aria-live="polite">
       <div style={spinnerStyle} />
       <span style={messageStyle}>{message}</span>
       <style>{`
-        @keyframes spin {
+        @keyframes ec-spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
@@ -24,21 +24,22 @@ const containerStyle: React.CSSProperties = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '2.5rem 1rem',
-  gap: '0.75rem',
-  color: '#64748b'
+  padding: '3rem 1.5rem',
+  gap: '0.875rem',
+  color: 'var(--color-text-secondary)'
 };
 
 const spinnerStyle: React.CSSProperties = {
   width: '32px',
   height: '32px',
-  border: '3px solid #e2e8f0',
-  borderTopColor: '#3b82f6',
-  borderRadius: '50%',
-  animation: 'spin 0.8s linear infinite'
+  border: '3px solid var(--color-border)',
+  borderTopColor: 'var(--color-primary)',
+  borderRadius: 'var(--radius-full)',
+  animation: 'ec-spin 0.8s linear infinite'
 };
 
 const messageStyle: React.CSSProperties = {
-  fontSize: '0.95rem',
-  fontWeight: 500
+  fontSize: '0.875rem',
+  fontWeight: 500,
+  color: 'var(--color-text-secondary)'
 };

@@ -55,7 +55,7 @@ export const StudentFilters: React.FC<StudentFiltersProps> = ({
           type="text"
           value={currentLevel}
           onChange={(e) => onCurrentLevelChange(e.target.value)}
-          placeholder="Ví dụ: A1, B2..."
+          placeholder="A1, B2..."
           disabled={disabled}
           style={inputStyle}
         />
@@ -81,11 +81,7 @@ const filterContainerStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   flexWrap: 'wrap',
-  gap: '1rem',
-  padding: '0.75rem 1rem',
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0'
+  gap: '0.875rem'
 };
 
 const fieldGroupStyle: React.CSSProperties = {
@@ -95,42 +91,40 @@ const fieldGroupStyle: React.CSSProperties = {
 };
 
 const labelStyle: React.CSSProperties = {
-  fontSize: '0.875rem',
-  fontWeight: 500,
-  color: '#475569',
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  color: 'var(--color-text-secondary)',
   whiteSpace: 'nowrap'
 };
 
 const selectStyle: React.CSSProperties = {
   padding: '0.45rem 0.75rem',
-  fontSize: '0.875rem',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
-  backgroundColor: '#ffffff',
-  color: '#1e293b',
-  outline: 'none',
+  fontSize: '0.8125rem',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
   cursor: 'pointer'
 };
 
 const inputStyle: React.CSSProperties = {
   padding: '0.45rem 0.75rem',
-  fontSize: '0.875rem',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
-  backgroundColor: '#ffffff',
-  color: '#1e293b',
-  outline: 'none',
-  width: '130px'
+  fontSize: '0.8125rem',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
+  width: '120px'
 };
 
 const clearButtonStyle: React.CSSProperties = {
   padding: '0.45rem 0.75rem',
-  fontSize: '0.875rem',
-  fontWeight: 500,
-  color: '#dc2626',
-  backgroundColor: '#fee2e2',
-  border: '1px solid #fca5a5',
-  borderRadius: '6px',
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  color: 'var(--status-danger-text)',
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer',
-  transition: 'background-color 0.2s'
+  transition: 'opacity 0.15s ease'
 };

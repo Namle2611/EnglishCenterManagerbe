@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingState } from '../../components/common/LoadingState';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { StudentStatusBadge } from '../../components/students/StudentStatusBadge';
 import { StudentStatusControl } from '../../components/students/StudentStatusControl';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/student.service';
 import type { StudentDetail, StudentStatus } from '../../types/student.types';
+import { getRoleHomeRoute } from '../../utils/roleHelper';
 import {
   formatDateOnly,
   getApiErrorMessage,
@@ -19,6 +22,7 @@ export const StudentDetailPage: React.FC = () => {
   const { user } = useAuth();
 
   const basePath = getStudentBasePath(location.pathname, user?.roles);
+  const homeRoute = user ? getRoleHomeRoute(user.roles) : '/login';
 
   const [student, setStudent] = useState<StudentDetail | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -58,7 +62,6 @@ export const StudentDetailPage: React.FC = () => {
           setErrorMessage(response.message || 'Không thể tải thông tin học viên.');
         }
       } catch (err: unknown) {
-        // If 404
         if ((err as { response?: { status?: number } })?.response?.status === 404) {
           setIsNotFound(true);
         } else {
@@ -76,29 +79,34 @@ export const StudentDetailPage: React.FC = () => {
     if (!student) return;
     const response = await studentService.updateStudentStatus(student.id, newStatus);
     if (response.success && response.data) {
-      // Direct update from backend source of truth
       setStudent(response.data);
       setSuccessBanner(`Đã cập nhật trạng thái học viên thành: ${newStatus}`);
     }
   };
 
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
   if (isLoading) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <LoadingState message="Đang tải thông tin chi tiết học viên..." />
-      </div>
+      </AppShell>
     );
   }
 
   if (isNotFound) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <div style={notFoundCardStyle}>
-          <h3 style={{ margin: '0 0 0.5rem 0', color: '#1e293b' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>
             Không tìm thấy học viên
-          </h3>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-            Học viên với mã định danh #{id} không tồn tại hoặc đã bị xóa khỏi hệ thống.
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            Học viên với mã định danh #{id} không tồn tại hoặc đã được chuyển khỏi hệ thống.
           </p>
           <button
             type="button"
@@ -108,15 +116,15 @@ export const StudentDetailPage: React.FC = () => {
             &larr; Quay lại danh sách
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   if (errorMessage || !student) {
     return (
-      <div style={pageContainerStyle}>
-        <div style={errorContainerStyle}>
-          <p>
+      <AppShell>
+        <div style={errorContainerStyle} role="alert">
+          <p style={{ margin: '0 0 1rem 0', fontWeight: 500 }}>
             <strong>Lỗi tải dữ liệu:</strong> {errorMessage}
           </p>
           <button
@@ -127,19 +135,12 @@ export const StudentDetailPage: React.FC = () => {
             Thử lại
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
-  // Get initials for avatar fallback
-  const getInitials = (name: string) => {
-    const parts = name.trim().split(' ');
-    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  };
-
   return (
-    <div style={pageContainerStyle}>
+    <AppShell>
       {/* Success banner */}
       {successBanner && (
         <div style={successBannerStyle} role="status">
@@ -155,28 +156,31 @@ export const StudentDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Navigation header */}
-      <div style={headerStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button
-            type="button"
-            onClick={() => navigate(basePath)}
-            style={backButtonStyle}
-            title="Quay lại danh sách"
-          >
-            &larr; Quay lại
-          </button>
-          <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>
-            Hồ sơ học viên: {student.fullName}
-          </h1>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Link to={`${basePath}/${student.id}/edit`} style={editButtonStyle}>
-            ✎ Chỉnh sửa thông tin
-          </Link>
-        </div>
-      </div>
+      {/* Page Header */}
+      <PageHeader
+        title={`Học viên: ${student.fullName}`}
+        subtitle={`Mã hồ sơ: ${student.studentCode}`}
+        breadcrumbs={[
+          { label: 'Trang chủ', path: homeRoute },
+          { label: 'Quản lý học viên', path: basePath },
+          { label: student.fullName }
+        ]}
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <button
+              type="button"
+              onClick={() => navigate(basePath)}
+              style={backButtonStyle}
+              title="Quay lại danh sách"
+            >
+              &larr; Quay lại
+            </button>
+            <Link to={`${basePath}/${student.id}/edit`} style={editButtonStyle}>
+              ✎ Chỉnh sửa hồ sơ
+            </Link>
+          </div>
+        }
+      />
 
       {/* Profile Overview Card */}
       <div style={cardStyle}>
@@ -187,7 +191,6 @@ export const StudentDetailPage: React.FC = () => {
               alt={student.fullName}
               style={avatarImageStyle}
               onError={(e) => {
-                // If avatar image fails to load, replace with initials
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
@@ -197,7 +200,7 @@ export const StudentDetailPage: React.FC = () => {
 
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-text-primary)' }}>
                 {student.fullName}
               </h2>
               <StudentStatusBadge status={student.status} />
@@ -206,31 +209,31 @@ export const StudentDetailPage: React.FC = () => {
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   padding: '0.15rem 0.5rem',
-                  borderRadius: '4px',
-                  backgroundColor: student.isActive ? '#ecfdf5' : '#fef2f2',
-                  color: student.isActive ? '#065f46' : '#991b1b',
-                  border: `1px solid ${student.isActive ? '#a7f3d0' : '#fecaca'}`
+                  borderRadius: 'var(--radius-full)',
+                  backgroundColor: student.isActive ? 'var(--status-active-bg)' : 'var(--status-danger-bg)',
+                  color: student.isActive ? 'var(--status-active-text)' : 'var(--status-danger-text)',
+                  border: `1px solid ${student.isActive ? 'var(--status-active-border)' : 'var(--status-danger-border)'}`
                 }}
               >
                 Tài khoản: {student.isActive ? 'Đang hoạt động' : 'Đã khóa'}
               </span>
             </div>
 
-            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap', color: '#475569', fontSize: '0.875rem' }}>
+            <div style={overviewMetaStyle}>
               <div>
-                <strong>Mã học viên:</strong>{' '}
-                <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                <span style={metaLabelStyle}>Mã học viên:</span>{' '}
+                <span className="font-mono" style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
                   {student.studentCode}
                 </span>
               </div>
               <div>
-                <strong>Email:</strong> {student.email}
+                <span style={metaLabelStyle}>Email:</span> {student.email}
               </div>
               <div>
-                <strong>Số điện thoại:</strong> {student.phone || '-'}
+                <span style={metaLabelStyle}>Số điện thoại:</span> {student.phone || '—'}
               </div>
               <div>
-                <strong>Vai trò hệ thống:</strong> {student.roles.join(', ') || 'Học viên'}
+                <span style={metaLabelStyle}>Vai trò:</span> {student.roles.join(', ') || 'Học viên'}
               </div>
             </div>
           </div>
@@ -243,25 +246,25 @@ export const StudentDetailPage: React.FC = () => {
         <div style={cardStyle}>
           <h3 style={sectionTitleStyle}>Thông tin cá nhân & học tập</h3>
           <div style={infoListStyle}>
-            <div style={infoItemStyle}>
-              <span style={infoLabelStyle}>Trình độ hiện tại:</span>
-              <span style={infoValueStyle}>{student.currentLevel || 'Chưa xác định'}</span>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Trình độ hiện tại</span>
+              <span style={infoValueStyle}>{student.currentLevel || 'Chưa phân cấp'}</span>
             </div>
-            <div style={infoItemStyle}>
-              <span style={infoLabelStyle}>Ngày nhập học:</span>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Ngày nhập học</span>
               <span style={infoValueStyle}>{formatDateOnly(student.enrollmentDate)}</span>
             </div>
-            <div style={infoItemStyle}>
-              <span style={infoLabelStyle}>Ngày sinh:</span>
-              <span style={infoValueStyle}>{formatDateOnly(student.dateOfBirth)}</span>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Ngày sinh</span>
+              <span style={infoValueStyle}>{formatDateOnly(student.dateOfBirth) || '—'}</span>
             </div>
-            <div style={infoItemStyle}>
-              <span style={infoLabelStyle}>Giới tính:</span>
-              <span style={infoValueStyle}>{student.gender || '-'}</span>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Giới tính</span>
+              <span style={infoValueStyle}>{student.gender || '—'}</span>
             </div>
-            <div style={infoItemStyle}>
-              <span style={infoLabelStyle}>Địa chỉ liên hệ:</span>
-              <span style={infoValueStyle}>{student.address || '-'}</span>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Địa chỉ liên hệ</span>
+              <span style={infoValueStyle}>{student.address || '—'}</span>
             </div>
           </div>
         </div>
@@ -274,77 +277,17 @@ export const StudentDetailPage: React.FC = () => {
           />
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 };
 
-const pageContainerStyle: React.CSSProperties = {
-  maxWidth: '1000px',
-  margin: '0 auto',
-  padding: '1.5rem 1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.5rem',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: '1rem'
-};
-
-const backButtonStyle: React.CSSProperties = {
-  padding: '0.45rem 0.85rem',
-  fontSize: '0.85rem',
-  fontWeight: 500,
-  backgroundColor: '#f1f5f9',
-  color: '#475569',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
-  cursor: 'pointer'
-};
-
-const editButtonStyle: React.CSSProperties = {
-  padding: '0.5rem 1rem',
-  fontSize: '0.875rem',
-  fontWeight: 600,
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
-  borderRadius: '6px',
-  textDecoration: 'none'
-};
-
-const successBannerStyle: React.CSSProperties = {
-  padding: '0.75rem 1.25rem',
-  backgroundColor: '#ecfdf5',
-  border: '1px solid #a7f3d0',
-  borderRadius: '8px',
-  color: '#065f46',
-  fontSize: '0.875rem',
-  fontWeight: 500,
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center'
-};
-
-const dismissButtonStyle: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1.25rem',
-  color: '#065f46',
-  cursor: 'pointer',
-  lineHeight: 1
-};
-
 const cardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  padding: '1.5rem',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  boxShadow: 'var(--shadow-sm)',
+  padding: '1.75rem',
+  marginBottom: '1.5rem'
 };
 
 const profileHeaderStyle: React.CSSProperties = {
@@ -354,92 +297,156 @@ const profileHeaderStyle: React.CSSProperties = {
   flexWrap: 'wrap'
 };
 
-const avatarImageStyle: React.CSSProperties = {
-  width: '80px',
-  height: '80px',
-  borderRadius: '50%',
-  objectFit: 'cover',
-  border: '2px solid #e2e8f0'
-};
-
 const avatarFallbackStyle: React.CSSProperties = {
-  width: '80px',
-  height: '80px',
-  borderRadius: '50%',
-  backgroundColor: '#3b82f6',
-  color: '#ffffff',
+  width: '64px',
+  height: '64px',
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--color-primary-subtle)',
+  color: 'var(--color-primary)',
+  border: '2px solid var(--color-primary-border)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontSize: '1.5rem',
-  fontWeight: 700,
-  flexShrink: 0
+  fontWeight: 700
+};
+
+const avatarImageStyle: React.CSSProperties = {
+  width: '64px',
+  height: '64px',
+  borderRadius: 'var(--radius-full)',
+  objectFit: 'cover',
+  border: '2px solid var(--color-border)'
+};
+
+const overviewMetaStyle: React.CSSProperties = {
+  marginTop: '0.75rem',
+  display: 'flex',
+  gap: '1.5rem',
+  flexWrap: 'wrap',
+  color: 'var(--color-text-secondary)',
+  fontSize: '0.8125rem'
+};
+
+const metaLabelStyle: React.CSSProperties = {
+  color: 'var(--color-text-muted)',
+  marginRight: '0.25rem'
 };
 
 const detailsGridStyle: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-  gap: '1.5rem',
-  alignItems: 'start'
+  gap: '1.5rem'
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  margin: '0 0 1rem 0',
   fontSize: '1rem',
-  color: '#1e293b',
-  borderBottom: '1px solid #f1f5f9',
-  paddingBottom: '0.5rem'
+  fontWeight: 600,
+  color: 'var(--color-text-primary)',
+  margin: '0 0 1.25rem 0',
+  borderBottom: '1px solid var(--color-border-subtle)',
+  paddingBottom: '0.625rem'
 };
 
 const infoListStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.75rem'
+  gap: '0.875rem'
 };
 
-const infoItemStyle: React.CSSProperties = {
+const infoRowStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
-  fontSize: '0.875rem',
-  borderBottom: '1px dashed #f1f5f9',
-  paddingBottom: '0.5rem'
+  alignItems: 'center',
+  paddingBottom: '0.5rem',
+  borderBottom: '1px solid var(--color-border-subtle)'
 };
 
 const infoLabelStyle: React.CSSProperties = {
-  color: '#64748b',
+  fontSize: '0.8125rem',
+  color: 'var(--color-text-secondary)',
   fontWeight: 500
 };
 
 const infoValueStyle: React.CSSProperties = {
-  color: '#0f172a',
+  fontSize: '0.875rem',
+  color: 'var(--color-text-primary)',
   fontWeight: 600
 };
 
-const notFoundCardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  padding: '3rem 1.5rem',
-  borderRadius: '8px',
-  textAlign: 'center',
-  border: '1px dashed #cbd5e1'
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  marginTop: '1rem',
-  padding: '0.5rem 1rem',
-  fontSize: '0.875rem',
+const backButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 0.875rem',
+  fontSize: '0.8125rem',
   fontWeight: 500,
-  backgroundColor: '#3b82f6',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-secondary)',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer'
 };
 
+const editButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 1rem',
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
+  borderRadius: 'var(--radius-md)',
+  textDecoration: 'none'
+};
+
+const primaryButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 1rem',
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
+  border: 'none',
+  borderRadius: 'var(--radius-md)',
+  cursor: 'pointer'
+};
+
+const successBannerStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '0.75rem 1rem',
+  backgroundColor: 'var(--status-active-bg)',
+  border: '1px solid var(--status-active-border)',
+  color: 'var(--status-active-text)',
+  borderRadius: 'var(--radius-md)',
+  fontSize: '0.875rem',
+  fontWeight: 500,
+  marginBottom: '1rem'
+};
+
+const dismissButtonStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  fontSize: '1.25rem',
+  color: 'var(--status-active-text)',
+  cursor: 'pointer',
+  padding: 0,
+  lineHeight: 1
+};
+
+const notFoundCardStyle: React.CSSProperties = {
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  padding: '2.5rem 2rem',
+  textAlign: 'center',
+  maxWidth: '480px',
+  margin: '2rem auto'
+};
+
 const errorContainerStyle: React.CSSProperties = {
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  borderRadius: 'var(--radius-lg)',
   padding: '1.5rem',
-  backgroundColor: '#fef2f2',
-  color: '#b91c1c',
-  borderRadius: '8px',
-  border: '1px solid #fecaca',
+  color: 'var(--status-danger-text)',
+  maxWidth: '600px',
+  margin: '2rem auto',
   textAlign: 'center'
 };

@@ -23,6 +23,7 @@ import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
+import { NotFoundPage } from './pages/common/NotFoundPage';
 
 const RootRedirect: React.FC = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -99,7 +100,7 @@ export const App: React.FC = () => {
           </Route>
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

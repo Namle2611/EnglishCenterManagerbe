@@ -53,7 +53,7 @@ export const TeacherFilters: React.FC<TeacherFiltersProps> = ({
           type="text"
           value={specialization}
           onChange={(e) => onSpecializationChange(e.target.value)}
-          placeholder="Ví dụ: IELTS, TOEIC, Ngữ pháp..."
+          placeholder="IELTS, TOEIC, Ngữ pháp..."
           disabled={disabled}
           style={inputStyle}
         />
@@ -61,17 +61,15 @@ export const TeacherFilters: React.FC<TeacherFiltersProps> = ({
 
       {/* Clear Filters Button */}
       {hasActiveFilters && (
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-          <button
-            type="button"
-            onClick={onClearFilters}
-            disabled={disabled}
-            style={clearButtonStyle}
-            title="Xóa tất cả bộ lọc đang chọn"
-          >
-            Xóa bộ lọc
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClearFilters}
+          disabled={disabled}
+          style={clearButtonStyle}
+          title="Xóa tất cả bộ lọc đang chọn"
+        >
+          ✕ Xóa bộ lọc
+        </button>
       )}
     </div>
   );
@@ -79,57 +77,52 @@ export const TeacherFilters: React.FC<TeacherFiltersProps> = ({
 
 const filterContainerStyle: React.CSSProperties = {
   display: 'flex',
+  alignItems: 'center',
   flexWrap: 'wrap',
-  gap: '1rem',
-  alignItems: 'flex-end',
-  backgroundColor: '#f8fafc',
-  padding: '0.875rem 1rem',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0'
+  gap: '0.875rem'
 };
 
 const fieldGroupStyle: React.CSSProperties = {
   display: 'flex',
-  flexDirection: 'column',
-  gap: '0.35rem',
-  minWidth: '180px'
+  alignItems: 'center',
+  gap: '0.5rem'
 };
 
 const labelStyle: React.CSSProperties = {
-  fontSize: '0.8rem',
+  fontSize: '0.8125rem',
   fontWeight: 600,
-  color: '#475569'
+  color: 'var(--color-text-secondary)',
+  whiteSpace: 'nowrap'
 };
 
 const selectStyle: React.CSSProperties = {
   padding: '0.45rem 0.75rem',
-  fontSize: '0.875rem',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  backgroundColor: '#ffffff',
-  color: '#1e293b',
-  outline: 'none',
+  fontSize: '0.8125rem',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
   cursor: 'pointer'
 };
 
 const inputStyle: React.CSSProperties = {
   padding: '0.45rem 0.75rem',
-  fontSize: '0.875rem',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  backgroundColor: '#ffffff',
-  color: '#1e293b',
-  outline: 'none'
+  fontSize: '0.8125rem',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
+  width: '140px'
 };
 
 const clearButtonStyle: React.CSSProperties = {
-  padding: '0.45rem 0.85rem',
-  fontSize: '0.85rem',
-  fontWeight: 500,
-  color: '#64748b',
-  backgroundColor: '#ffffff',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
+  padding: '0.45rem 0.75rem',
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  color: 'var(--status-danger-text)',
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer',
-  transition: 'all 0.15s ease'
+  transition: 'opacity 0.15s ease'
 };

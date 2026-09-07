@@ -25,10 +25,10 @@ export const TeacherTable: React.FC<TeacherTableProps> = ({
 }) => {
   const renderSortIndicator = (column: string) => {
     if (sortBy?.toLowerCase() !== column.toLowerCase()) {
-      return <span style={{ opacity: 0.3, marginLeft: '4px' }}>⇅</span>;
+      return <span style={{ opacity: 0.35, marginLeft: '4px', fontSize: '0.75rem' }}>⇅</span>;
     }
     return (
-      <span style={{ color: '#2563eb', marginLeft: '4px', fontWeight: 'bold' }}>
+      <span style={{ color: 'var(--color-primary)', marginLeft: '4px', fontWeight: 'bold' }}>
         {sortDirection === 'desc' ? '▼' : '▲'}
       </span>
     );
@@ -70,7 +70,7 @@ export const TeacherTable: React.FC<TeacherTableProps> = ({
             </th>
             <th style={headerCellStyle}>Bằng cấp</th>
             <th
-              style={{ ...headerCellStyle, cursor: disabled ? 'default' : 'pointer' }}
+              style={{ ...headerCellStyle, cursor: disabled ? 'default' : 'pointer', textAlign: 'right' }}
               onClick={() => !disabled && onSortChange('experienceYears')}
               title="Sắp xếp theo Kinh nghiệm"
             >
@@ -96,24 +96,41 @@ export const TeacherTable: React.FC<TeacherTableProps> = ({
         <tbody>
           {teachers.map((teacher) => (
             <tr key={teacher.id} style={bodyRowStyle}>
-              <td style={{ ...bodyCellStyle, fontWeight: 600, color: '#0f172a' }}>
+              <td style={bodyCellStyle}>
                 <Link
                   to={`${basePath}/${teacher.id}`}
-                  style={linkStyle}
+                  style={codeLinkStyle}
+                  className="font-mono"
                   title="Xem chi tiết giáo viên"
                 >
                   {teacher.teacherCode}
                 </Link>
               </td>
-              <td style={{ ...bodyCellStyle, fontWeight: 500 }}>{teacher.fullName}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>{teacher.email}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>{teacher.phone || '-'}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>{teacher.specialization}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>{teacher.qualification || '-'}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>
-                {teacher.experienceYears} năm
+              <td style={{ ...bodyCellStyle, fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                {teacher.fullName}
               </td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
+                {teacher.email}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
+                {teacher.phone || '—'}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
+                {teacher.specialization ? (
+                  <span style={specBadgeStyle}>{teacher.specialization}</span>
+                ) : (
+                  '—'
+                )}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
+                {teacher.qualification || '—'}
+              </td>
+              <td style={{ ...bodyCellStyle, textAlign: 'right' }} className="tabular-nums">
+                {teacher.experienceYears !== undefined && teacher.experienceYears !== null
+                  ? `${teacher.experienceYears} năm`
+                  : '—'}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
                 {formatDateOnly(teacher.hireDate)}
               </td>
               <td style={bodyCellStyle}>
@@ -123,14 +140,14 @@ export const TeacherTable: React.FC<TeacherTableProps> = ({
                 <div style={actionsContainerStyle}>
                   <Link
                     to={`${basePath}/${teacher.id}`}
-                    style={viewButtonStyle}
+                    style={viewBtnStyle}
                     title="Xem chi tiết"
                   >
                     Xem
                   </Link>
                   <Link
                     to={`${basePath}/${teacher.id}/edit`}
-                    style={editButtonStyle}
+                    style={editBtnStyle}
                     title="Chỉnh sửa thông tin"
                   >
                     Sửa
@@ -139,10 +156,10 @@ export const TeacherTable: React.FC<TeacherTableProps> = ({
                     type="button"
                     onClick={() => onQuickStatusChange(teacher)}
                     disabled={disabled}
-                    style={statusButtonStyle}
-                    title="Đổi trạng thái"
+                    style={statusBtnStyle}
+                    title="Cập nhật trạng thái giáo viên"
                   >
-                    Đổi TT
+                    Đổi trạng thái
                   </button>
                 </div>
               </td>
@@ -157,10 +174,10 @@ export const TeacherTable: React.FC<TeacherTableProps> = ({
 const tableContainerStyle: React.CSSProperties = {
   width: '100%',
   overflowX: 'auto',
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-lg)',
+  boxShadow: 'var(--shadow-xs)',
+  border: '1px solid var(--color-border)'
 };
 
 const tableStyle: React.CSSProperties = {
@@ -171,67 +188,88 @@ const tableStyle: React.CSSProperties = {
 };
 
 const headerRowStyle: React.CSSProperties = {
-  backgroundColor: '#f8fafc',
-  borderBottom: '2px solid #e2e8f0'
+  backgroundColor: 'var(--color-surface-subtle)',
+  borderBottom: '1px solid var(--color-border)'
 };
 
 const headerCellStyle: React.CSSProperties = {
   padding: '0.75rem 1rem',
   fontWeight: 600,
-  color: '#334155',
+  fontSize: '0.8125rem',
+  color: 'var(--color-text-secondary)',
   userSelect: 'none',
   whiteSpace: 'nowrap'
 };
 
 const bodyRowStyle: React.CSSProperties = {
-  borderBottom: '1px solid #f1f5f9',
+  borderBottom: '1px solid var(--color-border-subtle)',
   transition: 'background-color 0.15s ease'
 };
 
 const bodyCellStyle: React.CSSProperties = {
   padding: '0.75rem 1rem',
-  color: '#1e293b',
+  verticalAlign: 'middle',
   whiteSpace: 'nowrap'
 };
 
-const linkStyle: React.CSSProperties = {
-  color: '#2563eb',
-  textDecoration: 'none'
+const codeLinkStyle: React.CSSProperties = {
+  color: 'var(--color-primary)',
+  textDecoration: 'none',
+  fontWeight: 600,
+  fontSize: '0.8125rem',
+  backgroundColor: 'var(--color-primary-subtle)',
+  padding: '0.2rem 0.45rem',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--color-primary-border)'
+};
+
+const specBadgeStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  padding: '0.15rem 0.45rem',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+  borderRadius: 'var(--radius-sm)',
+  backgroundColor: 'var(--color-surface-subtle)',
+  border: '1px solid var(--color-border)',
+  color: 'var(--color-text-primary)'
 };
 
 const actionsContainerStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '0.4rem',
-  justifyContent: 'center'
+  justifyContent: 'center',
+  gap: '0.4rem'
 };
 
-const actionBtnBase: React.CSSProperties = {
+const viewBtnStyle: React.CSSProperties = {
   padding: '0.25rem 0.55rem',
   fontSize: '0.75rem',
-  fontWeight: 500,
-  borderRadius: '4px',
-  textDecoration: 'none',
-  cursor: 'pointer',
-  display: 'inline-block',
-  border: 'none',
-  transition: 'background-color 0.15s'
+  fontWeight: 600,
+  color: 'var(--color-primary)',
+  backgroundColor: 'var(--color-primary-subtle)',
+  border: '1px solid var(--color-primary-border)',
+  borderRadius: 'var(--radius-sm)',
+  textDecoration: 'none'
 };
 
-const viewButtonStyle: React.CSSProperties = {
-  ...actionBtnBase,
-  backgroundColor: '#eff6ff',
-  color: '#1d4ed8'
+const editBtnStyle: React.CSSProperties = {
+  padding: '0.25rem 0.55rem',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: 'var(--color-text-primary)',
+  backgroundColor: 'var(--color-surface-subtle)',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-sm)',
+  textDecoration: 'none'
 };
 
-const editButtonStyle: React.CSSProperties = {
-  ...actionBtnBase,
-  backgroundColor: '#f1f5f9',
-  color: '#334155'
-};
-
-const statusButtonStyle: React.CSSProperties = {
-  ...actionBtnBase,
-  backgroundColor: '#fef3c7',
-  color: '#92400e'
+const statusBtnStyle: React.CSSProperties = {
+  padding: '0.25rem 0.55rem',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: 'var(--status-warning-text)',
+  backgroundColor: 'var(--status-warning-bg)',
+  border: '1px solid var(--status-warning-border)',
+  borderRadius: 'var(--radius-sm)',
+  cursor: 'pointer'
 };

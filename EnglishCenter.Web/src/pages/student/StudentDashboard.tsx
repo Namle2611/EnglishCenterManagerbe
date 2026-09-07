@@ -1,32 +1,146 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { useAuth } from '../../hooks/useAuth';
 
 export const StudentDashboard: React.FC = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const { user } = useAuth();
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', fontFamily: 'Inter, system-ui, sans-serif' }}>
-      <header style={{ backgroundColor: '#7c3aed', color: '#fff', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0 }}>Student Portal</h2>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <span>Welcome, <strong>{user?.fullName}</strong> (STUDENT)</span>
-          <Link to="/change-password" style={{ color: '#ddd6fe', textDecoration: 'none' }}>Change Password</Link>
-          <button onClick={handleLogout} style={{ padding: '0.375rem 0.75rem', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Sign Out</button>
+    <AppShell>
+      <PageHeader
+        title="Cổng thông tin học viên"
+        subtitle={`Xin chào, ${user?.fullName || 'Học viên'}! Chúc bạn có những giờ học tập thật hiệu quả.`}
+      />
+
+      <div style={overviewCardStyle}>
+        <h3 style={overviewTitleStyle}>Hồ sơ học viên</h3>
+        <p style={overviewSubtitleStyle}>
+          Thông tin tài khoản học viên trên hệ thống trung tâm Anh ngữ.
+        </p>
+
+        <div style={infoGridStyle}>
+          <div style={infoItemStyle}>
+            <span style={infoLabelStyle}>Mã định danh</span>
+            <span style={infoValueStyle} className="font-mono">#{user?.id}</span>
+          </div>
+
+          <div style={infoItemStyle}>
+            <span style={infoLabelStyle}>Họ và tên</span>
+            <span style={infoValueStyle}>{user?.fullName}</span>
+          </div>
+
+          <div style={infoItemStyle}>
+            <span style={infoLabelStyle}>Email liên hệ</span>
+            <span style={infoValueStyle}>{user?.email}</span>
+          </div>
+
+          <div style={infoItemStyle}>
+            <span style={infoLabelStyle}>Vai trò hệ thống</span>
+            <span style={roleBadgeStyle}>
+              {user?.roles.join(', ')}
+            </span>
+          </div>
+
+          <div style={infoItemStyle}>
+            <span style={infoLabelStyle}>Trạng thái tài khoản</span>
+            <span style={user?.isActive ? activeBadgeStyle : inactiveBadgeStyle}>
+              {user?.isActive ? 'Đang hoạt động' : 'Tạm khóa'}
+            </span>
+          </div>
         </div>
-      </header>
-      <main style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h3>Student Overview (Phase 3 Placeholder)</h3>
-          <p>Email: {user?.email}</p>
-        </div>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
+};
+
+const overviewCardStyle: React.CSSProperties = {
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  boxShadow: 'var(--shadow-sm)',
+  padding: '1.75rem',
+  maxWidth: '800px'
+};
+
+const overviewTitleStyle: React.CSSProperties = {
+  fontSize: '1.125rem',
+  fontWeight: 600,
+  color: 'var(--color-text-primary)',
+  margin: '0 0 0.375rem 0'
+};
+
+const overviewSubtitleStyle: React.CSSProperties = {
+  fontSize: '0.875rem',
+  color: 'var(--color-text-secondary)',
+  margin: '0 0 1.25rem 0'
+};
+
+const infoGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+  gap: '1rem',
+  padding: '1.25rem',
+  backgroundColor: 'var(--color-surface-subtle)',
+  borderRadius: 'var(--radius-lg)',
+  border: '1px solid var(--color-border)'
+};
+
+const infoItemStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.25rem'
+};
+
+const infoLabelStyle: React.CSSProperties = {
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: 'var(--color-text-muted)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em'
+};
+
+const infoValueStyle: React.CSSProperties = {
+  fontSize: '0.9375rem',
+  fontWeight: 500,
+  color: 'var(--color-text-primary)'
+};
+
+const roleBadgeStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '0.2rem 0.5rem',
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--role-student-bg)',
+  color: 'var(--role-student-text)',
+  border: '1px solid var(--role-student-border)',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  width: 'fit-content'
+};
+
+const activeBadgeStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '0.2rem 0.5rem',
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--status-active-bg)',
+  color: 'var(--status-active-text)',
+  border: '1px solid var(--status-active-border)',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  width: 'fit-content'
+};
+
+const inactiveBadgeStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '0.2rem 0.5rem',
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--status-inactive-bg)',
+  color: 'var(--status-inactive-text)',
+  border: '1px solid var(--status-inactive-border)',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  width: 'fit-content'
 };

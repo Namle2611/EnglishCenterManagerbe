@@ -1,6 +1,7 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getRoleHomeRoute } from '../utils/roleHelper';
 
 interface RoleRouteProps {
   requiredRole?: string;
@@ -9,6 +10,7 @@ interface RoleRouteProps {
 
 export const RoleRoute: React.FC<RoleRouteProps> = ({ requiredRole, allowedRoles }) => {
   const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -18,10 +20,12 @@ export const RoleRoute: React.FC<RoleRouteProps> = ({ requiredRole, allowedRoles
           justifyContent: 'center',
           alignItems: 'center',
           height: '100vh',
-          fontFamily: 'sans-serif'
+          backgroundColor: 'var(--color-canvas)',
+          color: 'var(--color-text-secondary)',
+          fontFamily: 'var(--font-sans)'
         }}
       >
-        <div>Loading permissions...</div>
+        <div>Đang kiểm tra quyền truy cập...</div>
       </div>
     );
   }
@@ -32,41 +36,92 @@ export const RoleRoute: React.FC<RoleRouteProps> = ({ requiredRole, allowedRoles
   const hasAccess = user && effectiveRoles.some((role) => user.roles.includes(role));
 
   if (!hasAccess) {
+    const homeRoute = user ? getRoleHomeRoute(user.roles) : '/login';
+
     return (
       <div
         style={{
-          padding: '3rem 1.5rem',
-          textAlign: 'center',
-          fontFamily: 'Inter, system-ui, sans-serif',
-          maxWidth: '500px',
-          margin: '4rem auto',
-          backgroundColor: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--color-canvas)',
+          padding: '1.5rem'
         }}
       >
-        <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🚫</div>
-        <h2 style={{ margin: '0 0 0.5rem 0', color: '#1e293b' }}>403 - Access Denied</h2>
-        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-          Bạn không có quyền truy cập vào trang này (yêu cầu vai trò: {effectiveRoles.join(' hoặc ')}).
-        </p>
-        <button
-          type="button"
-          onClick={() => window.history.back()}
+        <div
           style={{
-            padding: '0.5rem 1rem',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            backgroundColor: '#3b82f6',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer'
+            padding: '2.5rem 2rem',
+            textAlign: 'center',
+            maxWidth: '480px',
+            width: '100%',
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-md)'
           }}
         >
-          &larr; Quay lại
-        </button>
+          <div style={{ fontSize: '3rem', lineHeight: 1, marginBottom: '1rem' }}>🛡️</div>
+          <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+            403 - Truy cập bị từ chối
+          </h1>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem', lineHeight: 1.5, marginBottom: '1.25rem' }}>
+            Bạn không có quyền truy cập vào khu vực này.
+          </p>
+
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.375rem 0.75rem',
+              backgroundColor: 'var(--status-danger-bg)',
+              color: 'var(--status-danger-text)',
+              border: '1px solid var(--status-danger-border)',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              marginBottom: '1.75rem'
+            }}
+          >
+            Yêu cầu vai trò: {effectiveRoles.join(' hoặc ')}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              style={{
+                padding: '0.625rem 1.25rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                backgroundColor: 'var(--color-surface-subtle)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer'
+              }}
+            >
+              &larr; Quay lại
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(homeRoute, { replace: true })}
+              style={{
+                padding: '0.625rem 1.25rem',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--color-text-inverse)',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer'
+              }}
+            >
+              Về trang chủ
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

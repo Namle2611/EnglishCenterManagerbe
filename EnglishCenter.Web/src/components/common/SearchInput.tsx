@@ -11,7 +11,7 @@ interface SearchInputProps {
 export const SearchInput: React.FC<SearchInputProps> = ({
   value: externalValue = '',
   onChange,
-  placeholder = 'Search...',
+  placeholder = 'Tìm kiếm...',
   debounceMs = 400,
   disabled = false
 }) => {
@@ -41,7 +41,19 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   return (
     <div style={wrapperStyle}>
       <span style={searchIconStyle} aria-hidden="true">
-        &#128269;
+        <svg
+          style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
       </span>
       <input
         type="text"
@@ -58,7 +70,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           onClick={handleClear}
           disabled={disabled}
           style={clearButtonStyle}
-          aria-label="Clear search"
+          aria-label="Xóa từ khóa tìm kiếm"
         >
           &times;
         </button>
@@ -72,14 +84,15 @@ const wrapperStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   width: '100%',
-  maxWidth: '320px'
+  maxWidth: '360px'
 };
 
 const searchIconStyle: React.CSSProperties = {
   position: 'absolute',
   left: '0.75rem',
-  color: '#94a3b8',
-  fontSize: '0.85rem',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   pointerEvents: 'none'
 };
 
@@ -87,22 +100,25 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.5rem 2rem 0.5rem 2.25rem',
   fontSize: '0.875rem',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
-  backgroundColor: '#ffffff',
-  color: '#1e293b',
-  outline: 'none',
-  boxSizing: 'border-box'
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
+  boxSizing: 'border-box',
+  transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
 };
 
 const clearButtonStyle: React.CSSProperties = {
   position: 'absolute',
-  right: '0.5rem',
+  right: '0.625rem',
   background: 'none',
   border: 'none',
-  fontSize: '1.1rem',
-  color: '#94a3b8',
+  fontSize: '1.25rem',
+  color: 'var(--color-text-muted)',
   cursor: 'pointer',
   padding: '0 0.25rem',
-  lineHeight: 1
+  lineHeight: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
 };

@@ -25,10 +25,10 @@ export const StudentTable: React.FC<StudentTableProps> = ({
 }) => {
   const renderSortIndicator = (column: string) => {
     if (sortBy?.toLowerCase() !== column.toLowerCase()) {
-      return <span style={{ opacity: 0.3, marginLeft: '4px' }}>⇅</span>;
+      return <span style={{ opacity: 0.35, marginLeft: '4px', fontSize: '0.75rem' }}>⇅</span>;
     }
     return (
-      <span style={{ color: '#2563eb', marginLeft: '4px', fontWeight: 'bold' }}>
+      <span style={{ color: 'var(--color-primary)', marginLeft: '4px', fontWeight: 'bold' }}>
         {sortDirection === 'desc' ? '▼' : '▲'}
       </span>
     );
@@ -82,20 +82,33 @@ export const StudentTable: React.FC<StudentTableProps> = ({
         <tbody>
           {students.map((student) => (
             <tr key={student.id} style={bodyRowStyle}>
-              <td style={{ ...bodyCellStyle, fontWeight: 600, color: '#0f172a' }}>
+              <td style={bodyCellStyle}>
                 <Link
                   to={`${basePath}/${student.id}`}
-                  style={linkStyle}
+                  style={codeLinkStyle}
+                  className="font-mono"
                   title="Xem chi tiết học viên"
                 >
                   {student.studentCode}
                 </Link>
               </td>
-              <td style={{ ...bodyCellStyle, fontWeight: 500 }}>{student.fullName}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>{student.email}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>{student.phone || '-'}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>{student.currentLevel || '-'}</td>
-              <td style={{ ...bodyCellStyle, color: '#475569' }}>
+              <td style={{ ...bodyCellStyle, fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                {student.fullName}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
+                {student.email}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
+                {student.phone || '—'}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
+                {student.currentLevel ? (
+                  <span style={levelBadgeStyle}>{student.currentLevel}</span>
+                ) : (
+                  '—'
+                )}
+              </td>
+              <td style={{ ...bodyCellStyle, color: 'var(--color-text-secondary)' }}>
                 {formatDateOnly(student.enrollmentDate)}
               </td>
               <td style={bodyCellStyle}>
@@ -105,14 +118,14 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                 <div style={actionsContainerStyle}>
                   <Link
                     to={`${basePath}/${student.id}`}
-                    style={actionButtonStyle}
-                    title="Xem chi tiết"
+                    style={viewBtnStyle}
+                    title="Xem hồ sơ chi tiết"
                   >
                     Xem
                   </Link>
                   <Link
                     to={`${basePath}/${student.id}/edit`}
-                    style={{ ...actionButtonStyle, color: '#0284c7' }}
+                    style={editBtnStyle}
                     title="Chỉnh sửa thông tin"
                   >
                     Sửa
@@ -121,8 +134,8 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                     type="button"
                     onClick={() => onQuickStatusChange(student)}
                     disabled={disabled}
-                    style={statusActionButtonStyle}
-                    title="Cập nhật trạng thái học viên"
+                    style={statusBtnStyle}
+                    title="Đổi trạng thái học viên"
                   >
                     Đổi trạng thái
                   </button>
@@ -139,10 +152,10 @@ export const StudentTable: React.FC<StudentTableProps> = ({
 const tableContainerStyle: React.CSSProperties = {
   width: '100%',
   overflowX: 'auto',
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
-  border: '1px solid #e2e8f0'
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-lg)',
+  boxShadow: 'var(--shadow-xs)',
+  border: '1px solid var(--color-border)'
 };
 
 const tableStyle: React.CSSProperties = {
@@ -153,21 +166,22 @@ const tableStyle: React.CSSProperties = {
 };
 
 const headerRowStyle: React.CSSProperties = {
-  backgroundColor: '#f8fafc',
-  borderBottom: '1px solid #e2e8f0'
+  backgroundColor: 'var(--color-surface-subtle)',
+  borderBottom: '1px solid var(--color-border)'
 };
 
 const headerCellStyle: React.CSSProperties = {
   padding: '0.75rem 1rem',
   fontWeight: 600,
-  color: '#334155',
+  fontSize: '0.8125rem',
+  color: 'var(--color-text-secondary)',
   userSelect: 'none',
   whiteSpace: 'nowrap'
 };
 
 const bodyRowStyle: React.CSSProperties = {
-  borderBottom: '1px solid #f1f5f9',
-  transition: 'background-color 0.15s'
+  borderBottom: '1px solid var(--color-border-subtle)',
+  transition: 'background-color 0.15s ease'
 };
 
 const bodyCellStyle: React.CSSProperties = {
@@ -176,39 +190,64 @@ const bodyCellStyle: React.CSSProperties = {
   whiteSpace: 'nowrap'
 };
 
-const linkStyle: React.CSSProperties = {
-  color: '#2563eb',
+const codeLinkStyle: React.CSSProperties = {
+  color: 'var(--color-primary)',
   textDecoration: 'none',
-  fontFamily: 'monospace, monospace',
-  fontSize: '0.9rem'
+  fontWeight: 600,
+  fontSize: '0.8125rem',
+  backgroundColor: 'var(--color-primary-subtle)',
+  padding: '0.2rem 0.45rem',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--color-primary-border)'
+};
+
+const levelBadgeStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  padding: '0.15rem 0.45rem',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+  borderRadius: 'var(--radius-sm)',
+  backgroundColor: 'var(--color-surface-subtle)',
+  border: '1px solid var(--color-border)',
+  color: 'var(--color-text-primary)'
 };
 
 const actionsContainerStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '0.5rem'
+  gap: '0.4rem'
 };
 
-const actionButtonStyle: React.CSSProperties = {
-  padding: '0.3rem 0.6rem',
+const viewBtnStyle: React.CSSProperties = {
+  padding: '0.25rem 0.55rem',
   fontSize: '0.75rem',
   fontWeight: 600,
-  color: '#2563eb',
-  backgroundColor: '#eff6ff',
-  border: '1px solid #bfdbfe',
-  borderRadius: '4px',
-  textDecoration: 'none',
-  cursor: 'pointer'
+  color: 'var(--color-primary)',
+  backgroundColor: 'var(--color-primary-subtle)',
+  border: '1px solid var(--color-primary-border)',
+  borderRadius: 'var(--radius-sm)',
+  textDecoration: 'none'
 };
 
-const statusActionButtonStyle: React.CSSProperties = {
-  padding: '0.3rem 0.6rem',
+const editBtnStyle: React.CSSProperties = {
+  padding: '0.25rem 0.55rem',
   fontSize: '0.75rem',
   fontWeight: 600,
-  color: '#d97706',
-  backgroundColor: '#fffbeb',
-  border: '1px solid #fde68a',
-  borderRadius: '4px',
+  color: 'var(--color-text-primary)',
+  backgroundColor: 'var(--color-surface-subtle)',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-sm)',
+  textDecoration: 'none'
+};
+
+const statusBtnStyle: React.CSSProperties = {
+  padding: '0.25rem 0.55rem',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: 'var(--status-warning-text)',
+  backgroundColor: 'var(--status-warning-bg)',
+  border: '1px solid var(--status-warning-border)',
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer'
 };

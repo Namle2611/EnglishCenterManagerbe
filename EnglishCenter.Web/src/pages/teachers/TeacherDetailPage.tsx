@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingState } from '../../components/common/LoadingState';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { TeacherStatusBadge } from '../../components/teachers/TeacherStatusBadge';
 import { TeacherStatusControl } from '../../components/teachers/TeacherStatusControl';
 import { teacherService } from '../../services/teacher.service';
@@ -26,7 +28,6 @@ export const TeacherDetailPage: React.FC = () => {
     (location.state as { successMessage?: string })?.successMessage || null
   );
 
-  // Clear location.state so refresh doesn't keep displaying stale success notification
   useEffect(() => {
     if (successBanner) {
       window.history.replaceState({}, document.title);
@@ -71,415 +72,376 @@ export const TeacherDetailPage: React.FC = () => {
     if (!teacher) return;
     const response = await teacherService.updateTeacherStatus(teacher.id, newStatus);
     if (response.success && response.data) {
-      // Direct update from backend source of truth
       setTeacher(response.data);
-      setSuccessBanner(`Đã cập nhật trạng thái giáo viên thành: ${newStatus === 'Active' ? 'Đang hoạt động' : 'Không hoạt động'}`);
+      setSuccessBanner(
+        `Đã cập nhật trạng thái giáo viên thành: ${newStatus === 'Active' ? 'Đang hoạt động' : 'Không hoạt động'}`
+      );
     }
+  };
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
   if (isLoading) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <LoadingState message="Đang tải thông tin chi tiết giáo viên..." />
-      </div>
+      </AppShell>
     );
   }
 
   if (isNotFound) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <div style={notFoundCardStyle}>
-          <h3 style={{ margin: '0 0 0.5rem 0', color: '#1e293b' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>
             Không tìm thấy giáo viên
-          </h3>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-            Hồ sơ giáo viên không tồn tại hoặc đã bị xóa khỏi hệ thống. (404 Not Found)
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            Hồ sơ giáo viên không tồn tại hoặc đã bị xóa khỏi hệ thống.
           </p>
-          <div style={{ marginTop: '1.25rem' }}>
-            <button
-              type="button"
-              onClick={() => navigate(basePath)}
-              style={backToTableBtnStyle}
-            >
-              &larr; Quay lại danh sách giáo viên
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate(basePath)}
+            style={primaryButtonStyle}
+          >
+            &larr; Quay lại danh sách giáo viên
+          </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   if (errorMessage || !teacher) {
     return (
-      <div style={pageContainerStyle}>
-        <div style={notFoundCardStyle}>
-          <p style={{ color: '#b91c1c', margin: '0 0 1rem 0' }}>
-            {errorMessage || 'Không thể tải thông tin giáo viên.'}
+      <AppShell>
+        <div style={errorContainerStyle} role="alert">
+          <p style={{ margin: '0 0 1rem 0', fontWeight: 500 }}>
+            <strong>Lỗi tải dữ liệu:</strong> {errorMessage}
           </p>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            style={retryButtonStyle}
+            style={primaryButtonStyle}
           >
             Thử lại
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
-  // Generate initials for avatar fallback
-  const initials = teacher.fullName
-    .split(' ')
-    .map((n) => n[0])
-    .filter(Boolean)
-    .slice(-2)
-    .join('')
-    .toUpperCase();
-
   return (
-    <div style={pageContainerStyle}>
-      {/* Top Header & Navigation */}
-      <div style={headerStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button
-            type="button"
-            onClick={() => navigate(basePath)}
-            style={backButtonStyle}
-            title="Quay lại danh sách"
-          >
-            &larr; Danh sách
-          </button>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>
-              {teacher.fullName} ({teacher.teacherCode})
-            </h1>
-            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-              Mã hồ sơ: #{teacher.id} &bull; Chuyên môn: {teacher.specialization}
-            </span>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Link
-            to={`${basePath}/${teacher.id}/edit`}
-            style={editButtonStyle}
-            title="Chỉnh sửa thông tin giáo viên"
-          >
-            ✏ Chỉnh sửa thông tin
-          </Link>
-        </div>
-      </div>
-
-      {/* Flash Success Notification */}
+    <AppShell>
+      {/* Success banner */}
       {successBanner && (
-        <div style={successBannerStyle} role="alert">
+        <div style={successBannerStyle} role="status">
           <span>✓ {successBanner}</span>
           <button
             type="button"
             onClick={() => setSuccessBanner(null)}
-            style={closeBannerButtonStyle}
+            style={dismissButtonStyle}
+            aria-label="Đóng thông báo"
           >
             &times;
           </button>
         </div>
       )}
 
-      {/* Main Profile Header Card */}
-      <div style={profileHeaderCardStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+      {/* Page Header */}
+      <PageHeader
+        title={`Giáo viên: ${teacher.fullName}`}
+        subtitle={`Mã hồ sơ: ${teacher.teacherCode}`}
+        breadcrumbs={[
+          { label: 'Trang chủ', path: '/admin' },
+          { label: 'Quản lý giáo viên', path: basePath },
+          { label: teacher.fullName }
+        ]}
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <button
+              type="button"
+              onClick={() => navigate(basePath)}
+              style={backButtonStyle}
+              title="Quay lại danh sách"
+            >
+              &larr; Quay lại
+            </button>
+            <Link to={`${basePath}/${teacher.id}/edit`} style={editButtonStyle}>
+              ✎ Chỉnh sửa hồ sơ
+            </Link>
+          </div>
+        }
+      />
+
+      {/* Profile Overview Card */}
+      <div style={cardStyle}>
+        <div style={profileHeaderStyle}>
           {teacher.avatarUrl ? (
             <img
               src={teacher.avatarUrl}
               alt={teacher.fullName}
               style={avatarImageStyle}
               onError={(e) => {
-                // If avatar fails to load, replace with initials
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
           ) : (
-            <div style={initialsAvatarStyle}>{initials}</div>
+            <div style={avatarFallbackStyle}>{getInitials(teacher.fullName)}</div>
           )}
 
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a' }}>
-              {teacher.fullName}
-            </h2>
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.875rem', color: '#475569' }}>
-                ✉ {teacher.email}
-              </span>
-              <span style={{ fontSize: '0.875rem', color: '#475569' }}>
-                ☎ {teacher.phone || 'Chưa cập nhật SĐT'}
-              </span>
-              <span style={roleBadgeStyle}>
-                Vai trò: Giáo viên ({teacher.roles.join(', ') || 'TEACHER'})
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-text-primary)' }}>
+                {teacher.fullName}
+              </h2>
+              <TeacherStatusBadge status={teacher.status} />
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: 'var(--radius-full)',
+                  backgroundColor: teacher.isActive ? 'var(--status-active-bg)' : 'var(--status-danger-bg)',
+                  color: teacher.isActive ? 'var(--status-active-text)' : 'var(--status-danger-text)',
+                  border: `1px solid ${teacher.isActive ? 'var(--status-active-border)' : 'var(--status-danger-border)'}`
+                }}
+              >
+                Tài khoản: {teacher.isActive ? 'Đang hoạt động' : 'Đã khóa'}
               </span>
             </div>
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Trạng thái hồ sơ:</span>
-            <TeacherStatusBadge status={teacher.status} />
-          </div>
-          <div style={{ fontSize: '0.8rem', color: teacher.isActive ? '#16a34a' : '#dc2626', fontWeight: 500 }}>
-            {teacher.isActive ? '● Tài khoản: Đang hoạt động' : '○ Tài khoản: Bị vô hiệu hóa'}
-          </div>
-        </div>
-      </div>
-
-      {/* Detailed Information Grid */}
-      <div style={detailGridStyle}>
-        {/* Personal & Contact Information */}
-        <div style={sectionCardStyle}>
-          <h3 style={sectionCardTitleStyle}>Thông tin cá nhân & Liên hệ</h3>
-          <div style={fieldListStyle}>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Mã giáo viên:</span>
-              <span style={fieldValueStyle}>{teacher.teacherCode}</span>
-            </div>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Họ và tên:</span>
-              <span style={fieldValueStyle}>{teacher.fullName}</span>
-            </div>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Email tài khoản:</span>
-              <span style={fieldValueStyle}>{teacher.email}</span>
-            </div>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Số điện thoại:</span>
-              <span style={fieldValueStyle}>{teacher.phone || '-'}</span>
-            </div>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Avatar URL:</span>
-              <span style={{ ...fieldValueStyle, wordBreak: 'break-all' }}>
-                {teacher.avatarUrl || '-'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Professional & Academic Information */}
-        <div style={sectionCardStyle}>
-          <h3 style={sectionCardTitleStyle}>Chuyên môn & Công tác</h3>
-          <div style={fieldListStyle}>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Chuyên môn giảng dạy:</span>
-              <span style={{ ...fieldValueStyle, fontWeight: 600, color: '#1d4ed8' }}>
-                {teacher.specialization}
-              </span>
-            </div>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Bằng cấp / Chứng chỉ:</span>
-              <span style={fieldValueStyle}>{teacher.qualification || '-'}</span>
-            </div>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Số năm kinh nghiệm:</span>
-              <span style={fieldValueStyle}>{teacher.experienceYears} năm</span>
-            </div>
-            <div style={fieldItemStyle}>
-              <span style={fieldLabelStyle}>Ngày vào làm:</span>
-              <span style={fieldValueStyle}>{formatDateOnly(teacher.hireDate)}</span>
+            <div style={overviewMetaStyle}>
+              <div>
+                <span style={metaLabelStyle}>Mã giáo viên:</span>{' '}
+                <span className="font-mono" style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
+                  {teacher.teacherCode}
+                </span>
+              </div>
+              <div>
+                <span style={metaLabelStyle}>Email:</span> {teacher.email}
+              </div>
+              <div>
+                <span style={metaLabelStyle}>Số điện thoại:</span> {teacher.phone || '—'}
+              </div>
+              <div>
+                <span style={metaLabelStyle}>Vai trò:</span> {teacher.roles.join(', ') || 'Giáo viên'}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Status Management Section */}
-      <TeacherStatusControl
-        currentStatus={teacher.status}
-        onStatusChange={handleStatusChange}
-      />
-    </div>
+      {/* Detailed Info Grid */}
+      <div style={detailsGridStyle}>
+        {/* Professional details */}
+        <div style={cardStyle}>
+          <h3 style={sectionTitleStyle}>Chuyên môn & Bằng cấp giảng dạy</h3>
+          <div style={infoListStyle}>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Chuyên môn đào tạo</span>
+              <span style={infoValueStyle}>{teacher.specialization || '—'}</span>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Bằng cấp / Chứng chỉ</span>
+              <span style={infoValueStyle}>{teacher.qualification || '—'}</span>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Kinh nghiệm giảng dạy</span>
+              <span style={infoValueStyle} className="tabular-nums">
+                {teacher.experienceYears !== undefined && teacher.experienceYears !== null
+                  ? `${teacher.experienceYears} năm`
+                  : '—'}
+              </span>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={infoLabelStyle}>Ngày vào làm</span>
+              <span style={infoValueStyle}>{formatDateOnly(teacher.hireDate)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Control Card */}
+        <div>
+          <TeacherStatusControl
+            currentStatus={teacher.status}
+            onStatusChange={handleStatusChange}
+          />
+        </div>
+      </div>
+    </AppShell>
   );
 };
 
-const pageContainerStyle: React.CSSProperties = {
-  maxWidth: '1000px',
-  margin: '0 auto',
-  padding: '1.5rem 1rem',
+const cardStyle: React.CSSProperties = {
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  boxShadow: 'var(--shadow-sm)',
+  padding: '1.75rem',
+  marginBottom: '1.5rem'
+};
+
+const profileHeaderStyle: React.CSSProperties = {
   display: 'flex',
-  flexDirection: 'column',
-  gap: '1.25rem',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+  alignItems: 'center',
+  gap: '1.5rem',
+  flexWrap: 'wrap'
 };
 
-const headerStyle: React.CSSProperties = {
+const avatarFallbackStyle: React.CSSProperties = {
+  width: '64px',
+  height: '64px',
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--color-primary-subtle)',
+  color: 'var(--color-primary)',
+  border: '2px solid var(--color-primary-border)',
   display: 'flex',
-  justifyContent: 'space-between',
   alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: '1rem'
-};
-
-const backButtonStyle: React.CSSProperties = {
-  padding: '0.45rem 0.85rem',
-  fontSize: '0.85rem',
-  fontWeight: 500,
-  backgroundColor: '#f1f5f9',
-  color: '#475569',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
-  cursor: 'pointer'
-};
-
-const editButtonStyle: React.CSSProperties = {
-  padding: '0.45rem 1rem',
-  fontSize: '0.875rem',
-  fontWeight: 600,
-  backgroundColor: '#ffffff',
-  color: '#2563eb',
-  border: '1px solid #93c5fd',
-  borderRadius: '6px',
-  textDecoration: 'none',
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '0.35rem'
-};
-
-const profileHeaderCardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  padding: '1.5rem',
-  border: '1px solid #e2e8f0',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: '1rem'
+  justifyContent: 'center',
+  fontSize: '1.5rem',
+  fontWeight: 700
 };
 
 const avatarImageStyle: React.CSSProperties = {
   width: '64px',
   height: '64px',
-  borderRadius: '50%',
+  borderRadius: 'var(--radius-full)',
   objectFit: 'cover',
-  border: '2px solid #e2e8f0'
+  border: '2px solid var(--color-border)'
 };
 
-const initialsAvatarStyle: React.CSSProperties = {
-  width: '64px',
-  height: '64px',
-  borderRadius: '50%',
-  backgroundColor: '#dbeafe',
-  color: '#1e40af',
+const overviewMetaStyle: React.CSSProperties = {
+  marginTop: '0.75rem',
   display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  fontSize: '1.25rem',
-  fontWeight: 700,
-  border: '2px solid #bfdbfe'
+  gap: '1.5rem',
+  flexWrap: 'wrap',
+  color: 'var(--color-text-secondary)',
+  fontSize: '0.8125rem'
 };
 
-const roleBadgeStyle: React.CSSProperties = {
-  fontSize: '0.75rem',
-  backgroundColor: '#f1f5f9',
-  color: '#334155',
-  padding: '0.15rem 0.5rem',
-  borderRadius: '4px',
+const metaLabelStyle: React.CSSProperties = {
+  color: 'var(--color-text-muted)',
+  marginRight: '0.25rem'
+};
+
+const detailsGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+  gap: '1.5rem'
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+  fontSize: '1rem',
+  fontWeight: 600,
+  color: 'var(--color-text-primary)',
+  margin: '0 0 1.25rem 0',
+  borderBottom: '1px solid var(--color-border-subtle)',
+  paddingBottom: '0.625rem'
+};
+
+const infoListStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.875rem'
+};
+
+const infoRowStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingBottom: '0.5rem',
+  borderBottom: '1px solid var(--color-border-subtle)'
+};
+
+const infoLabelStyle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  color: 'var(--color-text-secondary)',
   fontWeight: 500
 };
 
-const detailGridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-  gap: '1.25rem'
+const infoValueStyle: React.CSSProperties = {
+  fontSize: '0.875rem',
+  color: 'var(--color-text-primary)',
+  fontWeight: 600
 };
 
-const sectionCardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  padding: '1.25rem 1.5rem',
-  border: '1px solid #e2e8f0',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+const backButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 0.875rem',
+  fontSize: '0.8125rem',
+  fontWeight: 500,
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-secondary)',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  cursor: 'pointer'
 };
 
-const sectionCardTitleStyle: React.CSSProperties = {
-  margin: '0 0 1rem 0',
-  fontSize: '0.95rem',
+const editButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 1rem',
+  fontSize: '0.8125rem',
   fontWeight: 600,
-  color: '#0f172a',
-  borderBottom: '1px solid #f1f5f9',
-  paddingBottom: '0.5rem'
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
+  borderRadius: 'var(--radius-md)',
+  textDecoration: 'none'
 };
 
-const fieldListStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.75rem'
-};
-
-const fieldItemStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'baseline',
-  fontSize: '0.875rem'
-};
-
-const fieldLabelStyle: React.CSSProperties = {
-  color: '#64748b',
-  fontWeight: 500,
-  flex: '0 0 140px'
-};
-
-const fieldValueStyle: React.CSSProperties = {
-  color: '#1e293b',
-  fontWeight: 500,
-  textAlign: 'right',
-  flex: 1
+const primaryButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 1rem',
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
+  border: 'none',
+  borderRadius: 'var(--radius-md)',
+  cursor: 'pointer'
 };
 
 const successBannerStyle: React.CSSProperties = {
-  backgroundColor: '#ecfdf5',
-  color: '#065f46',
-  border: '1px solid #a7f3d0',
-  padding: '0.75rem 1rem',
-  borderRadius: '6px',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
+  padding: '0.75rem 1rem',
+  backgroundColor: 'var(--status-active-bg)',
+  border: '1px solid var(--status-active-border)',
+  color: 'var(--status-active-text)',
+  borderRadius: 'var(--radius-md)',
   fontSize: '0.875rem',
-  fontWeight: 500
+  fontWeight: 500,
+  marginBottom: '1rem'
 };
 
-const closeBannerButtonStyle: React.CSSProperties = {
+const dismissButtonStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
-  fontSize: '1.2rem',
-  color: '#065f46',
-  cursor: 'pointer'
+  fontSize: '1.25rem',
+  color: 'var(--status-active-text)',
+  cursor: 'pointer',
+  padding: 0,
+  lineHeight: 1
 };
 
 const notFoundCardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  padding: '3rem 1.5rem',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  padding: '2.5rem 2rem',
   textAlign: 'center',
-  border: '1px solid #e2e8f0',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+  maxWidth: '480px',
+  margin: '2rem auto'
 };
 
-const backToTableBtnStyle: React.CSSProperties = {
-  padding: '0.5rem 1.25rem',
-  fontSize: '0.875rem',
-  fontWeight: 500,
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer'
-};
-
-const retryButtonStyle: React.CSSProperties = {
-  padding: '0.5rem 1rem',
-  fontSize: '0.875rem',
-  backgroundColor: '#ef4444',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer'
+const errorContainerStyle: React.CSSProperties = {
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  borderRadius: 'var(--radius-lg)',
+  padding: '1.5rem',
+  color: 'var(--status-danger-text)',
+  maxWidth: '600px',
+  margin: '2rem auto',
+  textAlign: 'center'
 };

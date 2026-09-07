@@ -5,6 +5,8 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { LoadingState } from '../../components/common/LoadingState';
 import { Pagination } from '../../components/common/Pagination';
 import { SearchInput } from '../../components/common/SearchInput';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { StudentFilters } from '../../components/students/StudentFilters';
 import { StudentStatusControl } from '../../components/students/StudentStatusControl';
 import { StudentTable } from '../../components/students/StudentTable';
@@ -12,6 +14,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/student.service';
 import type { PagedResult } from '../../types/common.types';
 import type { StudentFilterParams, StudentListItem, StudentStatus } from '../../types/student.types';
+import { getRoleHomeRoute } from '../../utils/roleHelper';
 import {
   getApiErrorMessage,
   getStudentBasePath,
@@ -24,6 +27,7 @@ export const StudentListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const basePath = getStudentBasePath(location.pathname, user?.roles);
+  const homeRoute = user ? getRoleHomeRoute(user.roles) : '/login';
 
   // Parse and normalize parameters from URL
   const queryParams = normalizeStudentQueryParams(searchParams);
@@ -162,7 +166,6 @@ export const StudentListPage: React.FC = () => {
     if (!statusTargetStudent) return;
     await studentService.updateStudentStatus(statusTargetStudent.id, newStatus);
     setStatusTargetStudent(null);
-    // Refetch the current list to reflect updated status and respect server filter
     fetchStudents(queryParams);
   };
 
@@ -175,33 +178,30 @@ export const StudentListPage: React.FC = () => {
   );
 
   return (
-    <div style={pageContainerStyle}>
+    <AppShell>
       {/* Page Header */}
-      <div style={pageHeaderStyle}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#0f172a', fontWeight: 700 }}>
-            Quản lý học viên
-          </h1>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-            Xem danh sách, tìm kiếm, lọc và quản lý hồ sơ học viên trong trung tâm.
-          </p>
-        </div>
-
-        <Link to={`${basePath}/new`} style={createButtonStyle}>
-          + Thêm học viên
-        </Link>
-      </div>
+      <PageHeader
+        title="Quản lý học viên"
+        subtitle="Xem danh sách, tìm kiếm, lọc và quản lý hồ sơ học viên trong trung tâm."
+        breadcrumbs={[
+          { label: 'Trang chủ', path: homeRoute },
+          { label: 'Quản lý học viên' }
+        ]}
+        actions={
+          <Link to={`${basePath}/new`} style={createButtonStyle}>
+            + Thêm học viên
+          </Link>
+        }
+      />
 
       {/* Filter and Search Bar */}
       <div style={filterSectionStyle}>
-        <div style={{ flex: '1 1 300px', maxWidth: '400px' }}>
-          <SearchInput
-            value={queryParams.search || ''}
-            onChange={handleSearchChange}
-            placeholder="Tìm theo mã học viên, họ tên hoặc email..."
-            disabled={isLoading}
-          />
-        </div>
+        <SearchInput
+          value={queryParams.search || ''}
+          onChange={handleSearchChange}
+          placeholder="Tìm theo mã HV, họ tên hoặc email..."
+          disabled={isLoading}
+        />
 
         <StudentFilters
           status={queryParams.status}
@@ -273,59 +273,44 @@ export const StudentListPage: React.FC = () => {
         <div style={modalOverlayStyle} role="dialog" aria-modal="true">
           <div style={modalContentStyle}>
             <div style={modalHeaderStyle}>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
                 Đổi trạng thái: {statusTargetStudent.fullName} ({statusTargetStudent.studentCode})
               </h3>
               <button
                 type="button"
                 onClick={() => setStatusTargetStudent(null)}
                 style={closeButtonStyle}
-                aria-label="Đóng"
+                aria-label="Đóng hộp thoại"
               >
                 &times;
               </button>
             </div>
 
-            <StudentStatusControl
-              currentStatus={statusTargetStudent.status}
-              onStatusChange={handleQuickStatusUpdate}
-            />
+            <div style={{ padding: '1.25rem' }}>
+              <StudentStatusControl
+                currentStatus={statusTargetStudent.status}
+                onStatusChange={handleQuickStatusUpdate}
+              />
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
-};
-
-const pageContainerStyle: React.CSSProperties = {
-  maxWidth: '1200px',
-  margin: '0 auto',
-  padding: '1.5rem 1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.25rem',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const pageHeaderStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: '1rem'
 };
 
 const createButtonStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
-  padding: '0.6rem 1.2rem',
+  padding: '0.625rem 1.125rem',
   fontSize: '0.875rem',
   fontWeight: 600,
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
-  borderRadius: '6px',
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
+  borderRadius: 'var(--radius-md)',
   textDecoration: 'none',
-  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+  boxShadow: 'var(--shadow-xs)',
+  transition: 'background-color 0.15s ease'
 };
 
 const filterSectionStyle: React.CSSProperties = {
@@ -333,29 +318,31 @@ const filterSectionStyle: React.CSSProperties = {
   alignItems: 'center',
   flexWrap: 'wrap',
   gap: '1rem',
-  justifyContent: 'space-between'
+  justifyContent: 'space-between',
+  marginBottom: '1.25rem'
 };
 
 const errorContainerStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '1rem 1.25rem',
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  borderRadius: '8px',
-  color: '#991b1b',
-  fontSize: '0.875rem'
+  padding: '0.875rem 1.25rem',
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  borderRadius: 'var(--radius-md)',
+  color: 'var(--status-danger-text)',
+  fontSize: '0.875rem',
+  marginBottom: '1rem'
 };
 
 const retryButtonStyle: React.CSSProperties = {
-  padding: '0.4rem 0.85rem',
-  fontSize: '0.8rem',
+  padding: '0.375rem 0.75rem',
+  fontSize: '0.8125rem',
   fontWeight: 600,
-  backgroundColor: '#ef4444',
-  color: '#ffffff',
+  backgroundColor: 'var(--status-danger-text)',
+  color: 'var(--color-text-inverse)',
   border: 'none',
-  borderRadius: '4px',
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer'
 };
 
@@ -365,7 +352,8 @@ const modalOverlayStyle: React.CSSProperties = {
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+  backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  backdropFilter: 'blur(2px)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -374,11 +362,12 @@ const modalOverlayStyle: React.CSSProperties = {
 };
 
 const modalContentStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
   width: '100%',
   maxWidth: '560px',
-  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+  boxShadow: 'var(--shadow-lg)',
+  border: '1px solid var(--color-border)',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column'
@@ -386,17 +375,18 @@ const modalContentStyle: React.CSSProperties = {
 
 const modalHeaderStyle: React.CSSProperties = {
   padding: '1rem 1.25rem',
-  borderBottom: '1px solid #e2e8f0',
+  borderBottom: '1px solid var(--color-border)',
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center'
+  alignItems: 'center',
+  backgroundColor: 'var(--color-surface-subtle)'
 };
 
 const closeButtonStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   fontSize: '1.5rem',
-  color: '#94a3b8',
+  color: 'var(--color-text-muted)',
   cursor: 'pointer',
   lineHeight: 1,
   padding: 0

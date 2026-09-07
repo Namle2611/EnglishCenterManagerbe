@@ -71,22 +71,23 @@ export const StudentStatusControl: React.FC<StudentStatusControlProps> = ({
     <div style={containerStyle}>
       <div style={headerStyle}>
         <div>
-          <h4 style={{ margin: 0, fontSize: '1rem', color: '#1e293b' }}>
+          <h4 style={titleStyle}>
             Quản lý trạng thái học viên
           </h4>
-          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+          <p style={subtitleStyle}>
             Trạng thái sẽ đồng bộ quyền truy cập và tài khoản của học viên trên hệ thống.
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.85rem', color: '#475569' }}>Hiện tại:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Hiện tại:</span>
           <StudentStatusBadge status={currentStatus} />
         </div>
       </div>
 
       {errorMessage && (
         <div style={errorStyle} role="alert">
-          {errorMessage}
+          <span>⚠️</span>
+          <span>{errorMessage}</span>
         </div>
       )}
 
@@ -104,10 +105,10 @@ export const StudentStatusControl: React.FC<StudentStatusControlProps> = ({
               disabled={isBusy || isCurrent}
               style={{
                 ...statusOptionButtonStyle,
-                opacity: isCurrent ? 0.5 : 1,
-                borderColor: isSelected ? '#2563eb' : '#cbd5e1',
-                backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
-                color: isSelected ? '#1d4ed8' : '#334155',
+                opacity: isCurrent ? 0.45 : 1,
+                borderColor: isSelected ? 'var(--color-primary)' : 'var(--color-border-strong)',
+                backgroundColor: isSelected ? 'var(--color-primary-subtle)' : 'var(--color-surface)',
+                color: isSelected ? 'var(--color-primary)' : 'var(--color-text-primary)',
                 cursor: isCurrent ? 'not-allowed' : 'pointer'
               }}
             >
@@ -120,16 +121,16 @@ export const StudentStatusControl: React.FC<StudentStatusControlProps> = ({
       {/* Inline Confirmation Box */}
       {targetStatus && (
         <div style={confirmBoxStyle}>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>⚠️</span>
             <div style={{ flex: 1 }}>
-              <strong style={{ fontSize: '0.875rem', color: '#92400e' }}>
-                Xác nhận thay đổi trạng thái sang: {targetStatus}
+              <strong style={{ fontSize: '0.875rem', color: 'var(--status-warning-text)' }}>
+                Xác nhận chuyển trạng thái sang: {targetStatus}
               </strong>
-              <p style={{ margin: '0.35rem 0 0.75rem 0', fontSize: '0.85rem', color: '#451a03' }}>
+              <p style={{ margin: '0.35rem 0 0.75rem 0', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
                 {getConfirmationMessage(targetStatus)}
               </p>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button
                   type="button"
                   onClick={handleConfirm}
@@ -156,11 +157,11 @@ export const StudentStatusControl: React.FC<StudentStatusControlProps> = ({
 };
 
 const containerStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-lg)',
+  border: '1px solid var(--color-border)',
   padding: '1.25rem',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+  boxShadow: 'var(--shadow-xs)',
   display: 'flex',
   flexDirection: 'column',
   gap: '1rem'
@@ -172,8 +173,21 @@ const headerStyle: React.CSSProperties = {
   alignItems: 'center',
   flexWrap: 'wrap',
   gap: '0.75rem',
-  borderBottom: '1px solid #f1f5f9',
+  borderBottom: '1px solid var(--color-border-subtle)',
   paddingBottom: '0.75rem'
+};
+
+const titleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.9375rem',
+  fontWeight: 600,
+  color: 'var(--color-text-primary)'
+};
+
+const subtitleStyle: React.CSSProperties = {
+  margin: '0.25rem 0 0 0',
+  fontSize: '0.8125rem',
+  color: 'var(--color-text-secondary)'
 };
 
 const buttonGroupStyle: React.CSSProperties = {
@@ -183,48 +197,51 @@ const buttonGroupStyle: React.CSSProperties = {
 };
 
 const statusOptionButtonStyle: React.CSSProperties = {
-  padding: '0.45rem 0.85rem',
-  fontSize: '0.85rem',
+  padding: '0.4rem 0.85rem',
+  fontSize: '0.8125rem',
   fontWeight: 500,
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  transition: 'all 0.15s'
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--color-border)',
+  transition: 'border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease'
 };
 
 const confirmBoxStyle: React.CSSProperties = {
-  backgroundColor: '#fffbeb',
-  border: '1px solid #fde68a',
-  borderRadius: '6px',
-  padding: '0.85rem 1rem'
+  backgroundColor: 'var(--status-warning-bg)',
+  border: '1px solid var(--status-warning-border)',
+  borderRadius: 'var(--radius-md)',
+  padding: '0.875rem 1rem'
 };
 
 const confirmButtonStyle: React.CSSProperties = {
-  padding: '0.4rem 0.85rem',
-  fontSize: '0.8rem',
+  padding: '0.4rem 0.875rem',
+  fontSize: '0.8125rem',
   fontWeight: 600,
-  backgroundColor: '#d97706',
-  color: '#ffffff',
+  backgroundColor: 'var(--status-warning-text)',
+  color: 'var(--color-text-inverse)',
   border: 'none',
-  borderRadius: '4px',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer'
 };
 
 const cancelButtonStyle: React.CSSProperties = {
-  padding: '0.4rem 0.85rem',
-  fontSize: '0.8rem',
+  padding: '0.4rem 0.875rem',
+  fontSize: '0.8125rem',
   fontWeight: 500,
-  backgroundColor: '#ffffff',
-  color: '#475569',
-  border: '1px solid #cbd5e1',
-  borderRadius: '4px',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-secondary)',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer'
 };
 
 const errorStyle: React.CSSProperties = {
-  padding: '0.5rem 0.75rem',
-  fontSize: '0.85rem',
-  backgroundColor: '#fef2f2',
-  color: '#b91c1c',
-  borderRadius: '4px',
-  border: '1px solid #fecaca'
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  padding: '0.625rem 0.875rem',
+  fontSize: '0.8125rem',
+  backgroundColor: 'var(--status-danger-bg)',
+  color: 'var(--status-danger-text)',
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--status-danger-border)'
 };

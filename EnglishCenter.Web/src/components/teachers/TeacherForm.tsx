@@ -83,6 +83,13 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
     }
   }, [initialValues]);
 
+  // Clean password on unmount to ensure security lifecycle
+  useEffect(() => {
+    return () => {
+      setFormData((prev) => ({ ...prev, password: '' }));
+    };
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -123,8 +130,8 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
     const email = formData.email.trim();
     if (!email) {
       errors.email = 'Email là bắt buộc.';
-    } else if (email.length > 255) {
-      errors.email = 'Email không được vượt quá 255 ký tự.';
+    } else if (email.length > 256) {
+      errors.email = 'Email không được vượt quá 256 ký tự.';
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -136,8 +143,8 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
     const fullName = formData.fullName.trim();
     if (!fullName) {
       errors.fullName = 'Họ và tên là bắt buộc.';
-    } else if (fullName.length > 150) {
-      errors.fullName = 'Họ và tên không được vượt quá 150 ký tự.';
+    } else if (fullName.length > 100) {
+      errors.fullName = 'Họ và tên không được vượt quá 100 ký tự.';
     }
 
     // Phone
@@ -156,14 +163,14 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
     const spec = formData.specialization.trim();
     if (!spec) {
       errors.specialization = 'Chuyên môn là bắt buộc.';
-    } else if (spec.length > 150) {
-      errors.specialization = 'Chuyên môn không được vượt quá 150 ký tự.';
+    } else if (spec.length > 100) {
+      errors.specialization = 'Chuyên môn không được vượt quá 100 ký tự.';
     }
 
     // Qualification
     const qual = formData.qualification.trim();
-    if (qual && qual.length > 255) {
-      errors.qualification = 'Bằng cấp / Chứng chỉ không được vượt quá 255 ký tự.';
+    if (qual && qual.length > 200) {
+      errors.qualification = 'Bằng cấp / Chứng chỉ không được vượt quá 200 ký tự.';
     }
 
     // ExperienceYears: 0 is valid, empty string is invalid, negative/decimal/NaN is invalid
@@ -215,6 +222,7 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
           hireDate: formData.hireDate
         };
         await onSubmit(payload);
+        setFormData((prev) => ({ ...prev, password: '' }));
       } else {
         const payload: UpdateTeacherPayload = {
           email: formData.email.trim(),
@@ -236,40 +244,48 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
   const isBusy = isLoading || isSubmitting;
 
   return (
-    <form onSubmit={handleSubmit} style={formContainerStyle} noValidate>
+    <form onSubmit={handleSubmit} style={formStyle} noValidate>
+      {/* Server error banner */}
       {serverError && (
-        <div style={serverErrorStyle} role="alert">
-          {serverError}
+        <div style={errorBannerStyle} role="alert">
+          <span style={{ fontSize: '1rem', lineHeight: 1 }}>⚠️</span>
+          <span>{serverError}</span>
         </div>
       )}
 
-      {/* Read-only Context for Edit Mode */}
+      {/* Read-only info in Edit mode */}
       {mode === 'edit' && readOnlyData && (
         <div style={readOnlyCardStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <span style={readOnlyLabelStyle}>Mã giáo viên (Cố định):</span>
-            <span style={{ fontWeight: 600, color: '#0f172a' }}>
-              {readOnlyData.teacherCode || formData.teacherCode}
-            </span>
-          </div>
-          {readOnlyData.status && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              <span style={readOnlyLabelStyle}>Trạng thái hiện tại:</span>
-              <TeacherStatusBadge status={readOnlyData.status} />
+          <div style={readOnlyGridStyle}>
+            <div style={readOnlyItemStyle}>
+              <span style={readOnlyLabelStyle}>Mã giáo viên (bất biến)</span>
+              <span style={readOnlyCodeBadgeStyle} className="font-mono">
+                {readOnlyData.teacherCode || '—'}
+              </span>
             </div>
-          )}
+
+            {readOnlyData.status && (
+              <div style={readOnlyItemStyle}>
+                <span style={readOnlyLabelStyle}>Trạng thái hiện tại</span>
+                <div style={{ marginTop: '0.2rem' }}>
+                  <TeacherStatusBadge status={readOnlyData.status} />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Section 1: Account Information */}
-      <div style={sectionStyle}>
-        <h3 style={sectionTitleStyle}>1. Thông tin tài khoản & Định danh</h3>
-        <div style={gridStyle}>
-          {/* Teacher Code (Create only) */}
+      {/* Section 1: Core Account Info */}
+      <div style={sectionCardStyle}>
+        <h3 style={sectionTitleStyle}>Thông tin định danh & tài khoản</h3>
+        <p style={sectionSubtitleStyle}>Các trường bắt buộc để thiết lập tài khoản giáo viên trong trung tâm.</p>
+
+        <div style={fieldsGridStyle}>
           {mode === 'create' && (
-            <div style={formGroupStyle}>
+            <div style={fieldGroupStyle}>
               <label htmlFor="teacherCode" style={labelStyle}>
-                Mã giáo viên <span style={{ color: '#ef4444' }}>*</span>
+                Mã giáo viên <span style={{ color: 'var(--status-danger-text)' }}>*</span>
               </label>
               <input
                 id="teacherCode"
@@ -277,13 +293,14 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
                 type="text"
                 value={formData.teacherCode}
                 onChange={handleChange}
-                placeholder="Ví dụ: TEA001"
-                disabled={isBusy}
+                placeholder="VD: TCH2026001"
                 maxLength={20}
+                disabled={isBusy}
                 style={{
                   ...inputStyle,
-                  borderColor: validationErrors.teacherCode ? '#ef4444' : '#cbd5e1'
+                  borderColor: validationErrors.teacherCode ? 'var(--status-danger-border)' : 'var(--color-border-strong)'
                 }}
+                required
               />
               {validationErrors.teacherCode && (
                 <span style={fieldErrorStyle}>{validationErrors.teacherCode}</span>
@@ -291,10 +308,33 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
             </div>
           )}
 
-          {/* Email */}
-          <div style={formGroupStyle}>
+          <div style={fieldGroupStyle}>
+            <label htmlFor="fullName" style={labelStyle}>
+              Họ và tên <span style={{ color: 'var(--status-danger-text)' }}>*</span>
+            </label>
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="VD: Nguyễn Văn B"
+              maxLength={100}
+              disabled={isBusy}
+              style={{
+                ...inputStyle,
+                borderColor: validationErrors.fullName ? 'var(--status-danger-border)' : 'var(--color-border-strong)'
+              }}
+              required
+            />
+            {validationErrors.fullName && (
+              <span style={fieldErrorStyle}>{validationErrors.fullName}</span>
+            )}
+          </div>
+
+          <div style={fieldGroupStyle}>
             <label htmlFor="email" style={labelStyle}>
-              Email đăng nhập <span style={{ color: '#ef4444' }}>*</span>
+              Email liên hệ <span style={{ color: 'var(--status-danger-text)' }}>*</span>
             </label>
             <input
               id="email"
@@ -303,23 +343,23 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
               value={formData.email}
               onChange={handleChange}
               placeholder="teacher@example.com"
+              maxLength={256}
               disabled={isBusy}
-              maxLength={255}
               style={{
                 ...inputStyle,
-                borderColor: validationErrors.email ? '#ef4444' : '#cbd5e1'
+                borderColor: validationErrors.email ? 'var(--status-danger-border)' : 'var(--color-border-strong)'
               }}
+              required
             />
             {validationErrors.email && (
               <span style={fieldErrorStyle}>{validationErrors.email}</span>
             )}
           </div>
 
-          {/* Password (Create only) */}
           {mode === 'create' && (
-            <div style={formGroupStyle}>
+            <div style={fieldGroupStyle}>
               <label htmlFor="password" style={labelStyle}>
-                Mật khẩu ban đầu <span style={{ color: '#ef4444' }}>*</span>
+                Mật khẩu khởi tạo <span style={{ color: 'var(--status-danger-text)' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -333,13 +373,14 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
                   style={{
                     ...inputStyle,
                     paddingRight: '3rem',
-                    borderColor: validationErrors.password ? '#ef4444' : '#cbd5e1'
+                    borderColor: validationErrors.password ? 'var(--status-danger-border)' : 'var(--color-border-strong)'
                   }}
+                  required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={togglePasswordButtonStyle}
+                  style={togglePasswordBtnStyle}
                   tabIndex={-1}
                 >
                   {showPassword ? 'Ẩn' : 'Hiện'}
@@ -353,92 +394,15 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
         </div>
       </div>
 
-      {/* Section 2: Personal Profile */}
-      <div style={sectionStyle}>
-        <h3 style={sectionTitleStyle}>2. Thông tin cá nhân</h3>
-        <div style={gridStyle}>
-          {/* Full Name */}
-          <div style={formGroupStyle}>
-            <label htmlFor="fullName" style={labelStyle}>
-              Họ và tên <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              id="fullName"
-              name="fullName"
-              type="text"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="Nguyễn Văn A"
-              disabled={isBusy}
-              maxLength={150}
-              style={{
-                ...inputStyle,
-                borderColor: validationErrors.fullName ? '#ef4444' : '#cbd5e1'
-              }}
-            />
-            {validationErrors.fullName && (
-              <span style={fieldErrorStyle}>{validationErrors.fullName}</span>
-            )}
-          </div>
+      {/* Section 2: Professional & Academic Qualifications */}
+      <div style={sectionCardStyle}>
+        <h3 style={sectionTitleStyle}>Chuyên môn & Học vị giảng dạy</h3>
+        <p style={sectionSubtitleStyle}>Thông tin bằng cấp, kinh nghiệm và ngày bắt đầu công tác.</p>
 
-          {/* Phone */}
-          <div style={formGroupStyle}>
-            <label htmlFor="phone" style={labelStyle}>
-              Số điện thoại
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="0912345678"
-              disabled={isBusy}
-              maxLength={20}
-              style={{
-                ...inputStyle,
-                borderColor: validationErrors.phone ? '#ef4444' : '#cbd5e1'
-              }}
-            />
-            {validationErrors.phone && (
-              <span style={fieldErrorStyle}>{validationErrors.phone}</span>
-            )}
-          </div>
-
-          {/* Avatar URL */}
-          <div style={{ ...formGroupStyle, gridColumn: 'span 2' }}>
-            <label htmlFor="avatarUrl" style={labelStyle}>
-              Đường dẫn ảnh đại diện (Avatar URL)
-            </label>
-            <input
-              id="avatarUrl"
-              name="avatarUrl"
-              type="url"
-              value={formData.avatarUrl}
-              onChange={handleChange}
-              placeholder="https://example.com/avatar.jpg"
-              disabled={isBusy}
-              maxLength={500}
-              style={{
-                ...inputStyle,
-                borderColor: validationErrors.avatarUrl ? '#ef4444' : '#cbd5e1'
-              }}
-            />
-            {validationErrors.avatarUrl && (
-              <span style={fieldErrorStyle}>{validationErrors.avatarUrl}</span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Section 3: Professional Info */}
-      <div style={sectionStyle}>
-        <h3 style={sectionTitleStyle}>3. Thông tin chuyên môn & Công tác</h3>
-        <div style={gridStyle}>
-          {/* Specialization */}
-          <div style={formGroupStyle}>
+        <div style={fieldsGridStyle}>
+          <div style={fieldGroupStyle}>
             <label htmlFor="specialization" style={labelStyle}>
-              Chuyên môn <span style={{ color: '#ef4444' }}>*</span>
+              Chuyên môn đào tạo <span style={{ color: 'var(--status-danger-text)' }}>*</span>
             </label>
             <input
               id="specialization"
@@ -446,47 +410,23 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
               type="text"
               value={formData.specialization}
               onChange={handleChange}
-              placeholder="Ví dụ: IELTS, TOEIC, Giao tiếp..."
+              placeholder="VD: IELTS, Tiếng Anh Giao Tiếp, Ngữ Pháp..."
+              maxLength={100}
               disabled={isBusy}
-              maxLength={150}
               style={{
                 ...inputStyle,
-                borderColor: validationErrors.specialization ? '#ef4444' : '#cbd5e1'
+                borderColor: validationErrors.specialization ? 'var(--status-danger-border)' : 'var(--color-border-strong)'
               }}
+              required
             />
             {validationErrors.specialization && (
               <span style={fieldErrorStyle}>{validationErrors.specialization}</span>
             )}
           </div>
 
-          {/* Qualification */}
-          <div style={formGroupStyle}>
-            <label htmlFor="qualification" style={labelStyle}>
-              Bằng cấp / Chứng chỉ
-            </label>
-            <input
-              id="qualification"
-              name="qualification"
-              type="text"
-              value={formData.qualification}
-              onChange={handleChange}
-              placeholder="Ví dụ: Thạc sĩ TESOL, IELTS 8.5..."
-              disabled={isBusy}
-              maxLength={255}
-              style={{
-                ...inputStyle,
-                borderColor: validationErrors.qualification ? '#ef4444' : '#cbd5e1'
-              }}
-            />
-            {validationErrors.qualification && (
-              <span style={fieldErrorStyle}>{validationErrors.qualification}</span>
-            )}
-          </div>
-
-          {/* Experience Years */}
-          <div style={formGroupStyle}>
+          <div style={fieldGroupStyle}>
             <label htmlFor="experienceYears" style={labelStyle}>
-              Số năm kinh nghiệm <span style={{ color: '#ef4444' }}>*</span>
+              Kinh nghiệm giảng dạy (Năm) <span style={{ color: 'var(--status-danger-text)' }}>*</span>
             </label>
             <input
               id="experienceYears"
@@ -496,22 +436,23 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
               step="1"
               value={formData.experienceYears}
               onChange={handleChange}
-              placeholder="0"
+              placeholder="0, 1, 2..."
               disabled={isBusy}
+              className="tabular-nums"
               style={{
                 ...inputStyle,
-                borderColor: validationErrors.experienceYears ? '#ef4444' : '#cbd5e1'
+                borderColor: validationErrors.experienceYears ? 'var(--status-danger-border)' : 'var(--color-border-strong)'
               }}
+              required
             />
             {validationErrors.experienceYears && (
               <span style={fieldErrorStyle}>{validationErrors.experienceYears}</span>
             )}
           </div>
 
-          {/* Hire Date */}
-          <div style={formGroupStyle}>
+          <div style={fieldGroupStyle}>
             <label htmlFor="hireDate" style={labelStyle}>
-              Ngày vào làm <span style={{ color: '#ef4444' }}>*</span>
+              Ngày vào làm <span style={{ color: 'var(--status-danger-text)' }}>*</span>
             </label>
             <input
               id="hireDate"
@@ -522,28 +463,73 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
               disabled={isBusy}
               style={{
                 ...inputStyle,
-                borderColor: validationErrors.hireDate ? '#ef4444' : '#cbd5e1'
+                borderColor: validationErrors.hireDate ? 'var(--status-danger-border)' : 'var(--color-border-strong)'
               }}
+              required
             />
             {validationErrors.hireDate && (
               <span style={fieldErrorStyle}>{validationErrors.hireDate}</span>
             )}
           </div>
+
+          <div style={fieldGroupStyle}>
+            <label htmlFor="qualification" style={labelStyle}>Bằng cấp / Chứng chỉ</label>
+            <input
+              id="qualification"
+              name="qualification"
+              type="text"
+              value={formData.qualification}
+              onChange={handleChange}
+              placeholder="VD: Thạc sĩ Ngôn ngữ Anh, CELTA, TESOL..."
+              maxLength={200}
+              disabled={isBusy}
+              style={inputStyle}
+            />
+            {validationErrors.qualification && (
+              <span style={fieldErrorStyle}>{validationErrors.qualification}</span>
+            )}
+          </div>
+
+          <div style={fieldGroupStyle}>
+            <label htmlFor="phone" style={labelStyle}>Số điện thoại</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="0912345678"
+              maxLength={20}
+              disabled={isBusy}
+              style={inputStyle}
+            />
+            {validationErrors.phone && (
+              <span style={fieldErrorStyle}>{validationErrors.phone}</span>
+            )}
+          </div>
+
+          <div style={fieldGroupStyle}>
+            <label htmlFor="avatarUrl" style={labelStyle}>Ảnh đại diện (URL)</label>
+            <input
+              id="avatarUrl"
+              name="avatarUrl"
+              type="url"
+              value={formData.avatarUrl}
+              onChange={handleChange}
+              placeholder="https://example.com/avatar.jpg"
+              maxLength={500}
+              disabled={isBusy}
+              style={inputStyle}
+            />
+            {validationErrors.avatarUrl && (
+              <span style={fieldErrorStyle}>{validationErrors.avatarUrl}</span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div style={formActionsStyle}>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isBusy}
-            style={cancelButtonStyle}
-          >
-            Hủy bỏ
-          </button>
-        )}
+      {/* Actions */}
+      <div style={actionsRowStyle}>
         <button
           type="submit"
           disabled={isBusy}
@@ -556,143 +542,174 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
           {isBusy
             ? 'Đang xử lý...'
             : mode === 'create'
-            ? 'Tạo mới giáo viên'
+            ? '+ Tạo giáo viên mới'
             : 'Lưu thay đổi'}
         </button>
+
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isBusy}
+            style={cancelButtonStyle}
+          >
+            Hủy bỏ
+          </button>
+        )}
       </div>
     </form>
   );
 };
 
-const formContainerStyle: React.CSSProperties = {
+const formStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '1.5rem',
-  backgroundColor: '#ffffff',
-  padding: '1.75rem',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+  gap: '1.5rem'
 };
 
-const sectionStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem'
+const sectionCardStyle: React.CSSProperties = {
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  boxShadow: 'var(--shadow-sm)',
+  padding: '1.75rem'
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1rem',
+  fontSize: '1.0625rem',
   fontWeight: 600,
-  color: '#0f172a',
-  borderBottom: '1px solid #f1f5f9',
-  paddingBottom: '0.5rem'
+  color: 'var(--color-text-primary)',
+  margin: '0 0 0.25rem 0'
 };
 
-const gridStyle: React.CSSProperties = {
+const sectionSubtitleStyle: React.CSSProperties = {
+  fontSize: '0.8125rem',
+  color: 'var(--color-text-secondary)',
+  margin: '0 0 1.25rem 0'
+};
+
+const fieldsGridStyle: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-  gap: '1rem'
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+  gap: '1.25rem'
 };
 
-const formGroupStyle: React.CSSProperties = {
+const fieldGroupStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.35rem'
+  gap: '0.375rem'
 };
 
 const labelStyle: React.CSSProperties = {
-  fontSize: '0.85rem',
+  fontSize: '0.8125rem',
   fontWeight: 600,
-  color: '#334155'
+  color: 'var(--color-text-primary)'
 };
 
 const inputStyle: React.CSSProperties = {
-  width: '100%',
-  boxSizing: 'border-box',
-  padding: '0.55rem 0.75rem',
+  padding: '0.55rem 0.8rem',
   fontSize: '0.875rem',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  outline: 'none',
-  backgroundColor: '#ffffff',
-  color: '#1e293b',
-  transition: 'border-color 0.15s ease'
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--color-border-strong)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
+  boxSizing: 'border-box'
 };
 
-const togglePasswordButtonStyle: React.CSSProperties = {
+const togglePasswordBtnStyle: React.CSSProperties = {
   position: 'absolute',
   right: '0.5rem',
   top: '50%',
   transform: 'translateY(-50%)',
   background: 'none',
   border: 'none',
-  color: '#64748b',
-  fontSize: '0.8rem',
-  fontWeight: 500,
+  color: 'var(--color-primary)',
+  fontSize: '0.8125rem',
+  fontWeight: 600,
   cursor: 'pointer',
   padding: '0.25rem 0.5rem'
 };
 
 const fieldErrorStyle: React.CSSProperties = {
-  fontSize: '0.78rem',
-  color: '#ef4444',
-  marginTop: '0.15rem'
-};
-
-const serverErrorStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  borderRadius: '6px',
-  color: '#b91c1c',
-  fontSize: '0.875rem'
+  fontSize: '0.75rem',
+  color: 'var(--status-danger-text)',
+  fontWeight: 500
 };
 
 const readOnlyCardStyle: React.CSSProperties = {
+  backgroundColor: 'var(--color-surface-subtle)',
+  borderRadius: 'var(--radius-lg)',
+  border: '1px solid var(--color-border)',
+  padding: '1.25rem 1.5rem'
+};
+
+const readOnlyGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+  gap: '1rem'
+};
+
+const readOnlyItemStyle: React.CSSProperties = {
   display: 'flex',
-  flexWrap: 'wrap',
-  gap: '2rem',
-  padding: '0.875rem 1.25rem',
-  backgroundColor: '#f8fafc',
-  borderRadius: '6px',
-  border: '1px solid #e2e8f0',
-  alignItems: 'center'
+  flexDirection: 'column',
+  gap: '0.25rem'
 };
 
 const readOnlyLabelStyle: React.CSSProperties = {
-  fontSize: '0.78rem',
-  color: '#64748b',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: 'var(--color-text-muted)',
   textTransform: 'uppercase',
-  fontWeight: 600
+  letterSpacing: '0.04em'
 };
 
-const formActionsStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'flex-end',
-  gap: '0.75rem',
-  paddingTop: '1rem',
-  borderTop: '1px solid #f1f5f9'
-};
-
-const cancelButtonStyle: React.CSSProperties = {
-  padding: '0.55rem 1.25rem',
+const readOnlyCodeBadgeStyle: React.CSSProperties = {
   fontSize: '0.875rem',
-  fontWeight: 500,
-  color: '#475569',
-  backgroundColor: '#f1f5f9',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
-  cursor: 'pointer'
+  fontWeight: 600,
+  color: 'var(--color-primary)',
+  backgroundColor: 'var(--color-surface)',
+  padding: '0.2rem 0.5rem',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--color-border)',
+  width: 'fit-content'
+};
+
+const actionsRowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem'
 };
 
 const submitButtonStyle: React.CSSProperties = {
-  padding: '0.55rem 1.5rem',
-  fontSize: '0.875rem',
+  padding: '0.625rem 1.25rem',
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
   fontWeight: 600,
-  color: '#ffffff',
-  backgroundColor: '#2563eb',
+  fontSize: '0.875rem',
   border: 'none',
-  borderRadius: '6px'
+  borderRadius: 'var(--radius-md)',
+  transition: 'background-color 0.15s ease'
+};
+
+const cancelButtonStyle: React.CSSProperties = {
+  padding: '0.625rem 1.25rem',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-secondary)',
+  fontWeight: 500,
+  fontSize: '0.875rem',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  cursor: 'pointer'
+};
+
+const errorBannerStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.625rem',
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  color: 'var(--status-danger-text)',
+  padding: '0.75rem 1rem',
+  borderRadius: 'var(--radius-md)',
+  fontSize: '0.8125rem'
 };

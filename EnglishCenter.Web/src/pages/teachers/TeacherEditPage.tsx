@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingState } from '../../components/common/LoadingState';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { TeacherForm } from '../../components/teachers/TeacherForm';
 import { teacherService } from '../../services/teacher.service';
 import type { TeacherDetail, UpdateTeacherPayload } from '../../types/teacher.types';
@@ -80,130 +82,115 @@ export const TeacherEditPage: React.FC = () => {
 
   if (isLoadingDetail) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <LoadingState message="Đang tải dữ liệu giáo viên..." />
-      </div>
+      </AppShell>
     );
   }
 
   if (isNotFound) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <div style={notFoundCardStyle}>
-          <h3 style={{ margin: '0 0 0.5rem 0', color: '#1e293b' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>
             Không tìm thấy giáo viên
-          </h3>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
-            Hồ sơ giáo viên không tồn tại hoặc đã bị xóa khỏi hệ thống. (404 Not Found)
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            Hồ sơ giáo viên không tồn tại hoặc đã bị xóa khỏi hệ thống.
           </p>
-          <div style={{ marginTop: '1.25rem' }}>
-            <button
-              type="button"
-              onClick={() => navigate(basePath)}
-              style={backToTableBtnStyle}
-            >
-              &larr; Quay lại danh sách giáo viên
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate(basePath)}
+            style={primaryButtonStyle}
+          >
+            &larr; Quay lại danh sách giáo viên
+          </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div style={pageContainerStyle}>
-      <div style={headerStyle}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>
-            Chỉnh sửa giáo viên: {teacher?.fullName}
-          </h1>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-            Cập nhật thông tin cá nhân và chuyên môn của giáo viên ({teacher?.teacherCode}).
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate(`${basePath}/${teacher?.id}`)}
-          style={backButtonStyle}
-          title="Hủy và quay lại trang chi tiết"
-        >
-          &larr; Quay lại chi tiết
-        </button>
+    <AppShell>
+      <PageHeader
+        title={`Chỉnh sửa: ${teacher?.fullName}`}
+        subtitle={`Cập nhật thông tin chuyên môn của giáo viên (${teacher?.teacherCode}).`}
+        breadcrumbs={[
+          { label: 'Trang chủ', path: '/admin' },
+          { label: 'Quản lý giáo viên', path: basePath },
+          { label: teacher?.fullName || 'Chi tiết', path: `${basePath}/${teacher?.id}` },
+          { label: 'Chỉnh sửa' }
+        ]}
+        actions={
+          <button
+            type="button"
+            onClick={() => navigate(`${basePath}/${teacher?.id}`)}
+            style={backButtonStyle}
+            title="Hủy và quay lại trang chi tiết"
+          >
+            &larr; Quay lại chi tiết
+          </button>
+        }
+      />
+
+      <div style={{ maxWidth: '900px' }}>
+        {teacher && (
+          <TeacherForm
+            mode="edit"
+            initialValues={{
+              teacherCode: teacher.teacherCode,
+              email: teacher.email,
+              fullName: teacher.fullName,
+              phone: teacher.phone || '',
+              avatarUrl: teacher.avatarUrl || '',
+              specialization: teacher.specialization,
+              qualification: teacher.qualification || '',
+              experienceYears: teacher.experienceYears,
+              hireDate: teacher.hireDate
+            }}
+            readOnlyData={{
+              teacherCode: teacher.teacherCode,
+              status: teacher.status
+            }}
+            onSubmit={handleSubmit}
+            isLoading={isSubmitting}
+            serverError={serverError}
+            onCancel={() => navigate(`${basePath}/${teacher.id}`)}
+          />
+        )}
       </div>
-
-      {teacher && (
-        <TeacherForm
-          mode="edit"
-          initialValues={{
-            teacherCode: teacher.teacherCode,
-            email: teacher.email,
-            fullName: teacher.fullName,
-            phone: teacher.phone || '',
-            avatarUrl: teacher.avatarUrl || '',
-            specialization: teacher.specialization,
-            qualification: teacher.qualification || '',
-            experienceYears: teacher.experienceYears,
-            hireDate: teacher.hireDate
-          }}
-          readOnlyData={{
-            teacherCode: teacher.teacherCode,
-            status: teacher.status
-          }}
-          onSubmit={handleSubmit}
-          isLoading={isSubmitting}
-          serverError={serverError}
-          onCancel={() => navigate(`${basePath}/${teacher.id}`)}
-        />
-      )}
-    </div>
+    </AppShell>
   );
-};
-
-const pageContainerStyle: React.CSSProperties = {
-  maxWidth: '860px',
-  margin: '0 auto',
-  padding: '1.5rem 1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.5rem',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: '1rem'
 };
 
 const backButtonStyle: React.CSSProperties = {
   padding: '0.45rem 0.85rem',
-  fontSize: '0.85rem',
+  fontSize: '0.8125rem',
   fontWeight: 500,
-  backgroundColor: '#f1f5f9',
-  color: '#475569',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-secondary)',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer'
 };
 
 const notFoundCardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  padding: '3rem 1.5rem',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
+  border: '1px solid var(--color-border)',
+  padding: '2.5rem 2rem',
   textAlign: 'center',
-  border: '1px solid #e2e8f0',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+  maxWidth: '480px',
+  margin: '2rem auto'
 };
 
-const backToTableBtnStyle: React.CSSProperties = {
-  padding: '0.5rem 1.25rem',
+const primaryButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 1rem',
   fontSize: '0.875rem',
-  fontWeight: 500,
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
+  fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
   border: 'none',
-  borderRadius: '6px',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer'
 };

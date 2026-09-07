@@ -24,21 +24,48 @@ export const CourseTable: React.FC<CourseTableProps> = ({
   disabled = false
 }) => {
   const renderSortIndicator = (column: string) => {
-    if (sortBy?.toLowerCase() !== column.toLowerCase()) {
-      return <span style={{ opacity: 0.3, marginLeft: '4px' }}>⇅</span>;
-    }
+    const isCurrent = sortBy?.toLowerCase() === column.toLowerCase();
     return (
-      <span style={{ color: '#2563eb', marginLeft: '4px', fontWeight: 'bold' }}>
-        {sortDirection === 'desc' ? '▼' : '▲'}
+      <span
+        style={{
+          display: 'inline-flex',
+          marginLeft: '4px',
+          verticalAlign: 'middle',
+          color: isCurrent ? 'var(--color-primary, #1e40af)' : 'var(--color-text-muted, #94a3b8)',
+          opacity: isCurrent ? 1 : 0.4
+        }}
+        aria-hidden="true"
+      >
+        {isCurrent ? (sortDirection === 'desc' ? '▼' : '▲') : '⇅'}
       </span>
     );
   };
 
   return (
-    <div style={tableContainerStyle}>
-      <table style={tableStyle}>
+    <div
+      style={{
+        overflowX: 'auto',
+        border: '1px solid var(--color-border, #e2e8f0)',
+        borderRadius: 'var(--radius-lg, 12px)',
+        backgroundColor: 'var(--color-surface, #ffffff)',
+        boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))'
+      }}
+    >
+      <table
+        style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          textAlign: 'left',
+          fontSize: '0.875rem'
+        }}
+      >
         <thead>
-          <tr style={headerRowStyle}>
+          <tr
+            style={{
+              backgroundColor: 'var(--color-surface-hover, #f8fafc)',
+              borderBottom: '1px solid var(--color-border, #e2e8f0)'
+            }}
+          >
             <th
               style={{ ...headerCellStyle, cursor: disabled ? 'default' : 'pointer' }}
               onClick={() => !disabled && onSortChange('courseCode')}
@@ -61,14 +88,22 @@ export const CourseTable: React.FC<CourseTableProps> = ({
               Trình độ {renderSortIndicator('level')}
             </th>
             <th
-              style={{ ...headerCellStyle, cursor: disabled ? 'default' : 'pointer' }}
+              style={{
+                ...headerCellStyle,
+                textAlign: 'right',
+                cursor: disabled ? 'default' : 'pointer'
+              }}
               onClick={() => !disabled && onSortChange('durationMonths')}
               title="Sắp xếp theo Thời lượng"
             >
               Thời lượng {renderSortIndicator('durationMonths')}
             </th>
             <th
-              style={{ ...headerCellStyle, cursor: disabled ? 'default' : 'pointer' }}
+              style={{
+                ...headerCellStyle,
+                textAlign: 'right',
+                cursor: disabled ? 'default' : 'pointer'
+              }}
               onClick={() => !disabled && onSortChange('tuitionFee')}
               title="Sắp xếp theo Học phí"
             >
@@ -89,36 +124,104 @@ export const CourseTable: React.FC<CourseTableProps> = ({
             <tr
               key={course.id}
               style={{
-                ...rowStyle,
-                backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f8fafc'
+                borderBottom: '1px solid var(--color-border, #e2e8f0)',
+                backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa',
+                transition: 'background-color 0.15s ease'
               }}
             >
-              <td style={{ ...cellStyle, fontWeight: 600, color: '#1e293b' }}>
+              {/* Course Code (Monospace) */}
+              <td style={cellStyle}>
                 <Link
                   to={`${basePath}/${course.id}`}
-                  style={{ color: '#2563eb', textDecoration: 'none' }}
+                  style={{
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
                   title="Xem chi tiết khóa học"
                 >
-                  {course.courseCode}
+                  <span
+                    className="font-mono"
+                    style={{
+                      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      backgroundColor: 'var(--color-surface-hover, #f1f5f9)',
+                      color: 'var(--color-primary, #1e40af)',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: 'var(--radius-sm, 4px)',
+                      border: '1px solid var(--color-border, #e2e8f0)',
+                      letterSpacing: '0.025em'
+                    }}
+                  >
+                    {course.courseCode}
+                  </span>
                 </Link>
               </td>
-              <td style={{ ...cellStyle, color: '#1e293b', fontWeight: 500 }}>
+
+              {/* Course Name */}
+              <td
+                style={{
+                  ...cellStyle,
+                  color: 'var(--color-text, #0f172a)',
+                  fontWeight: 500,
+                  maxWidth: '280px'
+                }}
+              >
                 {course.courseName}
               </td>
-              <td style={{ ...cellStyle, color: '#475569' }}>
-                {course.level || <span style={{ color: '#94a3b8' }}>Chưa xác định</span>}
+
+              {/* Level */}
+              <td style={{ ...cellStyle, color: 'var(--color-text-secondary, #475569)' }}>
+                {course.level || (
+                  <span style={{ color: 'var(--color-text-muted, #94a3b8)', fontStyle: 'italic' }}>
+                    Chưa xác định
+                  </span>
+                )}
               </td>
-              <td style={{ ...cellStyle, color: '#475569' }}>
+
+              {/* Duration (Tabular nums, right aligned) */}
+              <td
+                className="tabular-nums"
+                style={{
+                  ...cellStyle,
+                  textAlign: 'right',
+                  color: 'var(--color-text-secondary, #475569)',
+                  fontVariantNumeric: 'tabular-nums'
+                }}
+              >
                 {formatDurationMonths(course.durationMonths)}
               </td>
-              <td style={{ ...cellStyle, color: '#0f172a', fontWeight: 600 }}>
+
+              {/* Tuition Fee (Tabular nums, NOT monospace, right aligned) */}
+              <td
+                className="tabular-nums"
+                style={{
+                  ...cellStyle,
+                  textAlign: 'right',
+                  color: 'var(--color-text, #0f172a)',
+                  fontWeight: 600,
+                  fontVariantNumeric: 'tabular-nums'
+                }}
+              >
                 {formatCurrency(course.tuitionFee)}
               </td>
+
+              {/* Status */}
               <td style={cellStyle}>
                 <CourseStatusBadge status={course.status} />
               </td>
+
+              {/* Actions */}
               <td style={{ ...cellStyle, textAlign: 'center' }}>
-                <div style={actionButtonGroupStyle}>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    justifyContent: 'center'
+                  }}
+                >
                   <Link
                     to={`${basePath}/${course.id}`}
                     style={actionLinkStyle}
@@ -126,7 +229,7 @@ export const CourseTable: React.FC<CourseTableProps> = ({
                   >
                     Xem
                   </Link>
-                  <span style={{ color: '#cbd5e1' }}>|</span>
+                  <span style={{ color: 'var(--color-border, #cbd5e1)' }}>|</span>
                   <Link
                     to={`${basePath}/${course.id}/edit`}
                     style={actionLinkStyle}
@@ -134,12 +237,20 @@ export const CourseTable: React.FC<CourseTableProps> = ({
                   >
                     Sửa
                   </Link>
-                  <span style={{ color: '#cbd5e1' }}>|</span>
+                  <span style={{ color: 'var(--color-border, #cbd5e1)' }}>|</span>
                   <button
                     type="button"
                     onClick={() => onQuickStatusChange(course)}
                     disabled={disabled}
-                    style={quickStatusButtonStyle}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#d97706',
+                      fontWeight: 500,
+                      fontSize: '0.8125rem',
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      padding: 0
+                    }}
                     title="Đổi trạng thái khóa học"
                   >
                     Đổi trạng thái
@@ -154,64 +265,25 @@ export const CourseTable: React.FC<CourseTableProps> = ({
   );
 };
 
-const tableContainerStyle: React.CSSProperties = {
-  overflowX: 'auto',
-  border: '1px solid #e2e8f0',
-  borderRadius: '8px',
-  backgroundColor: '#ffffff',
-  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-};
-
-const tableStyle: React.CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  textAlign: 'left',
-  fontSize: '0.875rem'
-};
-
-const headerRowStyle: React.CSSProperties = {
-  backgroundColor: '#f1f5f9',
-  borderBottom: '1px solid #e2e8f0'
-};
-
 const headerCellStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
+  padding: '0.875rem 1rem',
   fontWeight: 600,
-  color: '#334155',
+  fontSize: '0.8125rem',
+  color: 'var(--color-text-secondary, #334155)',
   userSelect: 'none',
   whiteSpace: 'nowrap'
 };
 
-const rowStyle: React.CSSProperties = {
-  borderBottom: '1px solid #e2e8f0',
-  transition: 'background-color 0.15s ease'
-};
-
 const cellStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
-  verticalAlign: 'middle'
-};
-
-const actionButtonGroupStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  justifyContent: 'center'
+  padding: '0.875rem 1rem',
+  verticalAlign: 'middle',
+  whiteSpace: 'nowrap'
 };
 
 const actionLinkStyle: React.CSSProperties = {
-  color: '#2563eb',
+  color: 'var(--color-primary, #1e40af)',
   textDecoration: 'none',
   fontWeight: 500,
-  fontSize: '0.8rem'
+  fontSize: '0.8125rem'
 };
 
-const quickStatusButtonStyle: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  color: '#d97706',
-  fontWeight: 500,
-  fontSize: '0.8rem',
-  cursor: 'pointer',
-  padding: 0
-};

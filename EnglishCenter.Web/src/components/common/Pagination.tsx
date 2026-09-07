@@ -27,24 +27,25 @@ export const Pagination: React.FC<PaginationProps> = ({
   const isLastPage = page >= totalPages;
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} aria-label="Phân trang">
       <div style={infoStyle}>
         {totalItems !== undefined && (
-          <span>
-            Total: <strong>{totalItems}</strong> items
+          <span className="tabular-nums">
+            Tổng số: <strong style={{ color: 'var(--color-text-primary)' }}>{totalItems}</strong> mục
           </span>
         )}
         {onPageSizeChange && (
           <label style={pageSizeLabelStyle}>
-            Show:
+            <span>Hiển thị:</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
               style={selectStyle}
+              aria-label="Số mục mỗi trang"
             >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
-                  {size} / page
+                  {size} / trang
                 </option>
               ))}
             </select>
@@ -57,24 +58,32 @@ export const Pagination: React.FC<PaginationProps> = ({
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={isFirstPage}
-          style={{ ...navButtonStyle, opacity: isFirstPage ? 0.5 : 1 }}
-          aria-label="Previous page"
+          style={{
+            ...navButtonStyle,
+            opacity: isFirstPage ? 0.4 : 1,
+            cursor: isFirstPage ? 'not-allowed' : 'pointer'
+          }}
+          aria-label="Trang trước"
         >
-          &larr; Previous
+          &larr; Trước
         </button>
 
-        <span style={pageIndicatorStyle}>
-          Page <strong>{page}</strong> of <strong>{Math.max(totalPages, 1)}</strong>
+        <span style={pageIndicatorStyle} className="tabular-nums">
+          Trang <strong style={{ color: 'var(--color-text-primary)' }}>{page}</strong> / <strong>{Math.max(totalPages, 1)}</strong>
         </span>
 
         <button
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={isLastPage}
-          style={{ ...navButtonStyle, opacity: isLastPage ? 0.5 : 1 }}
-          aria-label="Next page"
+          style={{
+            ...navButtonStyle,
+            opacity: isLastPage ? 0.4 : 1,
+            cursor: isLastPage ? 'not-allowed' : 'pointer'
+          }}
+          aria-label="Trang sau"
         >
-          Next &rarr;
+          Sau &rarr;
         </button>
       </div>
     </div>
@@ -85,35 +94,37 @@ const containerStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '0.75rem 1rem',
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
+  padding: '0.875rem 1.25rem',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-lg)',
+  border: '1px solid var(--color-border)',
+  boxShadow: 'var(--shadow-xs)',
   flexWrap: 'wrap',
-  gap: '1rem'
+  gap: '1rem',
+  marginTop: '0.5rem'
 };
 
 const infoStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  gap: '1rem',
+  gap: '1.25rem',
   fontSize: '0.875rem',
-  color: '#64748b'
+  color: 'var(--color-text-secondary)'
 };
 
 const pageSizeLabelStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  gap: '0.35rem'
+  gap: '0.5rem'
 };
 
 const selectStyle: React.CSSProperties = {
-  padding: '0.25rem 0.5rem',
-  fontSize: '0.875rem',
-  border: '1px solid #cbd5e1',
-  borderRadius: '4px',
-  backgroundColor: '#ffffff',
-  color: '#1e293b',
+  padding: '0.3125rem 0.625rem',
+  fontSize: '0.8125rem',
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
   cursor: 'pointer'
 };
 
@@ -124,17 +135,17 @@ const controlsStyle: React.CSSProperties = {
 };
 
 const navButtonStyle: React.CSSProperties = {
-  padding: '0.375rem 0.75rem',
-  fontSize: '0.875rem',
+  padding: '0.375rem 0.875rem',
+  fontSize: '0.8125rem',
   fontWeight: 500,
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
-  backgroundColor: '#ffffff',
-  color: '#334155',
-  cursor: 'pointer'
+  border: '1px solid var(--color-border-strong)',
+  borderRadius: 'var(--radius-md)',
+  backgroundColor: 'var(--color-surface)',
+  color: 'var(--color-text-primary)',
+  transition: 'background-color 0.15s ease'
 };
 
 const pageIndicatorStyle: React.CSSProperties = {
   fontSize: '0.875rem',
-  color: '#475569'
+  color: 'var(--color-text-secondary)'
 };

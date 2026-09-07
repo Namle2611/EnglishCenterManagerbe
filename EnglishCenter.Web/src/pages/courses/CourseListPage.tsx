@@ -8,6 +8,8 @@ import { SearchInput } from '../../components/common/SearchInput';
 import { CourseFilters } from '../../components/courses/CourseFilters';
 import { CourseStatusControl } from '../../components/courses/CourseStatusControl';
 import { CourseTable } from '../../components/courses/CourseTable';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { courseService } from '../../services/course.service';
 import type { PagedResult } from '../../types/common.types';
 import type { CourseFilterParams, CourseListItem, CourseStatus } from '../../types/course.types';
@@ -176,237 +178,218 @@ export const CourseListPage: React.FC = () => {
   const hasSearch = Boolean(queryParams.search && queryParams.search.trim().length > 0);
 
   return (
-    <div style={pageContainerStyle}>
-      {/* Header */}
-      <div style={headerStyle}>
-        <div>
-          <h1 style={titleStyle}>Quản lý khóa học</h1>
-          <p style={subtitleStyle}>
-            Xem danh sách, tìm kiếm, lọc và quản lý các khóa học tiếng Anh trên hệ thống
-          </p>
-        </div>
-        <Link to={`${basePath}/new`} style={createButtonStyle}>
-          + Thêm khóa học
-        </Link>
-      </div>
+    <AppShell>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Page Header */}
+        <PageHeader
+          title="Quản lý khóa học"
+          subtitle="Xem danh sách, tìm kiếm, lọc và quản lý các khóa học tiếng Anh trên hệ thống"
+          breadcrumbs={[
+            { label: 'Quản lý khóa học' }
+          ]}
+          actions={
+            <Link
+              to={`${basePath}/new`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                padding: '0.5625rem 1.125rem',
+                backgroundColor: 'var(--color-primary, #1e40af)',
+                color: '#ffffff',
+                textDecoration: 'none',
+                borderRadius: 'var(--radius-md, 8px)',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))',
+                transition: 'background-color 0.15s ease'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Thêm khóa học
+            </Link>
+          }
+        />
 
-      {/* Search and Filters Bar */}
-      <div style={controlsContainerStyle}>
-        <div style={searchRowStyle}>
-          <SearchInput
-            value={queryParams.search || ''}
-            onChange={handleSearch}
-            placeholder="Tìm theo mã khóa học hoặc tên khóa học..."
-            debounceMs={400}
+        {/* Search and Filters Bar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ maxWidth: '480px' }}>
+            <SearchInput
+              value={queryParams.search || ''}
+              onChange={handleSearch}
+              placeholder="Tìm theo mã khóa học hoặc tên khóa học..."
+              debounceMs={400}
+              disabled={isLoading && !data}
+            />
+          </div>
+
+          <CourseFilters
+            status={queryParams.status}
+            level={queryParams.level}
+            onStatusChange={handleStatusChange}
+            onLevelChange={handleLevelChange}
+            onClearFilters={handleClearFilters}
+            hasActiveFilters={hasActiveFilters}
             disabled={isLoading && !data}
           />
         </div>
 
-        <CourseFilters
-          status={queryParams.status}
-          level={queryParams.level}
-          onStatusChange={handleStatusChange}
-          onLevelChange={handleLevelChange}
-          onClearFilters={handleClearFilters}
-          hasActiveFilters={hasActiveFilters}
-          disabled={isLoading && !data}
-        />
-      </div>
-
-      {/* Main Content Area */}
-      {isLoading && !data ? (
-        <LoadingState message="Đang tải danh sách khóa học..." />
-      ) : errorMessage ? (
-        <div style={errorContainerStyle} role="alert">
-          <p style={{ margin: 0, fontWeight: 500 }}>{errorMessage}</p>
-          <button
-            type="button"
-            onClick={() => fetchCourses(normalizeCourseQueryParams(searchParams))}
-            style={retryButtonStyle}
+        {/* Main Content Area */}
+        {isLoading && !data ? (
+          <LoadingState message="Đang tải danh sách khóa học..." />
+        ) : errorMessage ? (
+          <div
+            role="alert"
+            style={{
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#991b1b',
+              borderRadius: 'var(--radius-lg, 12px)',
+              padding: '1.75rem',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.875rem'
+            }}
           >
-            Thử lại
-          </button>
-        </div>
-      ) : !data || data.items.length === 0 ? (
-        <EmptyState
-          title={hasSearch || hasActiveFilters ? 'Không tìm thấy khóa học' : 'Chưa có khóa học nào'}
-          description={
-            hasSearch || hasActiveFilters
-              ? 'Không có khóa học nào khớp với điều kiện tìm kiếm hoặc bộ lọc hiện tại.'
-              : 'Hệ thống chưa có khóa học nào. Hãy bắt đầu bằng cách thêm khóa học mới.'
-          }
-          actionText={hasSearch || hasActiveFilters ? 'Xóa bộ lọc' : '+ Thêm khóa học'}
-          onAction={
-            hasSearch || hasActiveFilters
-              ? handleClearFilters
-              : () => {
-                  window.location.href = `${basePath}/new`;
-                }
-          }
-        />
-      ) : (
-        <>
-          <CourseTable
-            courses={data.items}
-            basePath={basePath}
-            sortBy={queryParams.sortBy}
-            sortDirection={queryParams.sortDirection}
-            onSortChange={handleSortChange}
-            onQuickStatusChange={handleQuickStatusChange}
-            disabled={isLoading}
+            <p style={{ margin: 0, fontWeight: 500, fontSize: '0.9375rem' }}>{errorMessage}</p>
+            <button
+              type="button"
+              onClick={() => fetchCourses(normalizeCourseQueryParams(searchParams))}
+              style={{
+                padding: '0.5rem 1.125rem',
+                backgroundColor: '#dc2626',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: 'var(--radius-md, 8px)',
+                fontWeight: 600,
+                fontSize: '0.8125rem',
+                cursor: 'pointer'
+              }}
+            >
+              Thử lại
+            </button>
+          </div>
+        ) : !data || data.items.length === 0 ? (
+          <EmptyState
+            title={hasSearch || hasActiveFilters ? 'Không tìm thấy khóa học' : 'Chưa có khóa học nào'}
+            description={
+              hasSearch || hasActiveFilters
+                ? 'Không có khóa học nào khớp với điều kiện tìm kiếm hoặc bộ lọc hiện tại.'
+                : 'Hệ thống chưa có khóa học nào. Hãy bắt đầu bằng cách thêm khóa học mới.'
+            }
+            actionText={hasSearch || hasActiveFilters ? 'Xóa bộ lọc' : '+ Thêm khóa học'}
+            onAction={
+              hasSearch || hasActiveFilters
+                ? handleClearFilters
+                : () => {
+                    window.location.href = `${basePath}/new`;
+                  }
+            }
           />
+        ) : (
+          <>
+            <CourseTable
+              courses={data.items}
+              basePath={basePath}
+              sortBy={queryParams.sortBy}
+              sortDirection={queryParams.sortDirection}
+              onSortChange={handleSortChange}
+              onQuickStatusChange={handleQuickStatusChange}
+              disabled={isLoading}
+            />
 
-          <Pagination
-            page={data.page}
-            pageSize={data.pageSize}
-            totalItems={data.totalItems}
-            totalPages={data.totalPages}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
-        </>
-      )}
+            <Pagination
+              page={data.page}
+              pageSize={data.pageSize}
+              totalItems={data.totalItems}
+              totalPages={data.totalPages}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </>
+        )}
 
-      {/* Quick Status Modal */}
-      {statusTargetCourse && (
-        <div style={modalBackdropStyle}>
-          <div style={modalContentStyle}>
-            <div style={modalHeaderStyle}>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>
-                Đổi trạng thái: {statusTargetCourse.courseName}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setStatusTargetCourse(null)}
-                style={modalCloseButtonStyle}
+        {/* Quick Status Modal */}
+        {statusTargetCourse && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(15, 23, 42, 0.45)',
+              backdropFilter: 'blur(2px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '1rem'
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'var(--color-surface, #ffffff)',
+                borderRadius: 'var(--radius-lg, 12px)',
+                width: '100%',
+                maxWidth: '560px',
+                padding: '1.5rem',
+                boxShadow: 'var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1))',
+                border: '1px solid var(--color-border, #e2e8f0)'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '1rem'
+                }}
               >
-                ✕
-              </button>
-            </div>
-            <div style={{ marginTop: '1rem' }}>
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: '1.0625rem',
+                    fontWeight: 600,
+                    color: 'var(--color-text, #0f172a)'
+                  }}
+                >
+                  Đổi trạng thái: {statusTargetCourse.courseName}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setStatusTargetCourse(null)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.25rem',
+                    cursor: 'pointer',
+                    color: 'var(--color-text-muted, #64748b)',
+                    padding: '0.25rem',
+                    lineHeight: 1
+                  }}
+                  aria-label="Đóng"
+                >
+                  ✕
+                </button>
+              </div>
               <CourseStatusControl
                 currentStatus={statusTargetCourse.status}
                 onStatusChange={handleExecuteStatusUpdate}
               />
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </AppShell>
   );
 };
 
-const pageContainerStyle: React.CSSProperties = {
-  padding: '1.5rem 2rem',
-  maxWidth: '1200px',
-  margin: '0 auto',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: '1.5rem',
-  flexWrap: 'wrap',
-  gap: '1rem'
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1.75rem',
-  fontWeight: 700,
-  color: '#0f172a'
-};
-
-const subtitleStyle: React.CSSProperties = {
-  margin: '0.25rem 0 0 0',
-  fontSize: '0.875rem',
-  color: '#64748b'
-};
-
-const createButtonStyle: React.CSSProperties = {
-  padding: '0.6rem 1.25rem',
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
-  textDecoration: 'none',
-  borderRadius: '6px',
-  fontWeight: 600,
-  fontSize: '0.875rem',
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '0.35rem',
-  boxShadow: '0 1px 2px rgba(37, 99, 235, 0.2)'
-};
-
-const controlsContainerStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem',
-  marginBottom: '1.5rem'
-};
-
-const searchRowStyle: React.CSSProperties = {
-  maxWidth: '500px'
-};
-
-const errorContainerStyle: React.CSSProperties = {
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  color: '#991b1b',
-  borderRadius: '8px',
-  padding: '1.5rem',
-  textAlign: 'center',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '0.75rem'
-};
-
-const retryButtonStyle: React.CSSProperties = {
-  padding: '0.45rem 1rem',
-  backgroundColor: '#dc2626',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
-  fontWeight: 600,
-  fontSize: '0.85rem',
-  cursor: 'pointer'
-};
-
-const modalBackdropStyle: React.CSSProperties = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-  padding: '1rem'
-};
-
-const modalContentStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  width: '100%',
-  maxWidth: '550px',
-  padding: '1.5rem',
-  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-};
-
-const modalHeaderStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center'
-};
-
-const modalCloseButtonStyle: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1.1rem',
-  cursor: 'pointer',
-  color: '#64748b'
-};

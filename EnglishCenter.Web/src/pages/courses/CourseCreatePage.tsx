@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CourseForm } from '../../components/courses/CourseForm';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { courseService } from '../../services/course.service';
 import type { CreateCoursePayload } from '../../types/course.types';
 import { getCourseApiErrorMessage, getCourseBasePath } from '../../utils/courseHelper';
@@ -38,66 +40,28 @@ export const CourseCreatePage: React.FC = () => {
   };
 
   return (
-    <div style={pageContainerStyle}>
-      {/* Navigation Breadcrumb */}
-      <div style={breadcrumbStyle}>
-        <Link to={basePath} style={breadcrumbLinkStyle}>
-          ← Danh sách khóa học
-        </Link>
-        <span style={{ color: '#cbd5e1' }}>/</span>
-        <span style={{ color: '#64748b' }}>Thêm khóa học mới</span>
-      </div>
+    <AppShell>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Page Header with Breadcrumbs */}
+        <PageHeader
+          breadcrumbs={[
+            { label: 'Danh sách khóa học', path: basePath },
+            { label: 'Thêm khóa học mới' }
+          ]}
+          title="Thêm khóa học mới"
+          subtitle="Điền thông tin để tạo khóa học mới trên hệ thống trung tâm Anh ngữ"
+        />
 
-      {/* Page Title */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={titleStyle}>Thêm khóa học mới</h1>
-        <p style={subtitleStyle}>
-          Điền thông tin để tạo khóa học mới trên hệ thống trung tâm Anh ngữ
-        </p>
+        {/* Form Card */}
+        <CourseForm
+          mode="create"
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          isSubmitting={isSubmitting}
+          serverError={serverError}
+        />
       </div>
-
-      {/* Form Card */}
-      <CourseForm
-        mode="create"
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isSubmitting={isSubmitting}
-        serverError={serverError}
-      />
-    </div>
+    </AppShell>
   );
 };
 
-const pageContainerStyle: React.CSSProperties = {
-  padding: '1.5rem 2rem',
-  maxWidth: '900px',
-  margin: '0 auto',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const breadcrumbStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  fontSize: '0.85rem',
-  marginBottom: '1rem'
-};
-
-const breadcrumbLinkStyle: React.CSSProperties = {
-  color: '#2563eb',
-  textDecoration: 'none',
-  fontWeight: 500
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1.75rem',
-  fontWeight: 700,
-  color: '#0f172a'
-};
-
-const subtitleStyle: React.CSSProperties = {
-  margin: '0.25rem 0 0 0',
-  fontSize: '0.875rem',
-  color: '#64748b'
-};

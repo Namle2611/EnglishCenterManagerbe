@@ -5,32 +5,37 @@ interface EmptyStateProps {
   description?: string;
   actionText?: string;
   onAction?: () => void;
+  icon?: React.ReactNode;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  title = 'No records found',
-  description = 'There are no items matching your criteria.',
+  title = 'Không có dữ liệu',
+  description = 'Hiện tại không có mục nào khớp với điều kiện tìm kiếm của bạn.',
   actionText,
-  onAction
+  onAction,
+  icon
 }) => {
   return (
     <div style={containerStyle}>
       <div style={iconContainerStyle}>
-        <svg
-          style={{ width: '40px', height: '40px', color: '#94a3b8' }}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.5"
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-          />
-        </svg>
+        {icon || (
+          <svg
+            style={{ width: '48px', height: '48px', color: 'var(--color-text-muted)' }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.5"
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            />
+          </svg>
+        )}
       </div>
-      <h4 style={titleStyle}>{title}</h4>
+      <h3 style={titleStyle}>{title}</h3>
       <p style={descStyle}>{description}</p>
       {actionText && onAction && (
         <button type="button" onClick={onAction} style={buttonStyle}>
@@ -46,39 +51,48 @@ const containerStyle: React.CSSProperties = {
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '3rem 1.5rem',
+  padding: '3.5rem 1.5rem',
   textAlign: 'center',
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px dashed #cbd5e1'
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-lg)',
+  border: '1px dashed var(--color-border-strong)',
+  margin: '0.5rem 0'
 };
 
 const iconContainerStyle: React.CSSProperties = {
-  marginBottom: '0.75rem',
-  opacity: 0.8
+  marginBottom: '1rem',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '64px',
+  height: '64px',
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--color-surface-subtle)'
 };
 
 const titleStyle: React.CSSProperties = {
   margin: '0 0 0.5rem 0',
-  fontSize: '1.1rem',
+  fontSize: '1.125rem',
   fontWeight: 600,
-  color: '#1e293b'
+  color: 'var(--color-text-primary)'
 };
 
 const descStyle: React.CSSProperties = {
-  margin: '0 0 1.25rem 0',
-  fontSize: '0.9rem',
-  color: '#64748b',
-  maxWidth: '360px'
+  margin: '0 0 1.5rem 0',
+  fontSize: '0.875rem',
+  color: 'var(--color-text-secondary)',
+  maxWidth: '400px',
+  lineHeight: 1.5
 };
 
 const buttonStyle: React.CSSProperties = {
   padding: '0.5rem 1rem',
   fontSize: '0.875rem',
-  fontWeight: 500,
-  backgroundColor: '#3b82f6',
-  color: '#ffffff',
+  fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
   border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer'
+  borderRadius: 'var(--radius-md)',
+  cursor: 'pointer',
+  transition: 'background-color 0.15s ease'
 };

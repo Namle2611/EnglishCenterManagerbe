@@ -7,40 +7,45 @@ interface StudentStatusBadgeProps {
 
 const statusConfig: Record<
   StudentStatus,
-  { label: string; bg: string; color: string; border: string }
+  { label: string; bg: string; color: string; border: string; dot: string }
 > = {
   Active: {
     label: 'Đang hoạt động',
-    bg: '#ecfdf5',
-    color: '#065f46',
-    border: '#a7f3d0'
+    bg: 'var(--status-active-bg)',
+    color: 'var(--status-active-text)',
+    border: 'var(--status-active-border)',
+    dot: 'var(--status-active-text)'
   },
   Inactive: {
     label: 'Không hoạt động',
-    bg: '#f1f5f9',
-    color: '#475569',
-    border: '#cbd5e1'
+    bg: 'var(--status-inactive-bg)',
+    color: 'var(--status-inactive-text)',
+    border: 'var(--status-inactive-border)',
+    dot: 'var(--status-inactive-text)'
   },
   Graduated: {
     label: 'Đã tốt nghiệp',
-    bg: '#eff6ff',
-    color: '#1e40af',
-    border: '#bfdbfe'
+    bg: 'var(--color-primary-subtle)',
+    color: 'var(--color-primary)',
+    border: 'var(--color-primary-border)',
+    dot: 'var(--color-primary)'
   },
   Suspended: {
     label: 'Tạm khóa',
-    bg: '#fffbeb',
-    color: '#92400e',
-    border: '#fde68a'
+    bg: 'var(--status-warning-bg)',
+    color: 'var(--status-warning-text)',
+    border: 'var(--status-warning-border)',
+    dot: 'var(--status-warning-text)'
   }
 };
 
 export const StudentStatusBadge: React.FC<StudentStatusBadgeProps> = ({ status }) => {
   const config = statusConfig[status] || {
     label: status,
-    bg: '#f8fafc',
-    color: '#334155',
-    border: '#e2e8f0'
+    bg: 'var(--color-surface-subtle)',
+    color: 'var(--color-text-secondary)',
+    border: 'var(--color-border)',
+    dot: 'var(--color-text-secondary)'
   };
 
   return (
@@ -48,10 +53,11 @@ export const StudentStatusBadge: React.FC<StudentStatusBadgeProps> = ({ status }
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        padding: '0.2rem 0.6rem',
+        gap: '0.375rem',
+        padding: '0.2rem 0.55rem',
         fontSize: '0.75rem',
         fontWeight: 600,
-        borderRadius: '9999px',
+        borderRadius: 'var(--radius-full)',
         backgroundColor: config.bg,
         color: config.color,
         border: `1px solid ${config.border}`,
@@ -59,6 +65,15 @@ export const StudentStatusBadge: React.FC<StudentStatusBadgeProps> = ({ status }
         lineHeight: 1.2
       }}
     >
+      <span
+        style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: 'var(--radius-full)',
+          backgroundColor: config.dot
+        }}
+        aria-hidden="true"
+      />
       {config.label}
     </span>
   );

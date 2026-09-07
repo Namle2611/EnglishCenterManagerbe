@@ -5,6 +5,8 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { LoadingState } from '../../components/common/LoadingState';
 import { Pagination } from '../../components/common/Pagination';
 import { SearchInput } from '../../components/common/SearchInput';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { TeacherFilters } from '../../components/teachers/TeacherFilters';
 import { TeacherStatusControl } from '../../components/teachers/TeacherStatusControl';
 import { TeacherTable } from '../../components/teachers/TeacherTable';
@@ -103,35 +105,26 @@ export const TeacherListPage: React.FC = () => {
     });
   };
 
-  // Filter handlers
-  const handleStatusFilterChange = (status?: TeacherStatus) => {
+  // Status filter handler
+  const handleStatusChange = (status?: TeacherStatus) => {
     updateSearchParams({
       status: status || undefined,
       page: 1
     });
   };
 
-  const handleSpecializationFilterChange = (specialization?: string) => {
+  // Specialization filter handler
+  const handleSpecializationChange = (spec?: string) => {
     updateSearchParams({
-      specialization: specialization?.trim() || undefined,
+      specialization: spec?.trim() || undefined,
       page: 1
     });
   };
 
-  const handleClearFilters = () => {
-    const updated = new URLSearchParams();
-    if (queryParams.pageSize && queryParams.pageSize !== 10) {
-      updated.set('pageSize', String(queryParams.pageSize));
-    }
-    setSearchParams(updated, { replace: true });
-  };
-
-  // Sort handler
-  const handleSortChange = (column: string) => {
-    let nextDirection: 'asc' | 'desc' = 'asc';
-    if (queryParams.sortBy?.toLowerCase() === column.toLowerCase()) {
-      nextDirection = queryParams.sortDirection === 'asc' ? 'desc' : 'asc';
-    }
+  // Sorting handler
+  const handleSort = (column: string) => {
+    const isCurrent = queryParams.sortBy?.toLowerCase() === column.toLowerCase();
+    const nextDirection = isCurrent && queryParams.sortDirection === 'asc' ? 'desc' : 'asc';
 
     updateSearchParams({
       sortBy: column,
@@ -152,108 +145,100 @@ export const TeacherListPage: React.FC = () => {
     });
   };
 
-  // Quick Status change execution from list row
-  const handleQuickStatusChange = async (newStatus: TeacherStatus) => {
-    if (!statusTargetTeacher) return;
-
-    const response = await teacherService.updateTeacherStatus(statusTargetTeacher.id, newStatus);
-    if (response.success) {
-      setStatusTargetTeacher(null);
-      // Refetch current query to reflect updated state & filters
-      const params = normalizeTeacherQueryParams(searchParams);
-      await fetchTeachers(params);
-    }
+  // Reset filters
+  const handleClearFilters = () => {
+    setSearchParams(
+      {
+        page: '1',
+        pageSize: String(queryParams.pageSize || 10)
+      },
+      { replace: true }
+    );
   };
 
-  // Check if any filter is active
+  // Quick status update callback
+  const handleQuickStatusUpdate = async (newStatus: TeacherStatus) => {
+    if (!statusTargetTeacher) return;
+    await teacherService.updateTeacherStatus(statusTargetTeacher.id, newStatus);
+    setStatusTargetTeacher(null);
+    fetchTeachers(queryParams);
+  };
+
   const hasActiveFilters = Boolean(
-    queryParams.search || queryParams.status || queryParams.specialization
+    queryParams.search ||
+      queryParams.status ||
+      queryParams.specialization ||
+      queryParams.sortBy ||
+      queryParams.sortDirection
   );
 
-  // Auto-normalize page if current page exceeds totalPages
-  useEffect(() => {
-    if (data && data.totalPages > 0 && queryParams.page && queryParams.page > data.totalPages) {
-      updateSearchParams({ page: data.totalPages });
-    }
-  }, [data, queryParams.page, updateSearchParams]);
-
-
   return (
-    <div style={pageContainerStyle}>
-      {/* Header */}
-      <div style={headerStyle}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#0f172a' }}>
-            Quản lý giáo viên
-          </h1>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-            Danh sách, tìm kiếm và phân quyền giáo viên trung tâm
-          </p>
-        </div>
-        <Link to={`${basePath}/new`} style={createButtonStyle}>
-          + Thêm giáo viên
-        </Link>
-      </div>
-
-      {/* Search & Filters Bar */}
-      <div style={searchFilterBarStyle}>
-        <div style={{ flex: '1 1 300px' }}>
-          <SearchInput
-            value={queryParams.search || ''}
-            onChange={handleSearch}
-            placeholder="Tìm theo mã giáo viên, họ tên hoặc email..."
-            disabled={isLoading}
-          />
-        </div>
-      </div>
-
-      {/* Advanced Filter Row */}
-      <TeacherFilters
-        status={queryParams.status}
-        specialization={queryParams.specialization}
-        onStatusChange={handleStatusFilterChange}
-        onSpecializationChange={handleSpecializationFilterChange}
-        onClearFilters={handleClearFilters}
-        hasActiveFilters={hasActiveFilters}
-        disabled={isLoading}
+    <AppShell>
+      {/* Page Header */}
+      <PageHeader
+        title="Quản lý giáo viên"
+        subtitle="Xem danh sách, tìm kiếm, lọc và quản lý hồ sơ giảng viên trong trung tâm."
+        breadcrumbs={[
+          { label: 'Trang chủ', path: '/admin' },
+          { label: 'Quản lý giáo viên' }
+        ]}
+        actions={
+          <Link to={`${basePath}/new`} style={createButtonStyle}>
+            + Thêm giáo viên
+          </Link>
+        }
       />
 
-      {/* Content Area */}
-      {isLoading ? (
-        <div style={cardContainerStyle}>
-          <LoadingState message="Đang tải danh sách giáo viên..." />
-        </div>
-      ) : errorMessage ? (
-        <div style={cardContainerStyle}>
-          <div style={errorContainerStyle}>
-            <p style={{ margin: '0 0 1rem 0', color: '#b91c1c' }}>{errorMessage}</p>
-            <button
-              type="button"
-              onClick={() => fetchTeachers(queryParams)}
-              style={retryButtonStyle}
-            >
-              Thử lại
-            </button>
+      {/* Filter and Search Bar */}
+      <div style={filterSectionStyle}>
+        <SearchInput
+          value={queryParams.search || ''}
+          onChange={handleSearch}
+          placeholder="Tìm theo mã GV, họ tên hoặc email..."
+          disabled={isLoading}
+        />
+
+        <TeacherFilters
+          status={queryParams.status}
+          specialization={queryParams.specialization}
+          onStatusChange={handleStatusChange}
+          onSpecializationChange={handleSpecializationChange}
+          onClearFilters={handleClearFilters}
+          hasActiveFilters={hasActiveFilters}
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* Error state */}
+      {errorMessage && !isLoading && (
+        <div style={errorContainerStyle} role="alert">
+          <div>
+            <strong>Không thể tải danh sách giáo viên:</strong> {errorMessage}
           </div>
+          <button type="button" onClick={() => fetchTeachers(queryParams)} style={retryButtonStyle}>
+            Thử lại
+          </button>
         </div>
+      )}
+
+      {/* Content area */}
+      {isLoading ? (
+        <LoadingState message="Đang tải danh sách giáo viên..." />
       ) : !data || data.items.length === 0 ? (
-        <div style={cardContainerStyle}>
-          {hasActiveFilters ? (
-            <EmptyState
-              title="Không tìm thấy giáo viên phù hợp"
-              description="Thử thay đổi từ khóa tìm kiếm hoặc xóa các bộ lọc hiện tại."
-              actionText="Xóa bộ lọc"
-              onAction={handleClearFilters}
-            />
-          ) : (
-            <EmptyState
-              title="Chưa có giáo viên"
-              description="Hiện tại hệ thống chưa có hồ sơ giáo viên nào."
-              actionText="Thêm giáo viên mới"
-              onAction={() => window.location.assign(`${basePath}/new`)}
-            />
-          )}
-        </div>
+        <EmptyState
+          title={hasActiveFilters ? 'Không tìm thấy giáo viên phù hợp' : 'Chưa có giáo viên nào'}
+          description={
+            hasActiveFilters
+              ? 'Không có giáo viên nào khớp với bộ lọc hoặc từ khóa tìm kiếm của bạn.'
+              : 'Hệ thống hiện tại chưa có dữ liệu giáo viên. Hãy bắt đầu bằng cách thêm giáo viên mới.'
+          }
+          actionText={hasActiveFilters ? 'Xóa bộ lọc' : '+ Thêm giáo viên'}
+          onAction={
+            hasActiveFilters
+              ? handleClearFilters
+              : () => (window.location.href = `${basePath}/new`)
+          }
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <TeacherTable
@@ -261,7 +246,7 @@ export const TeacherListPage: React.FC = () => {
             basePath={basePath}
             sortBy={queryParams.sortBy}
             sortDirection={queryParams.sortDirection}
-            onSortChange={handleSortChange}
+            onSortChange={handleSort}
             onQuickStatusChange={(teacher) => setStatusTargetTeacher(teacher)}
             disabled={isLoading}
           />
@@ -280,90 +265,79 @@ export const TeacherListPage: React.FC = () => {
 
       {/* Quick Status Modal */}
       {statusTargetTeacher && (
-        <div style={modalOverlayStyle}>
+        <div style={modalOverlayStyle} role="dialog" aria-modal="true">
           <div style={modalContentStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>
-                Thay đổi trạng thái: {statusTargetTeacher.fullName} ({statusTargetTeacher.teacherCode})
+            <div style={modalHeaderStyle}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                Đổi trạng thái: {statusTargetTeacher.fullName} ({statusTargetTeacher.teacherCode})
               </h3>
               <button
                 type="button"
                 onClick={() => setStatusTargetTeacher(null)}
-                style={modalCloseButtonStyle}
+                style={closeButtonStyle}
+                aria-label="Đóng hộp thoại"
               >
                 &times;
               </button>
             </div>
-            <TeacherStatusControl
-              currentStatus={statusTargetTeacher.status}
-              onStatusChange={handleQuickStatusChange}
-            />
+
+            <div style={{ padding: '1.25rem' }}>
+              <TeacherStatusControl
+                currentStatus={statusTargetTeacher.status}
+                onStatusChange={handleQuickStatusUpdate}
+              />
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
-};
-
-const pageContainerStyle: React.CSSProperties = {
-  maxWidth: '1200px',
-  margin: '0 auto',
-  padding: '1.5rem 1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.25rem',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: '1rem'
 };
 
 const createButtonStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
-  padding: '0.6rem 1.1rem',
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
-  borderRadius: '6px',
-  textDecoration: 'none',
+  padding: '0.625rem 1.125rem',
   fontSize: '0.875rem',
   fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-text-inverse)',
+  borderRadius: 'var(--radius-md)',
+  textDecoration: 'none',
+  boxShadow: 'var(--shadow-xs)',
   transition: 'background-color 0.15s ease'
 };
 
-const searchFilterBarStyle: React.CSSProperties = {
+const filterSectionStyle: React.CSSProperties = {
   display: 'flex',
+  alignItems: 'center',
   flexWrap: 'wrap',
   gap: '1rem',
-  alignItems: 'center'
-};
-
-const cardContainerStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  padding: '2rem 1rem',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+  justifyContent: 'space-between',
+  marginBottom: '1.25rem'
 };
 
 const errorContainerStyle: React.CSSProperties = {
-  textAlign: 'center',
-  padding: '1.5rem'
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '0.875rem 1.25rem',
+  backgroundColor: 'var(--status-danger-bg)',
+  border: '1px solid var(--status-danger-border)',
+  borderRadius: 'var(--radius-md)',
+  color: 'var(--status-danger-text)',
+  fontSize: '0.875rem',
+  marginBottom: '1rem'
 };
 
 const retryButtonStyle: React.CSSProperties = {
-  padding: '0.5rem 1rem',
-  backgroundColor: '#ef4444',
-  color: '#ffffff',
+  padding: '0.375rem 0.75rem',
+  fontSize: '0.8125rem',
+  fontWeight: 600,
+  backgroundColor: 'var(--status-danger-text)',
+  color: 'var(--color-text-inverse)',
   border: 'none',
-  borderRadius: '6px',
-  fontSize: '0.875rem',
-  fontWeight: 500,
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer'
 };
 
@@ -373,30 +347,42 @@ const modalOverlayStyle: React.CSSProperties = {
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(15, 23, 42, 0.6)',
+  backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  backdropFilter: 'blur(2px)',
   display: 'flex',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
   zIndex: 1000,
   padding: '1rem'
 };
 
 const modalContentStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  padding: '1.5rem',
-  maxWidth: '550px',
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 'var(--radius-xl)',
   width: '100%',
+  maxWidth: '560px',
+  boxShadow: 'var(--shadow-lg)',
+  border: '1px solid var(--color-border)',
+  overflow: 'hidden',
   display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem',
-  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+  flexDirection: 'column'
 };
 
-const modalCloseButtonStyle: React.CSSProperties = {
+const modalHeaderStyle: React.CSSProperties = {
+  padding: '1rem 1.25rem',
+  borderBottom: '1px solid var(--color-border)',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: 'var(--color-surface-subtle)'
+};
+
+const closeButtonStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   fontSize: '1.5rem',
+  color: 'var(--color-text-muted)',
   cursor: 'pointer',
-  color: '#64748b'
+  lineHeight: 1,
+  padding: 0
 };

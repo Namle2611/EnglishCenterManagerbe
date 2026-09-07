@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingState } from '../../components/common/LoadingState';
 import { CourseForm } from '../../components/courses/CourseForm';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { courseService } from '../../services/course.service';
 import type { CourseDetail, UpdateCoursePayload } from '../../types/course.types';
 import { getCourseApiErrorMessage, getCourseBasePath } from '../../utils/courseHelper';
@@ -85,150 +87,125 @@ export const CourseEditPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={pageContainerStyle}>
+      <AppShell>
         <LoadingState message="Đang tải dữ liệu khóa học..." />
-      </div>
+      </AppShell>
     );
   }
 
   if (isNotFound) {
     return (
-      <div style={pageContainerStyle}>
-        <div style={notFoundCardStyle}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🔍</div>
-          <h2 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>Không tìm thấy khóa học</h2>
-          <p style={{ color: '#64748b', margin: '0 0 1.5rem 0' }}>
+      <AppShell>
+        <div
+          style={{
+            backgroundColor: 'var(--color-surface, #ffffff)',
+            borderRadius: 'var(--radius-lg, 12px)',
+            border: '1px solid var(--color-border, #e2e8f0)',
+            padding: '3rem 2rem',
+            textAlign: 'center',
+            maxWidth: '520px',
+            margin: '2rem auto',
+            boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))'
+          }}
+        >
+          <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🔍</div>
+          <h2 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-text, #0f172a)' }}>
+            Không tìm thấy khóa học
+          </h2>
+          <p
+            style={{
+              color: 'var(--color-text-muted, #64748b)',
+              margin: '0 0 1.5rem 0',
+              fontSize: '0.875rem'
+            }}
+          >
             Khóa học với mã định danh #{id} không tồn tại để chỉnh sửa.
           </p>
           <button
             type="button"
             onClick={() => navigate(basePath)}
-            style={primaryButtonStyle}
+            style={{
+              padding: '0.5625rem 1.25rem',
+              backgroundColor: 'var(--color-primary, #1e40af)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: 'var(--radius-md, 8px)',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              cursor: 'pointer'
+            }}
           >
             Quay lại danh sách khóa học
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   if (errorMessage || !course) {
     return (
-      <div style={pageContainerStyle}>
-        <div style={errorCardStyle}>
-          <p style={{ margin: '0 0 1rem 0', fontWeight: 500 }}>
+      <AppShell>
+        <div
+          style={{
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            color: '#991b1b',
+            borderRadius: 'var(--radius-lg, 12px)',
+            padding: '2rem',
+            textAlign: 'center',
+            maxWidth: '520px',
+            margin: '2rem auto'
+          }}
+        >
+          <p style={{ margin: '0 0 1rem 0', fontWeight: 500, fontSize: '0.9375rem' }}>
             {errorMessage || 'Đã xảy ra lỗi khi tải thông tin khóa học.'}
           </p>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            style={primaryButtonStyle}
+            style={{
+              padding: '0.5625rem 1.25rem',
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: 'var(--radius-md, 8px)',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              cursor: 'pointer'
+            }}
           >
             Thử lại
           </button>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div style={pageContainerStyle}>
-      {/* Navigation Breadcrumb */}
-      <div style={breadcrumbStyle}>
-        <Link to={basePath} style={breadcrumbLinkStyle}>
-          ← Danh sách khóa học
-        </Link>
-        <span style={{ color: '#cbd5e1' }}>/</span>
-        <Link to={`${basePath}/${course.id}`} style={breadcrumbLinkStyle}>
-          {course.courseCode}
-        </Link>
-        <span style={{ color: '#cbd5e1' }}>/</span>
-        <span style={{ color: '#64748b' }}>Chỉnh sửa</span>
-      </div>
+    <AppShell>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Page Header with Breadcrumbs */}
+        <PageHeader
+          breadcrumbs={[
+            { label: 'Danh sách khóa học', path: basePath },
+            { label: course.courseCode, path: `${basePath}/${course.id}` },
+            { label: 'Chỉnh sửa' }
+          ]}
+          title={`Chỉnh sửa khóa học: ${course.courseCode}`}
+          subtitle="Cập nhật thông tin chi tiết của khóa học (Mã khóa học là trường bất biến không thể chỉnh sửa)"
+        />
 
-      {/* Page Title */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={titleStyle}>Chỉnh sửa khóa học: {course.courseCode}</h1>
-        <p style={subtitleStyle}>
-          Cập nhật thông tin chi tiết của khóa học (Mã khóa học là trường bất biến không thể chỉnh sửa)
-        </p>
+        {/* Form Card */}
+        <CourseForm
+          mode="edit"
+          initialData={course}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          isSubmitting={isSubmitting}
+          serverError={serverError}
+        />
       </div>
-
-      {/* Form Card */}
-      <CourseForm
-        mode="edit"
-        initialData={course}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        isSubmitting={isSubmitting}
-        serverError={serverError}
-      />
-    </div>
+    </AppShell>
   );
 };
 
-const pageContainerStyle: React.CSSProperties = {
-  padding: '1.5rem 2rem',
-  maxWidth: '900px',
-  margin: '0 auto',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-};
-
-const breadcrumbStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  fontSize: '0.85rem',
-  marginBottom: '1rem'
-};
-
-const breadcrumbLinkStyle: React.CSSProperties = {
-  color: '#2563eb',
-  textDecoration: 'none',
-  fontWeight: 500
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: '1.75rem',
-  fontWeight: 700,
-  color: '#0f172a'
-};
-
-const subtitleStyle: React.CSSProperties = {
-  margin: '0.25rem 0 0 0',
-  fontSize: '0.875rem',
-  color: '#64748b'
-};
-
-const notFoundCardStyle: React.CSSProperties = {
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  padding: '3rem 2rem',
-  textAlign: 'center',
-  maxWidth: '500px',
-  margin: '2rem auto'
-};
-
-const errorCardStyle: React.CSSProperties = {
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  color: '#991b1b',
-  borderRadius: '8px',
-  padding: '2rem',
-  textAlign: 'center',
-  maxWidth: '500px',
-  margin: '2rem auto'
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  padding: '0.55rem 1.25rem',
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
-  fontWeight: 600,
-  fontSize: '0.875rem',
-  cursor: 'pointer'
-};
