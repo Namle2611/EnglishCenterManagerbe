@@ -89,6 +89,8 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff));
     options.AddPolicy(PolicyNames.ManageClasses, policy =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff));
+    options.AddPolicy(PolicyNames.ManageRooms, policy =>
+        policy.RequireRole(RoleNames.Admin, RoleNames.Staff));
 });
 
 // Register DI services
@@ -106,6 +108,8 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IClassService, ClassService>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IdentitySeeder>();
 
 // Configure CORS
