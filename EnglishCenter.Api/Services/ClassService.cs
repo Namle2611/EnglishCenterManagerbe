@@ -26,6 +26,11 @@ public class ClassService : IClassService
         return await _classRepository.GetPagedAsync(query, cancellationToken);
     }
 
+    public async Task<PagedResult<TeacherLookupItemResponse>> GetTeacherLookupAsync(TeacherLookupQuery query, CancellationToken cancellationToken = default)
+    {
+        return await _classRepository.GetTeacherLookupAsync(query, cancellationToken);
+    }
+
     public async Task<ClassDetailResponse> GetDetailAsync(int id, CancellationToken cancellationToken = default)
     {
         var classDetail = await _classRepository.GetDetailByIdAsync(id, cancellationToken);

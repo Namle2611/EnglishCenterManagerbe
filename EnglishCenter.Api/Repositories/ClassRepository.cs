@@ -2,6 +2,7 @@ using EnglishCenter.Api.Data;
 using EnglishCenter.Api.DTOs.Classes;
 using EnglishCenter.Api.DTOs.Common;
 using EnglishCenter.Api.Entities;
+using EnglishCenter.Api.Enums;
 using EnglishCenter.Api.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -94,6 +95,47 @@ public class ClassRepository : IClassRepository
             .ToListAsync(cancellationToken);
 
         return new PagedResult<ClassListItemResponse>(items, totalItems, page, pageSize);
+    }
+
+    public async Task<PagedResult<TeacherLookupItemResponse>> GetTeacherLookupAsync(TeacherLookupQuery query, CancellationToken cancellationToken = default)
+    {
+        var queryable = _context.Teachers
+            .AsNoTracking()
+            .AsQueryable();
+
+        // 1. Search across TeacherCode and FullName
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var search = query.Search.Trim();
+            queryable = queryable.Where(t =>
+                t.TeacherCode.Contains(search) ||
+                t.User.FullName.Contains(search));
+        }
+
+        // 2. Count total matching items
+        var totalItems = await queryable.CountAsync(cancellationToken);
+
+        // 3. Default sort: TeacherCode ASC
+        queryable = queryable.OrderBy(t => t.TeacherCode);
+
+        // 4. Pagination & direct projection
+        var page = query.Page < 1 ? 1 : query.Page;
+        var pageSize = query.PageSize < 1 ? 10 : query.PageSize;
+
+        var items = await queryable
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(t => new TeacherLookupItemResponse
+            {
+                Id = t.Id,
+                TeacherCode = t.TeacherCode,
+                FullName = t.User.FullName,
+                Specialization = t.Specialization,
+                Status = t.Status == TeacherStatus.Active ? "Active" : "Inactive"
+            })
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<TeacherLookupItemResponse>(items, totalItems, page, pageSize);
     }
 
     public async Task<ClassDetailResponse?> GetDetailByIdAsync(int id, CancellationToken cancellationToken = default)

@@ -33,14 +33,16 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Tổng quan', path: '/admin', icon: '📊' },
         { label: 'Quản lý học viên', path: '/admin/students', icon: '🎓' },
         { label: 'Quản lý giáo viên', path: '/admin/teachers', icon: '👨‍🏫' },
-        { label: 'Quản lý khóa học', path: '/admin/courses', icon: '📚' }
+        { label: 'Quản lý khóa học', path: '/admin/courses', icon: '📚' },
+        { label: 'Quản lý lớp học', path: '/admin/classes', icon: '🏫' }
       ];
     }
     if (user?.roles.includes('STAFF')) {
       return [
         { label: 'Tổng quan', path: '/staff', icon: '📊' },
         { label: 'Quản lý học viên', path: '/staff/students', icon: '🎓' },
-        { label: 'Quản lý khóa học', path: '/staff/courses', icon: '📚' }
+        { label: 'Quản lý khóa học', path: '/staff/courses', icon: '📚' },
+        { label: 'Quản lý lớp học', path: '/staff/classes', icon: '🏫' }
       ];
     }
     if (user?.roles.includes('TEACHER')) {

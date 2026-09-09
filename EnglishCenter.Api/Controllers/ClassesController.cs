@@ -26,6 +26,13 @@ public class ClassesController : ControllerBase
         return Ok(ApiResponse<PagedResult<ClassListItemResponse>>.Ok(result, "Classes retrieved successfully."));
     }
 
+    [HttpGet("lookups/teachers")]
+    public async Task<IActionResult> GetTeacherLookup([FromQuery] TeacherLookupQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _classService.GetTeacherLookupAsync(query, cancellationToken);
+        return Ok(ApiResponse<PagedResult<TeacherLookupItemResponse>>.Ok(result, "Teachers retrieved successfully."));
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {

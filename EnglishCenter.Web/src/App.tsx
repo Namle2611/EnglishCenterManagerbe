@@ -15,6 +15,10 @@ import { CourseCreatePage } from './pages/courses/CourseCreatePage';
 import { CourseDetailPage } from './pages/courses/CourseDetailPage';
 import { CourseEditPage } from './pages/courses/CourseEditPage';
 import { CourseListPage } from './pages/courses/CourseListPage';
+import { ClassCreatePage } from './pages/classes/ClassCreatePage';
+import { ClassDetailPage } from './pages/classes/ClassDetailPage';
+import { ClassEditPage } from './pages/classes/ClassEditPage';
+import { ClassListPage } from './pages/classes/ClassListPage';
 import { TeacherCreatePage } from './pages/teachers/TeacherCreatePage';
 import { TeacherDetailPage } from './pages/teachers/TeacherDetailPage';
 import { TeacherEditPage } from './pages/teachers/TeacherEditPage';
@@ -73,6 +77,10 @@ export const App: React.FC = () => {
               <Route path="/admin/courses/new" element={<CourseCreatePage />} />
               <Route path="/admin/courses/:id" element={<CourseDetailPage />} />
               <Route path="/admin/courses/:id/edit" element={<CourseEditPage />} />
+              <Route path="/admin/classes" element={<ClassListPage />} />
+              <Route path="/admin/classes/new" element={<ClassCreatePage />} />
+              <Route path="/admin/classes/:id" element={<ClassDetailPage />} />
+              <Route path="/admin/classes/:id/edit" element={<ClassEditPage />} />
             </Route>
 
             {/* Staff only */}
@@ -86,6 +94,10 @@ export const App: React.FC = () => {
               <Route path="/staff/courses/new" element={<CourseCreatePage />} />
               <Route path="/staff/courses/:id" element={<CourseDetailPage />} />
               <Route path="/staff/courses/:id/edit" element={<CourseEditPage />} />
+              <Route path="/staff/classes" element={<ClassListPage />} />
+              <Route path="/staff/classes/new" element={<ClassCreatePage />} />
+              <Route path="/staff/classes/:id" element={<ClassDetailPage />} />
+              <Route path="/staff/classes/:id/edit" element={<ClassEditPage />} />
             </Route>
 
             {/* Teacher only */}

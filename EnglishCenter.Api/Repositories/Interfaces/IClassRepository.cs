@@ -7,6 +7,7 @@ namespace EnglishCenter.Api.Repositories.Interfaces;
 public interface IClassRepository
 {
     Task<PagedResult<ClassListItemResponse>> GetPagedAsync(ClassQuery query, CancellationToken cancellationToken = default);
+    Task<PagedResult<TeacherLookupItemResponse>> GetTeacherLookupAsync(TeacherLookupQuery query, CancellationToken cancellationToken = default);
     Task<ClassDetailResponse?> GetDetailByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<CourseClass?> GetByIdTrackedAsync(int id, CancellationToken cancellationToken = default);
     Task<bool> ClassCodeExistsAsync(string classCode, CancellationToken cancellationToken = default);
