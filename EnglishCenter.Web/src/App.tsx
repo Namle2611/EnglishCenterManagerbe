@@ -24,6 +24,10 @@ import { TeacherDetailPage } from './pages/teachers/TeacherDetailPage';
 import { TeacherEditPage } from './pages/teachers/TeacherEditPage';
 import { TeacherListPage } from './pages/teachers/TeacherListPage';
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
+import { RoomCreatePage } from './pages/rooms/RoomCreatePage';
+import { RoomDetailPage } from './pages/rooms/RoomDetailPage';
+import { RoomEditPage } from './pages/rooms/RoomEditPage';
+import { RoomListPage } from './pages/rooms/RoomListPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -81,6 +85,10 @@ export const App: React.FC = () => {
               <Route path="/admin/classes/new" element={<ClassCreatePage />} />
               <Route path="/admin/classes/:id" element={<ClassDetailPage />} />
               <Route path="/admin/classes/:id/edit" element={<ClassEditPage />} />
+              <Route path="/admin/rooms" element={<RoomListPage />} />
+              <Route path="/admin/rooms/new" element={<RoomCreatePage />} />
+              <Route path="/admin/rooms/:id" element={<RoomDetailPage />} />
+              <Route path="/admin/rooms/:id/edit" element={<RoomEditPage />} />
             </Route>
 
             {/* Staff only */}
@@ -98,6 +106,10 @@ export const App: React.FC = () => {
               <Route path="/staff/classes/new" element={<ClassCreatePage />} />
               <Route path="/staff/classes/:id" element={<ClassDetailPage />} />
               <Route path="/staff/classes/:id/edit" element={<ClassEditPage />} />
+              <Route path="/staff/rooms" element={<RoomListPage />} />
+              <Route path="/staff/rooms/new" element={<RoomCreatePage />} />
+              <Route path="/staff/rooms/:id" element={<RoomDetailPage />} />
+              <Route path="/staff/rooms/:id/edit" element={<RoomEditPage />} />
             </Route>
 
             {/* Teacher only */}
