@@ -28,6 +28,10 @@ import { RoomCreatePage } from './pages/rooms/RoomCreatePage';
 import { RoomDetailPage } from './pages/rooms/RoomDetailPage';
 import { RoomEditPage } from './pages/rooms/RoomEditPage';
 import { RoomListPage } from './pages/rooms/RoomListPage';
+import { ScheduleCreatePage } from './pages/schedules/ScheduleCreatePage';
+import { ScheduleDetailPage } from './pages/schedules/ScheduleDetailPage';
+import { ScheduleEditPage } from './pages/schedules/ScheduleEditPage';
+import { ScheduleListPage } from './pages/schedules/ScheduleListPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -89,6 +93,10 @@ export const App: React.FC = () => {
               <Route path="/admin/rooms/new" element={<RoomCreatePage />} />
               <Route path="/admin/rooms/:id" element={<RoomDetailPage />} />
               <Route path="/admin/rooms/:id/edit" element={<RoomEditPage />} />
+              <Route path="/admin/schedules" element={<ScheduleListPage />} />
+              <Route path="/admin/schedules/new" element={<ScheduleCreatePage />} />
+              <Route path="/admin/schedules/:id" element={<ScheduleDetailPage />} />
+              <Route path="/admin/schedules/:id/edit" element={<ScheduleEditPage />} />
             </Route>
 
             {/* Staff only */}
@@ -110,6 +118,10 @@ export const App: React.FC = () => {
               <Route path="/staff/rooms/new" element={<RoomCreatePage />} />
               <Route path="/staff/rooms/:id" element={<RoomDetailPage />} />
               <Route path="/staff/rooms/:id/edit" element={<RoomEditPage />} />
+              <Route path="/staff/schedules" element={<ScheduleListPage />} />
+              <Route path="/staff/schedules/new" element={<ScheduleCreatePage />} />
+              <Route path="/staff/schedules/:id" element={<ScheduleDetailPage />} />
+              <Route path="/staff/schedules/:id/edit" element={<ScheduleEditPage />} />
             </Route>
 
             {/* Teacher only */}
