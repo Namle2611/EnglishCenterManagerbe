@@ -81,6 +81,17 @@ export const StaffDashboard: React.FC = () => {
           </div>
           <span style={navArrowStyle}>&rarr;</span>
         </Link>
+
+        <Link to="/staff/payments" style={navCardStyle}>
+          <div style={navIconContainerStyle}>💳</div>
+          <div style={navContentStyle}>
+            <h2 style={navTitleStyle}>Quản lý thanh toán</h2>
+            <p style={navDescriptionStyle}>
+              Theo dõi dòng tiền học phí, xác nhận giao dịch thanh toán và quản lý công nợ học viên
+            </p>
+          </div>
+          <span style={navArrowStyle}>&rarr;</span>
+        </Link>
       </div>
 
       {/* Staff Account Overview Card */}

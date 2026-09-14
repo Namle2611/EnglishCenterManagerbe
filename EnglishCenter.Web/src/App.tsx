@@ -36,6 +36,10 @@ import { EnrollmentListPage } from './pages/enrollments/EnrollmentListPage';
 import { EnrollmentCreatePage } from './pages/enrollments/EnrollmentCreatePage';
 import { EnrollmentDetailPage } from './pages/enrollments/EnrollmentDetailPage';
 import { EnrollmentEditPage } from './pages/enrollments/EnrollmentEditPage';
+import { PaymentListPage } from './pages/payments/PaymentListPage';
+import { PaymentCreatePage } from './pages/payments/PaymentCreatePage';
+import { PaymentDetailPage } from './pages/payments/PaymentDetailPage';
+import { PaymentEditPage } from './pages/payments/PaymentEditPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -105,6 +109,10 @@ export const App: React.FC = () => {
               <Route path="/admin/enrollments/new" element={<EnrollmentCreatePage />} />
               <Route path="/admin/enrollments/:id" element={<EnrollmentDetailPage />} />
               <Route path="/admin/enrollments/:id/edit" element={<EnrollmentEditPage />} />
+              <Route path="/admin/payments" element={<PaymentListPage />} />
+              <Route path="/admin/payments/new" element={<PaymentCreatePage />} />
+              <Route path="/admin/payments/:id" element={<PaymentDetailPage />} />
+              <Route path="/admin/payments/:id/edit" element={<PaymentEditPage />} />
             </Route>
 
             {/* Staff only */}
@@ -134,6 +142,10 @@ export const App: React.FC = () => {
               <Route path="/staff/enrollments/new" element={<EnrollmentCreatePage />} />
               <Route path="/staff/enrollments/:id" element={<EnrollmentDetailPage />} />
               <Route path="/staff/enrollments/:id/edit" element={<EnrollmentEditPage />} />
+              <Route path="/staff/payments" element={<PaymentListPage />} />
+              <Route path="/staff/payments/new" element={<PaymentCreatePage />} />
+              <Route path="/staff/payments/:id" element={<PaymentDetailPage />} />
+              <Route path="/staff/payments/:id/edit" element={<PaymentEditPage />} />
             </Route>
 
             {/* Teacher only */}
