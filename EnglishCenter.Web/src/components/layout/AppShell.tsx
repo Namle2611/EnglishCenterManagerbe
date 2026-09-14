@@ -36,7 +36,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý khóa học', path: '/admin/courses', icon: '📚' },
         { label: 'Quản lý lớp học', path: '/admin/classes', icon: '🏫' },
         { label: 'Quản lý phòng học', path: '/admin/rooms', icon: '🚪' },
-        { label: 'Quản lý lịch học', path: '/admin/schedules', icon: '📅' }
+        { label: 'Quản lý lịch học', path: '/admin/schedules', icon: '📅' },
+        { label: 'Quản lý ghi danh', path: '/admin/enrollments', icon: '📝' }
       ];
     }
     if (user?.roles.includes('STAFF')) {
@@ -46,7 +47,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý khóa học', path: '/staff/courses', icon: '📚' },
         { label: 'Quản lý lớp học', path: '/staff/classes', icon: '🏫' },
         { label: 'Quản lý phòng học', path: '/staff/rooms', icon: '🚪' },
-        { label: 'Quản lý lịch học', path: '/staff/schedules', icon: '📅' }
+        { label: 'Quản lý lịch học', path: '/staff/schedules', icon: '📅' },
+        { label: 'Quản lý ghi danh', path: '/staff/enrollments', icon: '📝' }
       ];
     }
     if (user?.roles.includes('TEACHER')) {

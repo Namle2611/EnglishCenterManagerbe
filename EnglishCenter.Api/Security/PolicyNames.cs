@@ -8,4 +8,5 @@ public static class PolicyNames
     public const string ManageClasses = "ManageClasses";
     public const string ManageRooms = "ManageRooms";
     public const string ManageSchedules = "ManageSchedules";
+    public const string ManageEnrollments = "ManageEnrollments";
 }
