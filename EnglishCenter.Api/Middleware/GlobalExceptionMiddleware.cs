@@ -70,6 +70,14 @@ public class GlobalExceptionMiddleware
                     JsonOptions);
                 break;
 
+            case ForbiddenException forbiddenEx:
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                await JsonSerializer.SerializeAsync(
+                    context.Response.Body,
+                    ApiResponse.Fail(forbiddenEx.Message),
+                    JsonOptions);
+                break;
+
             case UnauthorizedAccessException:
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 await JsonSerializer.SerializeAsync(

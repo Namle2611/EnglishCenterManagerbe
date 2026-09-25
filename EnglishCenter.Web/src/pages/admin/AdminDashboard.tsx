@@ -103,6 +103,17 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <span style={navArrowStyle}>&rarr;</span>
         </Link>
+
+        <Link to="/admin/attendances" style={navCardStyle}>
+          <div style={navIconContainerStyle}>📋</div>
+          <div style={navContentStyle}>
+            <h2 style={navTitleStyle}>Quản lý điểm danh</h2>
+            <p style={navDescriptionStyle}>
+              Theo dõi lịch sử chuyên cần, kiểm tra điểm danh theo buổi học và điều chỉnh hồ sơ điểm danh
+            </p>
+          </div>
+          <span style={navArrowStyle}>&rarr;</span>
+        </Link>
       </div>
 
       {/* Administrator Account Overview Card (Strictly factual info, zero fake metrics) */}

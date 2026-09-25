@@ -95,6 +95,7 @@ html, body {
   padding: 0;
   min-height: 100%;
   background-color: var(--color-canvas);
+  overflow-x: hidden;
 }
 
 #root {
@@ -102,6 +103,28 @@ html, body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .app-sidebar {
+    display: none !important;
+  }
+  .app-sidebar.mobile-open {
+    display: flex !important;
+  }
+  .app-mobile-menu-toggle {
+    display: block !important;
+  }
+  .app-user-details {
+    display: none !important;
+  }
+  .app-topbar-actions {
+    gap: 0.375rem !important;
+  }
+  .app-main-workspace {
+    padding: 1rem 0.5rem !important;
+  }
 }
 
 /* Typography Standards */

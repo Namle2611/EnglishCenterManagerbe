@@ -38,7 +38,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý phòng học', path: '/admin/rooms', icon: '🚪' },
         { label: 'Quản lý lịch học', path: '/admin/schedules', icon: '📅' },
         { label: 'Quản lý ghi danh', path: '/admin/enrollments', icon: '📝' },
-        { label: 'Quản lý thanh toán', path: '/admin/payments', icon: '💳' }
+        { label: 'Quản lý thanh toán', path: '/admin/payments', icon: '💳' },
+        { label: 'Quản lý điểm danh', path: '/admin/attendances', icon: '📋' }
       ];
     }
     if (user?.roles.includes('STAFF')) {
@@ -50,12 +51,14 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý phòng học', path: '/staff/rooms', icon: '🚪' },
         { label: 'Quản lý lịch học', path: '/staff/schedules', icon: '📅' },
         { label: 'Quản lý ghi danh', path: '/staff/enrollments', icon: '📝' },
-        { label: 'Quản lý thanh toán', path: '/staff/payments', icon: '💳' }
+        { label: 'Quản lý thanh toán', path: '/staff/payments', icon: '💳' },
+        { label: 'Quản lý điểm danh', path: '/staff/attendances', icon: '📋' }
       ];
     }
     if (user?.roles.includes('TEACHER')) {
       return [
-        { label: 'Tổng quan', path: '/teacher', icon: '📊' }
+        { label: 'Tổng quan', path: '/teacher', icon: '📊' },
+        { label: 'Điểm danh', path: '/teacher/attendances', icon: '📋' }
       ];
     }
     if (user?.roles.includes('STUDENT')) {
@@ -107,6 +110,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <div style={topbarLeftStyle}>
           <button
             type="button"
+            className="app-mobile-menu-toggle"
             aria-label="Mở menu điều hướng"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             style={mobileMenuToggleStyle}
@@ -125,7 +129,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
               <div style={avatarCircleStyle}>
                 {getInitials(user.fullName)}
               </div>
-              <div style={userInfoColumnStyle}>
+              <div className="app-user-details" style={userInfoColumnStyle}>
                 <div style={userNameRowStyle}>
                   <span style={userNameStyle}>{user.fullName}</span>
                   <span style={{ ...roleBadgeStyle, ...getRoleBadgeStyle() }}>
@@ -137,7 +141,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             </div>
           )}
 
-          <div style={topbarActionsStyle}>
+          <div className="app-topbar-actions" style={topbarActionsStyle}>
             <Link
               to="/change-password"
               style={changePasswordBtnStyle}
@@ -161,6 +165,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       <div style={bodyLayoutStyle}>
         {/* Sidebar */}
         <aside
+          className={`app-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}
           style={{
             ...sidebarStyle,
             ...(isMobileMenuOpen ? sidebarMobileOpenStyle : {})
@@ -201,7 +206,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         )}
 
         {/* Main Content Workspace */}
-        <main style={mainWorkspaceStyle}>
+        <main className="app-main-workspace" style={mainWorkspaceStyle}>
           {children}
         </main>
       </div>

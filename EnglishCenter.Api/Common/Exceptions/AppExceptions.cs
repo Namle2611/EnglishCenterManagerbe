@@ -14,6 +14,13 @@ public class ConflictException : Exception
     }
 }
 
+public class ForbiddenException : Exception
+{
+    public ForbiddenException(string message) : base(message)
+    {
+    }
+}
+
 public class ValidationException : Exception
 {
     public List<string> Errors { get; }

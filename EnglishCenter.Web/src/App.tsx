@@ -40,6 +40,9 @@ import { PaymentListPage } from './pages/payments/PaymentListPage';
 import { PaymentCreatePage } from './pages/payments/PaymentCreatePage';
 import { PaymentDetailPage } from './pages/payments/PaymentDetailPage';
 import { PaymentEditPage } from './pages/payments/PaymentEditPage';
+import { AttendanceListPage } from './pages/attendances/AttendanceListPage';
+import { AttendanceSessionPage } from './pages/attendances/AttendanceSessionPage';
+import { AttendanceDetailPage } from './pages/attendances/AttendanceDetailPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -113,6 +116,9 @@ export const App: React.FC = () => {
               <Route path="/admin/payments/new" element={<PaymentCreatePage />} />
               <Route path="/admin/payments/:id" element={<PaymentDetailPage />} />
               <Route path="/admin/payments/:id/edit" element={<PaymentEditPage />} />
+              <Route path="/admin/attendances" element={<AttendanceListPage />} />
+              <Route path="/admin/attendances/session" element={<AttendanceSessionPage />} />
+              <Route path="/admin/attendances/:id" element={<AttendanceDetailPage />} />
             </Route>
 
             {/* Staff only */}
@@ -146,11 +152,17 @@ export const App: React.FC = () => {
               <Route path="/staff/payments/new" element={<PaymentCreatePage />} />
               <Route path="/staff/payments/:id" element={<PaymentDetailPage />} />
               <Route path="/staff/payments/:id/edit" element={<PaymentEditPage />} />
+              <Route path="/staff/attendances" element={<AttendanceListPage />} />
+              <Route path="/staff/attendances/session" element={<AttendanceSessionPage />} />
+              <Route path="/staff/attendances/:id" element={<AttendanceDetailPage />} />
             </Route>
 
             {/* Teacher only */}
             <Route element={<RoleRoute requiredRole="TEACHER" />}>
               <Route path="/teacher" element={<TeacherDashboard />} />
+              <Route path="/teacher/attendances" element={<AttendanceListPage />} />
+              <Route path="/teacher/attendances/session" element={<AttendanceSessionPage />} />
+              <Route path="/teacher/attendances/:id" element={<AttendanceDetailPage />} />
             </Route>
 
             {/* Student only */}

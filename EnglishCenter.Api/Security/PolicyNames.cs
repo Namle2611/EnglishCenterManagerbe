@@ -10,4 +10,5 @@ public static class PolicyNames
     public const string ManageSchedules = "ManageSchedules";
     public const string ManageEnrollments = "ManageEnrollments";
     public const string ManagePayments = "ManagePayments";
+    public const string ManageAttendance = "ManageAttendance";
 }
