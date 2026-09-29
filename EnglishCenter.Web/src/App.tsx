@@ -43,6 +43,7 @@ import { PaymentEditPage } from './pages/payments/PaymentEditPage';
 import { AttendanceListPage } from './pages/attendances/AttendanceListPage';
 import { AttendanceSessionPage } from './pages/attendances/AttendanceSessionPage';
 import { AttendanceDetailPage } from './pages/attendances/AttendanceDetailPage';
+import { LearningContentPage } from './pages/learningContent/LearningContentPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -119,6 +120,10 @@ export const App: React.FC = () => {
               <Route path="/admin/attendances" element={<AttendanceListPage />} />
               <Route path="/admin/attendances/session" element={<AttendanceSessionPage />} />
               <Route path="/admin/attendances/:id" element={<AttendanceDetailPage />} />
+              <Route path="/admin/learning-content" element={<LearningContentPage />} />
+              <Route path="/admin/learning-content/courses/:courseId" element={<LearningContentPage />} />
+              <Route path="/admin/learning-content/courses/:courseId/sections/:sectionId" element={<LearningContentPage />} />
+              <Route path="/admin/learning-content/courses/:courseId/sections/:sectionId/lessons/:lessonId" element={<LearningContentPage />} />
             </Route>
 
             {/* Staff only */}
@@ -155,6 +160,10 @@ export const App: React.FC = () => {
               <Route path="/staff/attendances" element={<AttendanceListPage />} />
               <Route path="/staff/attendances/session" element={<AttendanceSessionPage />} />
               <Route path="/staff/attendances/:id" element={<AttendanceDetailPage />} />
+              <Route path="/staff/learning-content" element={<LearningContentPage />} />
+              <Route path="/staff/learning-content/courses/:courseId" element={<LearningContentPage />} />
+              <Route path="/staff/learning-content/courses/:courseId/sections/:sectionId" element={<LearningContentPage />} />
+              <Route path="/staff/learning-content/courses/:courseId/sections/:sectionId/lessons/:lessonId" element={<LearningContentPage />} />
             </Route>
 
             {/* Teacher only */}
@@ -163,6 +172,10 @@ export const App: React.FC = () => {
               <Route path="/teacher/attendances" element={<AttendanceListPage />} />
               <Route path="/teacher/attendances/session" element={<AttendanceSessionPage />} />
               <Route path="/teacher/attendances/:id" element={<AttendanceDetailPage />} />
+              <Route path="/teacher/learning-content" element={<LearningContentPage />} />
+              <Route path="/teacher/learning-content/courses/:courseId" element={<LearningContentPage />} />
+              <Route path="/teacher/learning-content/courses/:courseId/sections/:sectionId" element={<LearningContentPage />} />
+              <Route path="/teacher/learning-content/courses/:courseId/sections/:sectionId/lessons/:lessonId" element={<LearningContentPage />} />
             </Route>
 
             {/* Student only */}

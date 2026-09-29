@@ -39,7 +39,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý lịch học', path: '/admin/schedules', icon: '📅' },
         { label: 'Quản lý ghi danh', path: '/admin/enrollments', icon: '📝' },
         { label: 'Quản lý thanh toán', path: '/admin/payments', icon: '💳' },
-        { label: 'Quản lý điểm danh', path: '/admin/attendances', icon: '📋' }
+        { label: 'Quản lý điểm danh', path: '/admin/attendances', icon: '📋' },
+        { label: 'Nội dung học tập', path: '/admin/learning-content', icon: '📖' }
       ];
     }
     if (user?.roles.includes('STAFF')) {
@@ -52,13 +53,15 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý lịch học', path: '/staff/schedules', icon: '📅' },
         { label: 'Quản lý ghi danh', path: '/staff/enrollments', icon: '📝' },
         { label: 'Quản lý thanh toán', path: '/staff/payments', icon: '💳' },
-        { label: 'Quản lý điểm danh', path: '/staff/attendances', icon: '📋' }
+        { label: 'Quản lý điểm danh', path: '/staff/attendances', icon: '📋' },
+        { label: 'Nội dung học tập', path: '/staff/learning-content', icon: '📖' }
       ];
     }
     if (user?.roles.includes('TEACHER')) {
       return [
         { label: 'Tổng quan', path: '/teacher', icon: '📊' },
-        { label: 'Điểm danh', path: '/teacher/attendances', icon: '📋' }
+        { label: 'Điểm danh', path: '/teacher/attendances', icon: '📋' },
+        { label: 'Nội dung học tập', path: '/teacher/learning-content', icon: '📖' }
       ];
     }
     if (user?.roles.includes('STUDENT')) {

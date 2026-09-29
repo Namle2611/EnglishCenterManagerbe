@@ -70,7 +70,7 @@ export const LoginPage: React.FC = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@englishcenter.local"
+              placeholder="admincenter@gmail.com"
               disabled={isSubmitting}
               required
               style={inputStyle}
