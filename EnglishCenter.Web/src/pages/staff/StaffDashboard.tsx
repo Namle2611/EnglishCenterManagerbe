@@ -114,6 +114,17 @@ export const StaffDashboard: React.FC = () => {
           </div>
           <span style={navArrowStyle}>&rarr;</span>
         </Link>
+
+        <Link to="/staff/assignments" style={navCardStyle}>
+          <div style={navIconContainerStyle}>📑</div>
+          <div style={navContentStyle}>
+            <h2 style={navTitleStyle}>Quản lý bài tập</h2>
+            <p style={navDescriptionStyle}>
+              Tạo bài tập, theo dõi hạn nộp, quản lý trạng thái và tổng hợp bài nộp của học viên
+            </p>
+          </div>
+          <span style={navArrowStyle}>&rarr;</span>
+        </Link>
       </div>
 
       {/* Staff Account Overview Card */}

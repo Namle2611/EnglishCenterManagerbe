@@ -44,6 +44,12 @@ import { AttendanceListPage } from './pages/attendances/AttendanceListPage';
 import { AttendanceSessionPage } from './pages/attendances/AttendanceSessionPage';
 import { AttendanceDetailPage } from './pages/attendances/AttendanceDetailPage';
 import { LearningContentPage } from './pages/learningContent/LearningContentPage';
+import { AssignmentManagementPage } from './pages/assignments/AssignmentManagementPage';
+import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage';
+import { SubmissionDetailPage } from './pages/assignments/SubmissionDetailPage';
+import { StudentAssignmentsPage } from './pages/assignments/StudentAssignmentsPage';
+import { StudentAssignmentDetailPage } from './pages/assignments/StudentAssignmentDetailPage';
+import { StudentSubmissionDetailPage } from './pages/assignments/StudentSubmissionDetailPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -124,6 +130,10 @@ export const App: React.FC = () => {
               <Route path="/admin/learning-content/courses/:courseId" element={<LearningContentPage />} />
               <Route path="/admin/learning-content/courses/:courseId/sections/:sectionId" element={<LearningContentPage />} />
               <Route path="/admin/learning-content/courses/:courseId/sections/:sectionId/lessons/:lessonId" element={<LearningContentPage />} />
+              <Route path="/admin/assignments" element={<AssignmentManagementPage />} />
+              <Route path="/admin/assignments/:assignmentId" element={<AssignmentDetailPage />} />
+              <Route path="/admin/assignments/:assignmentId/submissions" element={<AssignmentDetailPage />} />
+              <Route path="/admin/submissions/:submissionId" element={<SubmissionDetailPage />} />
             </Route>
 
             {/* Staff only */}
@@ -164,6 +174,10 @@ export const App: React.FC = () => {
               <Route path="/staff/learning-content/courses/:courseId" element={<LearningContentPage />} />
               <Route path="/staff/learning-content/courses/:courseId/sections/:sectionId" element={<LearningContentPage />} />
               <Route path="/staff/learning-content/courses/:courseId/sections/:sectionId/lessons/:lessonId" element={<LearningContentPage />} />
+              <Route path="/staff/assignments" element={<AssignmentManagementPage />} />
+              <Route path="/staff/assignments/:assignmentId" element={<AssignmentDetailPage />} />
+              <Route path="/staff/assignments/:assignmentId/submissions" element={<AssignmentDetailPage />} />
+              <Route path="/staff/submissions/:submissionId" element={<SubmissionDetailPage />} />
             </Route>
 
             {/* Teacher only */}
@@ -176,11 +190,18 @@ export const App: React.FC = () => {
               <Route path="/teacher/learning-content/courses/:courseId" element={<LearningContentPage />} />
               <Route path="/teacher/learning-content/courses/:courseId/sections/:sectionId" element={<LearningContentPage />} />
               <Route path="/teacher/learning-content/courses/:courseId/sections/:sectionId/lessons/:lessonId" element={<LearningContentPage />} />
+              <Route path="/teacher/assignments" element={<AssignmentManagementPage />} />
+              <Route path="/teacher/assignments/:assignmentId" element={<AssignmentDetailPage />} />
+              <Route path="/teacher/assignments/:assignmentId/submissions" element={<AssignmentDetailPage />} />
+              <Route path="/teacher/submissions/:submissionId" element={<SubmissionDetailPage />} />
             </Route>
 
             {/* Student only */}
             <Route element={<RoleRoute requiredRole="STUDENT" />}>
               <Route path="/student" element={<StudentDashboard />} />
+              <Route path="/student/assignments" element={<StudentAssignmentsPage />} />
+              <Route path="/student/assignments/:assignmentId" element={<StudentAssignmentDetailPage />} />
+              <Route path="/student/submissions/:submissionId" element={<StudentSubmissionDetailPage />} />
             </Route>
           </Route>
 

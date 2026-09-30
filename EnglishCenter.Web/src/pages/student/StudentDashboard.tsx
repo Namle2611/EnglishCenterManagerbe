@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { AppShell } from '../../components/layout/AppShell';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { useAuth } from '../../hooks/useAuth';
@@ -12,6 +13,52 @@ export const StudentDashboard: React.FC = () => {
         title="Cổng thông tin học viên"
         subtitle={`Xin chào, ${user?.fullName || 'Học viên'}! Chúc bạn có những giờ học tập thật hiệu quả.`}
       />
+
+      {/* Quick Action Navigation */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '1.25rem',
+          marginBottom: '1.75rem',
+          maxWidth: '800px'
+        }}
+      >
+        <Link
+          to="/student/assignments"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            padding: '1.25rem',
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-sm)',
+            textDecoration: 'none',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-primary)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-border)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <div style={{ fontSize: '2rem', lineHeight: 1 }}>📑</div>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              Bài tập của tôi
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+              Xem danh sách bài tập được giao, làm bài nộp và theo dõi kết quả chấm điểm
+            </p>
+          </div>
+          <span style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>&rarr;</span>
+        </Link>
+      </div>
 
       <div style={overviewCardStyle}>
         <h3 style={overviewTitleStyle}>Hồ sơ học viên</h3>

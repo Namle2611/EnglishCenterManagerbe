@@ -103,6 +103,10 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher));
     options.AddPolicy(PolicyNames.MaintainLearningContent, policy =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff));
+    options.AddPolicy(PolicyNames.AccessAssignments, policy =>
+        policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher, RoleNames.Student));
+    options.AddPolicy(PolicyNames.ManageAssignments, policy =>
+        policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher));
 });
 
 // Register DI services
@@ -134,6 +138,10 @@ builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<ISectionService, SectionService>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ILessonService, LessonService>();
+builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IdentitySeeder>();
 
 // Configure CORS
