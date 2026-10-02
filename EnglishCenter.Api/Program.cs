@@ -107,6 +107,10 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher, RoleNames.Student));
     options.AddPolicy(PolicyNames.ManageAssignments, policy =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher));
+    options.AddPolicy(PolicyNames.AccessQuizzes, policy =>
+        policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher, RoleNames.Student));
+    options.AddPolicy(PolicyNames.ManageQuizzes, policy =>
+        policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher));
 });
 
 // Register DI services
@@ -142,6 +146,11 @@ builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddScoped<IQuizQuestionService, QuizQuestionService>();
+builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
+builder.Services.AddScoped<IQuizAttemptService, QuizAttemptService>();
 builder.Services.AddScoped<IdentitySeeder>();
 
 // Configure CORS

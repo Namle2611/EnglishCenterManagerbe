@@ -50,6 +50,15 @@ import { SubmissionDetailPage } from './pages/assignments/SubmissionDetailPage';
 import { StudentAssignmentsPage } from './pages/assignments/StudentAssignmentsPage';
 import { StudentAssignmentDetailPage } from './pages/assignments/StudentAssignmentDetailPage';
 import { StudentSubmissionDetailPage } from './pages/assignments/StudentSubmissionDetailPage';
+import { QuizManagementPage } from './pages/quizzes/QuizManagementPage';
+import { QuizDetailPage } from './pages/quizzes/QuizDetailPage';
+import { QuestionManagementPage } from './pages/quizzes/QuestionManagementPage';
+import { QuizAttemptsManagementPage } from './pages/quizzes/QuizAttemptsManagementPage';
+import { ManagementAttemptDetailPage } from './pages/quizzes/ManagementAttemptDetailPage';
+import { StudentQuizListPage } from './pages/quizzes/StudentQuizListPage';
+import { StudentQuizDetailPage } from './pages/quizzes/StudentQuizDetailPage';
+import { StudentQuizAttemptHistoryPage } from './pages/quizzes/StudentQuizAttemptHistoryPage';
+import { StudentQuizTakingPage } from './pages/quizzes/StudentQuizTakingPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -134,6 +143,11 @@ export const App: React.FC = () => {
               <Route path="/admin/assignments/:assignmentId" element={<AssignmentDetailPage />} />
               <Route path="/admin/assignments/:assignmentId/submissions" element={<AssignmentDetailPage />} />
               <Route path="/admin/submissions/:submissionId" element={<SubmissionDetailPage />} />
+              <Route path="/admin/quizzes" element={<QuizManagementPage />} />
+              <Route path="/admin/quizzes/:quizId" element={<QuizDetailPage />} />
+              <Route path="/admin/quizzes/:quizId/questions" element={<QuestionManagementPage />} />
+              <Route path="/admin/quizzes/:quizId/attempts" element={<QuizAttemptsManagementPage />} />
+              <Route path="/admin/quiz-attempts/:attemptId" element={<ManagementAttemptDetailPage />} />
             </Route>
 
             {/* Staff only */}
@@ -178,6 +192,11 @@ export const App: React.FC = () => {
               <Route path="/staff/assignments/:assignmentId" element={<AssignmentDetailPage />} />
               <Route path="/staff/assignments/:assignmentId/submissions" element={<AssignmentDetailPage />} />
               <Route path="/staff/submissions/:submissionId" element={<SubmissionDetailPage />} />
+              <Route path="/staff/quizzes" element={<QuizManagementPage />} />
+              <Route path="/staff/quizzes/:quizId" element={<QuizDetailPage />} />
+              <Route path="/staff/quizzes/:quizId/questions" element={<QuestionManagementPage />} />
+              <Route path="/staff/quizzes/:quizId/attempts" element={<QuizAttemptsManagementPage />} />
+              <Route path="/staff/quiz-attempts/:attemptId" element={<ManagementAttemptDetailPage />} />
             </Route>
 
             {/* Teacher only */}
@@ -194,6 +213,11 @@ export const App: React.FC = () => {
               <Route path="/teacher/assignments/:assignmentId" element={<AssignmentDetailPage />} />
               <Route path="/teacher/assignments/:assignmentId/submissions" element={<AssignmentDetailPage />} />
               <Route path="/teacher/submissions/:submissionId" element={<SubmissionDetailPage />} />
+              <Route path="/teacher/quizzes" element={<QuizManagementPage />} />
+              <Route path="/teacher/quizzes/:quizId" element={<QuizDetailPage />} />
+              <Route path="/teacher/quizzes/:quizId/questions" element={<QuestionManagementPage />} />
+              <Route path="/teacher/quizzes/:quizId/attempts" element={<QuizAttemptsManagementPage />} />
+              <Route path="/teacher/quiz-attempts/:attemptId" element={<ManagementAttemptDetailPage />} />
             </Route>
 
             {/* Student only */}
@@ -202,6 +226,10 @@ export const App: React.FC = () => {
               <Route path="/student/assignments" element={<StudentAssignmentsPage />} />
               <Route path="/student/assignments/:assignmentId" element={<StudentAssignmentDetailPage />} />
               <Route path="/student/submissions/:submissionId" element={<StudentSubmissionDetailPage />} />
+              <Route path="/student/quizzes" element={<StudentQuizListPage />} />
+              <Route path="/student/quizzes/:quizId" element={<StudentQuizDetailPage />} />
+              <Route path="/student/quizzes/:quizId/attempts" element={<StudentQuizAttemptHistoryPage />} />
+              <Route path="/student/quiz-attempts/:attemptId" element={<StudentQuizTakingPage />} />
             </Route>
           </Route>
 

@@ -15,4 +15,7 @@ public static class PolicyNames
     public const string MaintainLearningContent = "MaintainLearningContent";
     public const string AccessAssignments = "AccessAssignments";
     public const string ManageAssignments = "ManageAssignments";
+    public const string AccessQuizzes = "AccessQuizzes";
+    public const string ManageQuizzes = "ManageQuizzes";
 }
+

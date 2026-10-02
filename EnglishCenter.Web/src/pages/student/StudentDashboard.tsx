@@ -58,6 +58,41 @@ export const StudentDashboard: React.FC = () => {
           </div>
           <span style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>&rarr;</span>
         </Link>
+
+        <Link
+          to="/student/quizzes"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            padding: '1.25rem',
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-sm)',
+            textDecoration: 'none',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-primary)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-border)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <div style={{ fontSize: '2rem', lineHeight: 1 }}>📝</div>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              Bài kiểm tra của tôi
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+              Tham gia làm bài kiểm tra trực tuyến, theo dõi thời gian và tra cứu lịch sử kết quả
+            </p>
+          </div>
+          <span style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>&rarr;</span>
+        </Link>
       </div>
 
       <div style={overviewCardStyle}>
