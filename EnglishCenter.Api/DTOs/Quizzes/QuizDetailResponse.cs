@@ -7,6 +7,7 @@ public class QuizDetailResponse
 {
     public int Id { get; set; }
     public int ClassId { get; set; }
+    public int CourseId { get; set; }
     public string ClassCode { get; set; } = string.Empty;
     public string CourseName { get; set; } = string.Empty;
     public ClassStatus ClassStatus { get; set; }

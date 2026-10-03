@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using EnglishCenter.Api.Configuration;
 using EnglishCenter.Api.Data;
 using EnglishCenter.Api.DTOs.Common;
 using EnglishCenter.Api.Middleware;
@@ -151,6 +152,9 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IQuizQuestionService, QuizQuestionService>();
 builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
 builder.Services.AddScoped<IQuizAttemptService, QuizAttemptService>();
+builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection(GeminiOptions.SectionName));
+builder.Services.AddScoped<IGeminiQuizClient, GeminiQuizClient>();
+builder.Services.AddScoped<IQuizAiService, QuizAiService>();
 builder.Services.AddScoped<IdentitySeeder>();
 
 // Configure CORS

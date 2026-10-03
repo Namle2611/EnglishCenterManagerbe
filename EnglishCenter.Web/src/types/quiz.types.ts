@@ -31,6 +31,7 @@ export interface QuizListItemResponse {
 export interface QuizDetailResponse {
   id: number;
   classId: number;
+  courseId: number;
   classCode: string;
   courseName: string;
   classStatus: ClassStatus;
@@ -309,4 +310,68 @@ export interface TeacherQuizClassLookupParams {
   page?: number;
   pageSize?: number;
   search?: string;
+}
+
+// ==================================================
+// AI QUIZ TYPES
+// ==================================================
+
+export type QuizAiSourceType = 'Topic' | 'Lesson';
+
+export type QuizAiDifficulty = 'Easy' | 'Medium' | 'Hard';
+
+export type QuizAiLanguage = 'English' | 'Vietnamese';
+
+export interface GenerateQuizQuestionsRequest {
+  sourceType: QuizAiSourceType;
+  topic?: string | null;
+  lessonId?: number | null;
+  questionCount: number;
+  questionTypes: QuestionType[];
+  difficulty: QuizAiDifficulty;
+  language: QuizAiLanguage;
+  scorePerQuestion: number;
+  additionalInstructions?: string | null;
+}
+
+export interface GeneratedQuizOptionItemResponse {
+  content: string;
+  isCorrect: boolean;
+  orderIndex: number;
+}
+
+export interface GeneratedQuizQuestionItemResponse {
+  tempId: string;
+  content: string;
+  questionType: QuestionType;
+  score: number;
+  orderIndex: number;
+  options: GeneratedQuizOptionItemResponse[];
+  correctTextAnswer: string | null;
+  explanation: string | null;
+}
+
+export interface GeneratedQuizQuestionsResponse {
+  quizId: number;
+  sourceType: QuizAiSourceType;
+  sourceSummary: string;
+  questions: GeneratedQuizQuestionItemResponse[];
+  warnings: string[];
+}
+
+export interface ApplyGeneratedOptionItemRequest {
+  content: string;
+  isCorrect: boolean;
+}
+
+export interface ApplyGeneratedQuestionItemRequest {
+  content: string;
+  questionType: QuestionType;
+  score: number;
+  correctTextAnswer?: string | null;
+  options?: ApplyGeneratedOptionItemRequest[] | null;
+}
+
+export interface ApplyGeneratedQuestionsRequest {
+  questions: ApplyGeneratedQuestionItemRequest[];
 }

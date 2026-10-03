@@ -1,4 +1,5 @@
 using EnglishCenter.Api.DTOs.Questions;
+using EnglishCenter.Api.DTOs.QuizAi;
 using EnglishCenter.Api.Services.Models;
 
 namespace EnglishCenter.Api.Services.Interfaces;
@@ -13,6 +14,12 @@ public interface IQuizQuestionService
     Task<QuestionManagementResponse> CreateAsync(
         int quizId,
         CreateQuestionRequest request,
+        QuizActor actor,
+        CancellationToken cancellationToken = default);
+
+    Task<List<QuestionManagementResponse>> CreateBulkAsync(
+        int quizId,
+        List<ApplyGeneratedQuestionItemRequest> questions,
         QuizActor actor,
         CancellationToken cancellationToken = default);
 

@@ -1,8 +1,11 @@
 import { axiosClient } from '../api/axiosClient';
 import type { ApiResponse, PagedResult } from '../types/common.types';
 import type {
+  ApplyGeneratedQuestionsRequest,
   CreateQuestionRequest,
   CreateQuizRequest,
+  GenerateQuizQuestionsRequest,
+  GeneratedQuizQuestionsResponse,
   ManagementAttemptDetailResponse,
   QuestionManagementResponse,
   QuizAttemptListItemResponse,
@@ -325,6 +328,39 @@ export const quizService = {
     const response = await axiosClient.post<
       ApiResponse<StudentAttemptReviewResponse | StudentOpenQuizResultResponse>
     >(`/quiz-attempts/${attemptId}/submit`);
+    return response.data;
+  },
+
+  /**
+   * 20. POST /api/ai/quizzes/{quizId}/generate-questions - Generate question proposals using AI.
+   */
+  async generateAiQuestions(
+    quizId: number,
+    payload: GenerateQuizQuestionsRequest,
+    signal?: AbortSignal
+  ): Promise<ApiResponse<GeneratedQuizQuestionsResponse>> {
+    const response = await axiosClient.post<ApiResponse<GeneratedQuizQuestionsResponse>>(
+      `/ai/quizzes/${quizId}/generate-questions`,
+      payload,
+      { signal }
+    );
+    return response.data;
+  },
+
+  /**
+   * 21. POST /api/ai/quizzes/{quizId}/apply-questions - Atomically persist generated AI questions.
+   * Note: This request must NOT be automatically retried.
+   */
+  async applyAiQuestions(
+    quizId: number,
+    payload: ApplyGeneratedQuestionsRequest,
+    signal?: AbortSignal
+  ): Promise<ApiResponse<QuestionManagementResponse[]>> {
+    const response = await axiosClient.post<ApiResponse<QuestionManagementResponse[]>>(
+      `/ai/quizzes/${quizId}/apply-questions`,
+      payload,
+      { signal }
+    );
     return response.data;
   }
 };

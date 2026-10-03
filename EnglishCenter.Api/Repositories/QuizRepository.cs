@@ -209,6 +209,7 @@ public class QuizRepository : IQuizRepository
             {
                 Id = q.Id,
                 ClassId = q.ClassId,
+                CourseId = q.Class.CourseId,
                 ClassCode = q.Class.ClassCode,
                 CourseName = q.Class.Course.CourseName,
                 ClassStatus = q.Class.Status,

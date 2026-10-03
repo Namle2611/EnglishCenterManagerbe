@@ -6,17 +6,23 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { DeleteQuestionModal } from '../../components/quizzes/DeleteQuestionModal';
 import { QuestionFormModal } from '../../components/quizzes/QuestionFormModal';
 import { QuestionList } from '../../components/quizzes/QuestionList';
+import { QuizAiGenerateModal } from '../../components/quizzes/QuizAiGenerateModal';
+import { QuizAiProposalEditor } from '../../components/quizzes/QuizAiProposalEditor';
+import { useAuth } from '../../hooks/useAuth';
 import { quizService } from '../../services/quiz.service';
 import type {
+  GeneratedQuizQuestionsResponse,
   QuestionManagementResponse,
   QuestionOptionRequest,
   QuestionType,
   QuizDetailResponse
 } from '../../types/quiz.types';
+import { isQuizEligibleForAi } from '../../utils/quizAiHelper';
 
 export const QuestionManagementPage: React.FC = () => {
   const { quizId } = useParams<{ quizId: string }>();
   const location = useLocation();
+  const { user } = useAuth();
 
   const getRoleBaseUrl = () => {
     if (location.pathname.startsWith('/admin')) return '/admin';
@@ -32,12 +38,17 @@ export const QuestionManagementPage: React.FC = () => {
   const [questions, setQuestions] = useState<QuestionManagementResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successNotification, setSuccessNotification] = useState<string | null>(null);
 
-  // Modals
+  // Manual Modals
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [questionToEdit, setQuestionToEdit] = useState<QuestionManagementResponse | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<QuestionManagementResponse | null>(null);
+
+  // AI State & Modals
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiProposal, setAiProposal] = useState<GeneratedQuizQuestionsResponse | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -90,6 +101,20 @@ export const QuestionManagementPage: React.FC = () => {
   }, [loadData]);
 
   const isReadOnly = (quiz?.attemptCount || 0) > 0;
+
+  // Role and Eligibility checks
+  const canUseAi = Boolean(
+    user &&
+      !user.roles.includes('STUDENT') &&
+      !user.roles.includes('Student') &&
+      (user.roles.includes('ADMIN') ||
+        user.roles.includes('Admin') ||
+        user.roles.includes('STAFF') ||
+        user.roles.includes('Staff') ||
+        user.roles.includes('TEACHER') ||
+        user.roles.includes('Teacher'))
+  );
+  const isAiEligible = canUseAi && isQuizEligibleForAi(quiz);
 
   const handleCreateOpen = () => {
     setQuestionToEdit(null);
@@ -144,13 +169,42 @@ export const QuestionManagementPage: React.FC = () => {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         setIsDeleteModalOpen(false);
         loadData();
-        setErrorMessage(
-          'Bài kiểm tra đã có học viên làm bài. Không thể xóa câu hỏi.'
-        );
+        setErrorMessage('Bài kiểm tra đã có học viên làm bài. Không thể xóa câu hỏi.');
         return;
       }
       throw err;
     }
+  };
+
+  // AI Handlers
+  const handleAiGenerateSuccess = (proposalData: GeneratedQuizQuestionsResponse) => {
+    setAiProposal(proposalData);
+    setSuccessNotification(null);
+    setErrorMessage(null);
+  };
+
+  const handleAiApplySuccess = () => {
+    setAiProposal(null);
+    setSuccessNotification('Đã áp dụng các câu hỏi từ đề xuất AI vào bài kiểm tra thành công.');
+    loadData();
+  };
+
+  const handleAiConflict = () => {
+    setAiProposal(null);
+    setIsAiModalOpen(false);
+    loadData();
+  };
+
+  const handleAiNetworkUncertain = () => {
+    loadData();
+  };
+
+  const handleAiRegenerateRequest = () => {
+    setIsAiModalOpen(true);
+  };
+
+  const handleAiDiscard = () => {
+    setAiProposal(null);
   };
 
   return (
@@ -164,25 +218,50 @@ export const QuestionManagementPage: React.FC = () => {
         ]}
         actions={
           !isReadOnly ? (
-            <button
-              type="button"
-              onClick={handleCreateOpen}
-              style={{
-                padding: '0.625rem 1.25rem',
-                borderRadius: 'var(--radius-md)',
-                border: 'none',
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-text-inverse)',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem'
-              }}
-            >
-              <span>+</span> Thêm câu hỏi
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              {isAiEligible && (
+                <button
+                  type="button"
+                  onClick={() => setIsAiModalOpen(true)}
+                  style={{
+                    padding: '0.625rem 1.25rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-primary-border)',
+                    backgroundColor: 'var(--color-primary-subtle)',
+                    color: 'var(--color-primary)',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    minHeight: '44px'
+                  }}
+                >
+                  <span>✨</span> Tạo câu hỏi bằng AI
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleCreateOpen}
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: 'none',
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-text-inverse)',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  minHeight: '44px'
+                }}
+              >
+                <span>+</span> Thêm câu hỏi
+              </button>
+            </div>
           ) : undefined
         }
       />
@@ -210,8 +289,29 @@ export const QuestionManagementPage: React.FC = () => {
         </div>
       )}
 
+      {successNotification && (
+        <div
+          role="status"
+          style={{
+            padding: '1rem 1.25rem',
+            backgroundColor: 'var(--status-active-bg)',
+            color: 'var(--status-active-text)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--status-active-border)',
+            marginBottom: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          <span>✓</span>
+          <span>{successNotification}</span>
+        </div>
+      )}
+
       {errorMessage && (
         <div
+          role="alert"
           style={{
             padding: '1rem',
             backgroundColor: 'var(--status-danger-bg)',
@@ -223,6 +323,19 @@ export const QuestionManagementPage: React.FC = () => {
         >
           {errorMessage}
         </div>
+      )}
+
+      {/* AI Proposal Editor (Displayed when transient proposal is active) */}
+      {aiProposal && (
+        <QuizAiProposalEditor
+          quizId={id}
+          proposal={aiProposal}
+          onApplySuccess={handleAiApplySuccess}
+          onRegenerateRequest={handleAiRegenerateRequest}
+          onDiscard={handleAiDiscard}
+          onNetworkUncertain={handleAiNetworkUncertain}
+          onConflict={handleAiConflict}
+        />
       )}
 
       {isLoading ? (
@@ -251,6 +364,15 @@ export const QuestionManagementPage: React.FC = () => {
         question={questionToDelete}
         onConfirm={handleDeleteConfirm}
         onClose={() => setIsDeleteModalOpen(false)}
+      />
+
+      <QuizAiGenerateModal
+        isOpen={isAiModalOpen}
+        quizId={id}
+        quizCourseId={quiz?.courseId || 0}
+        onClose={() => setIsAiModalOpen(false)}
+        onGenerateSuccess={handleAiGenerateSuccess}
+        onConflict={handleAiConflict}
       />
     </AppShell>
   );
