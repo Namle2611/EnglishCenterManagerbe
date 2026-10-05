@@ -63,6 +63,7 @@ import { GradeManagementIndexPage } from './pages/grades/GradeManagementIndexPag
 import { ClassGradebookPage } from './pages/grades/ClassGradebookPage';
 import { StudentGradeDetailPage } from './pages/grades/StudentGradeDetailPage';
 import { StudentGradesPage } from './pages/grades/StudentGradesPage';
+import { NotificationIndexPage } from './pages/notifications/NotificationIndexPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -155,6 +156,7 @@ export const App: React.FC = () => {
               <Route path="/admin/grades" element={<GradeManagementIndexPage />} />
               <Route path="/admin/classes/:classId/grades" element={<ClassGradebookPage />} />
               <Route path="/admin/classes/:classId/grades/students/:studentId" element={<StudentGradeDetailPage />} />
+              <Route path="/admin/notifications" element={<NotificationIndexPage />} />
             </Route>
 
             {/* Staff only */}
@@ -207,6 +209,7 @@ export const App: React.FC = () => {
               <Route path="/staff/grades" element={<GradeManagementIndexPage />} />
               <Route path="/staff/classes/:classId/grades" element={<ClassGradebookPage />} />
               <Route path="/staff/classes/:classId/grades/students/:studentId" element={<StudentGradeDetailPage />} />
+              <Route path="/staff/notifications" element={<NotificationIndexPage />} />
             </Route>
 
             {/* Teacher only */}
@@ -231,6 +234,7 @@ export const App: React.FC = () => {
               <Route path="/teacher/grades" element={<GradeManagementIndexPage />} />
               <Route path="/teacher/classes/:classId/grades" element={<ClassGradebookPage />} />
               <Route path="/teacher/classes/:classId/grades/students/:studentId" element={<StudentGradeDetailPage />} />
+              <Route path="/teacher/notifications" element={<NotificationIndexPage />} />
             </Route>
 
             {/* Student only */}
@@ -245,6 +249,7 @@ export const App: React.FC = () => {
               <Route path="/student/quiz-attempts/:attemptId" element={<StudentQuizTakingPage />} />
               <Route path="/student/grades" element={<StudentGradesPage />} />
               <Route path="/student/grades/:classId" element={<StudentGradeDetailPage />} />
+              <Route path="/student/notifications" element={<NotificationIndexPage />} />
             </Route>
           </Route>
 

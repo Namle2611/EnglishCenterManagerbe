@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getRoleHomeRoute } from '../../utils/roleHelper';
+import { useUnreadCount } from '../../hooks/useUnreadCount';
+import { NotificationBell } from '../notifications/NotificationBell';
+import { formatUnreadBadge } from '../../utils/notificationHelper';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -18,10 +21,19 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { unreadCount } = useUnreadCount({ enabled: !!user });
 
   const handleLogout = async () => {
     await logout();
     navigate('/login', { replace: true });
+  };
+
+  const getNotificationsRoute = (): string => {
+    if (user?.roles.includes('ADMIN')) return '/admin/notifications';
+    if (user?.roles.includes('STAFF')) return '/staff/notifications';
+    if (user?.roles.includes('TEACHER')) return '/teacher/notifications';
+    if (user?.roles.includes('STUDENT')) return '/student/notifications';
+    return '/login';
   };
 
   const userRole = user?.roles?.[0] || '';
@@ -43,7 +55,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Nội dung học tập', path: '/admin/learning-content', icon: '📖' },
         { label: 'Quản lý bài tập', path: '/admin/assignments', icon: '📑' },
         { label: 'Quản lý bài kiểm tra', path: '/admin/quizzes', icon: '📝' },
-        { label: 'Quản lý điểm', path: '/admin/grades', icon: '🎯' }
+        { label: 'Quản lý điểm', path: '/admin/grades', icon: '🎯' },
+        { label: 'Thông báo', path: '/admin/notifications', icon: '🔔' }
       ];
     }
     if (user?.roles.includes('STAFF')) {
@@ -60,7 +73,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Nội dung học tập', path: '/staff/learning-content', icon: '📖' },
         { label: 'Quản lý bài tập', path: '/staff/assignments', icon: '📑' },
         { label: 'Quản lý bài kiểm tra', path: '/staff/quizzes', icon: '📝' },
-        { label: 'Quản lý điểm', path: '/staff/grades', icon: '🎯' }
+        { label: 'Quản lý điểm', path: '/staff/grades', icon: '🎯' },
+        { label: 'Thông báo', path: '/staff/notifications', icon: '🔔' }
       ];
     }
     if (user?.roles.includes('TEACHER')) {
@@ -70,7 +84,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Nội dung học tập', path: '/teacher/learning-content', icon: '📖' },
         { label: 'Bài tập', path: '/teacher/assignments', icon: '📑' },
         { label: 'Quản lý bài kiểm tra', path: '/teacher/quizzes', icon: '📝' },
-        { label: 'Quản lý điểm', path: '/teacher/grades', icon: '🎯' }
+        { label: 'Quản lý điểm', path: '/teacher/grades', icon: '🎯' },
+        { label: 'Thông báo', path: '/teacher/notifications', icon: '🔔' }
       ];
     }
     if (user?.roles.includes('STUDENT')) {
@@ -78,7 +93,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Tổng quan', path: '/student', icon: '📊' },
         { label: 'Bài tập của tôi', path: '/student/assignments', icon: '📑' },
         { label: 'Bài kiểm tra của tôi', path: '/student/quizzes', icon: '📝' },
-        { label: 'Điểm của tôi', path: '/student/grades', icon: '🎯' }
+        { label: 'Điểm của tôi', path: '/student/grades', icon: '🎯' },
+        { label: 'Thông báo', path: '/student/notifications', icon: '🔔' }
       ];
     }
     return [];
@@ -157,6 +173,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           )}
 
           <div className="app-topbar-actions" style={topbarActionsStyle}>
+            {user && (
+              <NotificationBell
+                unreadCount={unreadCount}
+                rolePath={getNotificationsRoute()}
+              />
+            )}
             <Link
               to="/change-password"
               style={changePasswordBtnStyle}
@@ -192,6 +214,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           <nav aria-label="Điều hướng chính" style={sidebarNavStyle}>
             {navItems.map((item) => {
               const active = isActiveRoute(item.path);
+              const isNotificationItem = item.path.endsWith('/notifications');
+              const badgeText = isNotificationItem ? formatUnreadBadge(unreadCount) : null;
+
               return (
                 <Link
                   key={item.path}
@@ -204,6 +229,14 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 >
                   <span style={navIconStyle}>{item.icon}</span>
                   <span style={navLabelStyle}>{item.label}</span>
+                  {badgeText && (
+                    <span
+                      style={sidebarBadgeStyle}
+                      aria-label={`${unreadCount} thông báo chưa đọc`}
+                    >
+                      {badgeText}
+                    </span>
+                  )}
                   {active && <span style={activeIndicatorStyle} />}
                 </Link>
               );
@@ -477,4 +510,16 @@ const mainWorkspaceStyle: React.CSSProperties = {
   maxWidth: '1200px',
   margin: '0 auto',
   width: '100%'
+};
+
+const sidebarBadgeStyle: React.CSSProperties = {
+  marginLeft: 'auto',
+  marginRight: '0.5rem',
+  padding: '0.125rem 0.5rem',
+  fontSize: '0.75rem',
+  fontWeight: 700,
+  lineHeight: 1,
+  color: '#ffffff',
+  backgroundColor: '#ef4444',
+  borderRadius: '9999px'
 };
