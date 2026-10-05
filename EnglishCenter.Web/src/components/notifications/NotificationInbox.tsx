@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { NotificationResponse } from '../../types/notification.types';
 import { notificationService } from '../../services/notification.service';
-import { triggerUnreadCountRefresh } from '../../utils/notificationHelper';
+import { NOTIFICATION_INBOX_REFRESH_EVENT, triggerUnreadCountRefresh } from '../../utils/notificationHelper';
 import { NotificationItem } from './NotificationItem';
 
 export interface NotificationInboxProps {
@@ -71,8 +71,16 @@ export const NotificationInbox: React.FC<NotificationInboxProps> = ({
     const timer = setTimeout(() => {
       fetchInbox();
     }, 0);
+
+    const handleInboxRefresh = () => {
+      fetchInbox();
+    };
+
+    window.addEventListener(NOTIFICATION_INBOX_REFRESH_EVENT, handleInboxRefresh);
+
     return () => {
       clearTimeout(timer);
+      window.removeEventListener(NOTIFICATION_INBOX_REFRESH_EVENT, handleInboxRefresh);
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }

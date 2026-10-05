@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using EnglishCenter.Api.Configuration;
 using EnglishCenter.Api.Data;
 using EnglishCenter.Api.DTOs.Common;
+using EnglishCenter.Api.Hubs;
 using EnglishCenter.Api.Middleware;
 using EnglishCenter.Api.Repositories;
 using EnglishCenter.Api.Repositories.Interfaces;
@@ -77,6 +78,19 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero,
         NameClaimType = ClaimTypes.Name,
         RoleClaimType = ClaimTypes.Role
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -158,6 +172,8 @@ builder.Services.AddScoped<IGradeRepository, GradeRepository>();
 builder.Services.AddScoped<IGradeService, GradeService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationRealtimePublisher, NotificationRealtimePublisher>();
 builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection(GeminiOptions.SectionName));
 builder.Services.AddScoped<IGeminiQuizClient, GeminiQuizClient>();
 builder.Services.AddScoped<IQuizAiService, QuizAiService>();
@@ -226,6 +242,7 @@ app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapControllers();
 
 app.Run();

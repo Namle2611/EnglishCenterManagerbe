@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getRoleHomeRoute } from '../../utils/roleHelper';
 import { useUnreadCount } from '../../hooks/useUnreadCount';
+import { useNotificationRealtime } from '../../hooks/useNotificationRealtime';
 import { NotificationBell } from '../notifications/NotificationBell';
 import { formatUnreadBadge } from '../../utils/notificationHelper';
 
@@ -22,6 +23,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { unreadCount } = useUnreadCount({ enabled: !!user });
+  useNotificationRealtime({ enabled: !!user });
 
   const handleLogout = async () => {
     await logout();

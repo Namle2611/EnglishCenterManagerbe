@@ -27,6 +27,49 @@ axiosClient.interceptors.request.use(
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
+/**
+ * Shared token refresh coordination helper.
+ * Reused across REST interceptors and SignalR accessTokenFactory.
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = authStorage.getRefreshToken();
+  if (!refreshToken) {
+    authStorage.clear();
+    return null;
+  }
+
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const response = await axios.post<ApiResponse<RefreshTokenResponseData>>(
+        `${baseURL}/auth/refresh-token`,
+        { refreshToken }
+      );
+
+      if (response.data?.success && response.data.data) {
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+        authStorage.setTokens(accessToken, newRefreshToken);
+        return accessToken;
+      }
+
+      authStorage.clear();
+      return null;
+    } catch {
+      authStorage.clear();
+      return null;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 // Response interceptor: Handle 401 and execute single refresh promise
 axiosClient.interceptors.response.use(
   (response) => response,
@@ -49,40 +92,7 @@ axiosClient.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    const refreshToken = authStorage.getRefreshToken();
-    if (!refreshToken) {
-      authStorage.clear();
-      return Promise.reject(error);
-    }
-
-    if (!isRefreshing) {
-      isRefreshing = true;
-      refreshPromise = (async () => {
-        try {
-          const response = await axios.post<ApiResponse<RefreshTokenResponseData>>(
-            `${baseURL}/auth/refresh-token`,
-            { refreshToken }
-          );
-
-          if (response.data?.success && response.data.data) {
-            const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-            authStorage.setTokens(accessToken, newRefreshToken);
-            return accessToken;
-          }
-
-          authStorage.clear();
-          return null;
-        } catch {
-          authStorage.clear();
-          return null;
-        } finally {
-          isRefreshing = false;
-          refreshPromise = null;
-        }
-      })();
-    }
-
-    const newAccessToken = await refreshPromise;
+    const newAccessToken = await refreshAccessToken();
     if (newAccessToken) {
       originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       return axiosClient(originalRequest);

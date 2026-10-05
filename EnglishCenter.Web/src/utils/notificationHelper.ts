@@ -6,6 +6,7 @@ import type {
 } from '../types/notification.types';
 
 export const NOTIFICATION_REFRESH_EVENT = 'englishcenter:notifications:refresh';
+export const NOTIFICATION_INBOX_REFRESH_EVENT = 'englishcenter:notifications:inbox-refresh';
 
 /**
  * Triggers a global unread count refresh in the AppShell via custom event.
@@ -13,6 +14,44 @@ export const NOTIFICATION_REFRESH_EVENT = 'englishcenter:notifications:refresh';
 export function triggerUnreadCountRefresh(): void {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(NOTIFICATION_REFRESH_EVENT));
+  }
+}
+
+/**
+ * Triggers a refresh of the open NotificationInbox via custom event.
+ */
+export function triggerNotificationInboxRefresh(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(NOTIFICATION_INBOX_REFRESH_EVENT));
+  }
+}
+
+/**
+ * Resolves the SignalR NotificationHub HTTP(S) URL from API base configuration.
+ * Always returns HTTP/HTTPS URL for SignalR negotiation; does NOT produce ws/wss scheme.
+ * Strips any trailing /api prefix so hub route is mapped at root /hubs/notifications.
+ */
+export function getNotificationHubUrl(apiBaseUrl?: string): string {
+  const base = apiBaseUrl || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5137/api';
+  const origin = base.replace(/\/api\/?$/i, '').replace(/\/+$/, '');
+  return `${origin}/hubs/notifications`;
+}
+
+/**
+ * Checks whether an access token is expired or close to expiry (within 30 seconds).
+ * Inspects exp claim only for client-side refresh timing; server remains auth authority.
+ */
+export function isTokenExpired(token: string | null | undefined): boolean {
+  if (!token) return true;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return true;
+    const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+    const payload = JSON.parse(payloadJson) as { exp?: number };
+    if (!payload.exp) return false;
+    return payload.exp * 1000 <= Date.now() + 30_000;
+  } catch {
+    return true;
   }
 }
 

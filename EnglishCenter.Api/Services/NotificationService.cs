@@ -11,10 +11,14 @@ namespace EnglishCenter.Api.Services;
 public class NotificationService : INotificationService
 {
     private readonly INotificationRepository _repository;
+    private readonly INotificationRealtimePublisher _realtimePublisher;
 
-    public NotificationService(INotificationRepository repository)
+    public NotificationService(
+        INotificationRepository repository,
+        INotificationRealtimePublisher realtimePublisher)
     {
         _repository = repository;
+        _realtimePublisher = realtimePublisher;
     }
 
     public async Task<PagedResult<NotificationResponse>> GetUserNotificationsAsync(
@@ -111,6 +115,8 @@ public class NotificationService : INotificationService
         await _repository.AddAsync(notification, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
 
+        await _realtimePublisher.PublishNotificationReceivedAsync(notification.ReceiverId);
+
         var created = await _repository.GetByIdAndReceiverAsync(notification.Id, notification.ReceiverId, cancellationToken);
         return MapToResponse(created ?? notification);
     }
@@ -191,6 +197,8 @@ public class NotificationService : INotificationService
 
         await _repository.AddRangeAsync(notifications, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
+
+        await _realtimePublisher.PublishNotificationReceivedAsync(activeStudentUserIds);
 
         return new BatchCreateNotificationResponse
         {
