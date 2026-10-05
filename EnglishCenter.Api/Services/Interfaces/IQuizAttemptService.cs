@@ -38,4 +38,9 @@ public interface IQuizAttemptService
         int attemptId,
         QuizActor actor,
         CancellationToken cancellationToken = default);
+
+    Task<Dictionary<int, HashSet<int>>> ReconcileClassesStaleAttemptsAsync(
+        IReadOnlyCollection<int> classIds,
+        DateTime utcNow,
+        CancellationToken cancellationToken = default);
 }

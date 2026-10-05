@@ -16,6 +16,7 @@ import type {
   UpdateSubmissionPayload
 } from '../types/assignment.types';
 import { normalizeNullableString } from '../utils/assignmentHelper';
+import type { GradeSubmissionPayload } from '../types/grade.types';
 
 export const assignmentService = {
   /**
@@ -256,6 +257,22 @@ export const assignmentService = {
     const response = await axiosClient.put<ApiResponse<SubmissionDetail>>(
       `/submissions/${id}`,
       strictPayload
+    );
+    return response.data;
+  },
+
+  /**
+   * Grade an assignment submission (Admin/Staff/Teacher).
+   * PUT /api/assignments/{assignmentId}/submissions/{submissionId}/grade
+   */
+  async gradeSubmission(
+    assignmentId: number,
+    submissionId: number,
+    payload: GradeSubmissionPayload
+  ): Promise<ApiResponse<SubmissionDetail>> {
+    const response = await axiosClient.put<ApiResponse<SubmissionDetail>>(
+      `/assignments/${assignmentId}/submissions/${submissionId}/grade`,
+      payload
     );
     return response.data;
   }

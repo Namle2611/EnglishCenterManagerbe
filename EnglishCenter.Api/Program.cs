@@ -112,6 +112,8 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher, RoleNames.Student));
     options.AddPolicy(PolicyNames.ManageQuizzes, policy =>
         policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher));
+    options.AddPolicy(PolicyNames.AccessGrades, policy =>
+        policy.RequireRole(RoleNames.Admin, RoleNames.Staff, RoleNames.Teacher, RoleNames.Student));
 });
 
 // Register DI services
@@ -152,6 +154,8 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IQuizQuestionService, QuizQuestionService>();
 builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
 builder.Services.AddScoped<IQuizAttemptService, QuizAttemptService>();
+builder.Services.AddScoped<IGradeRepository, GradeRepository>();
+builder.Services.AddScoped<IGradeService, GradeService>();
 builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection(GeminiOptions.SectionName));
 builder.Services.AddScoped<IGeminiQuizClient, GeminiQuizClient>();
 builder.Services.AddScoped<IQuizAiService, QuizAiService>();

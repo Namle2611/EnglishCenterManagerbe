@@ -42,7 +42,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý điểm danh', path: '/admin/attendances', icon: '📋' },
         { label: 'Nội dung học tập', path: '/admin/learning-content', icon: '📖' },
         { label: 'Quản lý bài tập', path: '/admin/assignments', icon: '📑' },
-        { label: 'Quản lý bài kiểm tra', path: '/admin/quizzes', icon: '📝' }
+        { label: 'Quản lý bài kiểm tra', path: '/admin/quizzes', icon: '📝' },
+        { label: 'Quản lý điểm', path: '/admin/grades', icon: '🎯' }
       ];
     }
     if (user?.roles.includes('STAFF')) {
@@ -58,7 +59,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Quản lý điểm danh', path: '/staff/attendances', icon: '📋' },
         { label: 'Nội dung học tập', path: '/staff/learning-content', icon: '📖' },
         { label: 'Quản lý bài tập', path: '/staff/assignments', icon: '📑' },
-        { label: 'Quản lý bài kiểm tra', path: '/staff/quizzes', icon: '📝' }
+        { label: 'Quản lý bài kiểm tra', path: '/staff/quizzes', icon: '📝' },
+        { label: 'Quản lý điểm', path: '/staff/grades', icon: '🎯' }
       ];
     }
     if (user?.roles.includes('TEACHER')) {
@@ -67,14 +69,16 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         { label: 'Điểm danh', path: '/teacher/attendances', icon: '📋' },
         { label: 'Nội dung học tập', path: '/teacher/learning-content', icon: '📖' },
         { label: 'Bài tập', path: '/teacher/assignments', icon: '📑' },
-        { label: 'Quản lý bài kiểm tra', path: '/teacher/quizzes', icon: '📝' }
+        { label: 'Quản lý bài kiểm tra', path: '/teacher/quizzes', icon: '📝' },
+        { label: 'Quản lý điểm', path: '/teacher/grades', icon: '🎯' }
       ];
     }
     if (user?.roles.includes('STUDENT')) {
       return [
         { label: 'Tổng quan', path: '/student', icon: '📊' },
         { label: 'Bài tập của tôi', path: '/student/assignments', icon: '📑' },
-        { label: 'Bài kiểm tra của tôi', path: '/student/quizzes', icon: '📝' }
+        { label: 'Bài kiểm tra của tôi', path: '/student/quizzes', icon: '📝' },
+        { label: 'Điểm của tôi', path: '/student/grades', icon: '🎯' }
       ];
     }
     return [];

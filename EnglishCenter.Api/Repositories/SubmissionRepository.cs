@@ -127,6 +127,17 @@ public class SubmissionRepository : ISubmissionRepository
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
+    public async Task<Submission?> GetByIdAndAssignmentForUpdateAsync(int id, int assignmentId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Submissions
+            .Include(s => s.Assignment)
+                .ThenInclude(a => a.Class)
+                    .ThenInclude(c => c.Teacher)
+            .Include(s => s.Student)
+                .ThenInclude(st => st.User)
+            .FirstOrDefaultAsync(s => s.Id == id && s.AssignmentId == assignmentId, cancellationToken);
+    }
+
     public async Task<Submission?> GetByAssignmentAndStudentAsync(
         int assignmentId,
         int studentId,

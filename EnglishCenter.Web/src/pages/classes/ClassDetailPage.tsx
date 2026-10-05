@@ -105,23 +105,44 @@ export const ClassDetailPage: React.FC = () => {
                 &larr; Quay lại danh sách
               </Link>
               {classDetail && (
-                <Link
-                  to={`${basePath}/${classDetail.id}/edit`}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.375rem',
-                    padding: '0.5rem 1rem',
-                    backgroundColor: 'var(--color-primary, #1e40af)',
-                    color: '#ffffff',
-                    borderRadius: 'var(--radius-md, 8px)',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    textDecoration: 'none'
-                  }}
-                >
-                  ✏️ Chỉnh sửa
-                </Link>
+                <>
+                  <Link
+                    to={`${basePath}/${classDetail.id}/grades`}
+                    id="btn-class-grades"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                      border: '1px solid rgba(37, 99, 235, 0.25)',
+                      color: '#2563eb',
+                      borderRadius: 'var(--radius-md, 8px)',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    🎯 Bảng điểm lớp
+                  </Link>
+                  <Link
+                    to={`${basePath}/${classDetail.id}/edit`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.375rem',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: 'var(--color-primary, #1e40af)',
+                      color: '#ffffff',
+                      borderRadius: 'var(--radius-md, 8px)',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    ✏️ Chỉnh sửa
+                  </Link>
+                </>
               )}
             </div>
           }

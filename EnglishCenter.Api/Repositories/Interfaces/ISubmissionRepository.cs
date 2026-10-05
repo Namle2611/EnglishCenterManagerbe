@@ -16,6 +16,7 @@ public interface ISubmissionRepository
         CancellationToken cancellationToken = default);
 
     Task<Submission?> GetByIdForUpdateAsync(int id, CancellationToken cancellationToken = default);
+    Task<Submission?> GetByIdAndAssignmentForUpdateAsync(int id, int assignmentId, CancellationToken cancellationToken = default);
 
     Task<Submission?> GetByAssignmentAndStudentAsync(
         int assignmentId,

@@ -93,6 +93,41 @@ export const StudentDashboard: React.FC = () => {
           </div>
           <span style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>&rarr;</span>
         </Link>
+
+        <Link
+          to="/student/grades"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            padding: '1.25rem',
+            backgroundColor: 'var(--color-surface)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-sm)',
+            textDecoration: 'none',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-primary)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-border)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <div style={{ fontSize: '2rem', lineHeight: 1 }}>🎯</div>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              Điểm của tôi
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+              Xem bảng điểm chi tiết, kết quả bài tập và bài kiểm tra các lớp đang theo học
+            </p>
+          </div>
+          <span style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>&rarr;</span>
+        </Link>
       </div>
 
       <div style={overviewCardStyle}>

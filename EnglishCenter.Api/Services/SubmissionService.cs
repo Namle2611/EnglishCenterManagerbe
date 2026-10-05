@@ -353,6 +353,74 @@ public class SubmissionService : ISubmissionService
         throw new ConflictException("Submission could not be updated due to concurrent conflicts. Please retry.");
     }
 
+    public async Task<SubmissionDetailResponse> GradeAsync(
+        int assignmentId,
+        int submissionId,
+        GradeSubmissionRequest request,
+        AssignmentActor actor,
+        CancellationToken cancellationToken = default)
+    {
+        if (actor.IsStudent && !actor.CanManageAll && !actor.IsTeacher)
+        {
+            throw new ForbiddenException("Students cannot grade submissions.");
+        }
+
+        // STEP A: Load Assignment by assignmentId
+        var assignment = await _assignmentRepository.GetByIdForUpdateAsync(assignmentId, cancellationToken);
+        if (assignment == null)
+        {
+            throw new NotFoundException($"Assignment with ID {assignmentId} not found.");
+        }
+
+        // STEP B: Authorize actor against Assignment (dynamic current Class Teacher)
+        if (actor.IsTeacher && !actor.CanManageAll)
+        {
+            if (assignment.Class.Teacher?.UserId != actor.UserId)
+            {
+                throw new ForbiddenException("You cannot grade submissions for another teacher's class.");
+            }
+        }
+
+        // Lifecycle rules (Section 18)
+        if (assignment.Status == AssignmentStatus.Draft)
+        {
+            throw new ValidationException("Cannot grade submissions for a draft assignment.");
+        }
+        if (assignment.Class.Status == ClassStatus.Planned)
+        {
+            throw new ValidationException("Cannot grade submissions for a planned class.");
+        }
+        if (assignment.Class.Status == ClassStatus.Cancelled)
+        {
+            throw new ValidationException("Cannot grade submissions for a cancelled class.");
+        }
+
+        // STEP C: Scoped submission lookup (Section 10 & 13: 404 for nonexistent or foreign assignment)
+        var submission = await _submissionRepository.GetByIdAndAssignmentForUpdateAsync(submissionId, assignmentId, cancellationToken);
+        if (submission == null)
+        {
+            throw new NotFoundException($"Submission with ID {submissionId} not found.");
+        }
+
+        // Validate Score (Section 14)
+        if (!request.Score.HasValue)
+        {
+            throw new ValidationException("Score is required.");
+        }
+        if (request.Score.Value < 0 || request.Score.Value > assignment.MaxScore)
+        {
+            throw new ValidationException($"Score must be between 0 and {assignment.MaxScore}.");
+        }
+
+        // Write authoritative grade (Section 15 & 16)
+        submission.Score = request.Score.Value;
+        submission.Feedback = string.IsNullOrWhiteSpace(request.Feedback) ? null : request.Feedback.Trim();
+
+        await _submissionRepository.SaveChangesAsync(cancellationToken);
+
+        return (await _submissionRepository.GetDetailByIdAsync(submission.Id, cancellationToken))!;
+    }
+
     private static bool IsTransientConflict(Exception? exception)
     {
         while (exception != null)

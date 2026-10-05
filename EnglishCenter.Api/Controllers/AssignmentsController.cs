@@ -112,9 +112,27 @@ public class AssignmentsController : ControllerBase
             ApiResponse<SubmissionDetailResponse>.Ok(result, "Assignment submitted successfully."));
     }
 
+    [HttpPut("{assignmentId:int}/submissions/{submissionId:int}/grade")]
+    [Authorize(Policy = PolicyNames.ManageAssignments)]
+    public async Task<IActionResult> GradeSubmission(
+        int assignmentId,
+        int submissionId,
+        [FromBody] GradeSubmissionRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _submissionService.GradeAsync(assignmentId, submissionId, request, GetActor(), cancellationToken);
+        return Ok(ApiResponse<SubmissionDetailResponse>.Ok(result, "Submission graded successfully."));
+    }
+
     private AssignmentActor GetActor()
     {
-        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = User;
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Unauthorized.");
+        }
+
+        var userIdValue = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdValue, out var userId))
         {
             throw new UnauthorizedAccessException("Unauthorized.");
@@ -123,10 +141,10 @@ public class AssignmentsController : ControllerBase
         return new AssignmentActor
         {
             UserId = userId,
-            IsAdmin = User.IsInRole(RoleNames.Admin),
-            IsStaff = User.IsInRole(RoleNames.Staff),
-            IsTeacher = User.IsInRole(RoleNames.Teacher),
-            IsStudent = User.IsInRole(RoleNames.Student)
+            IsAdmin = user.IsInRole(RoleNames.Admin),
+            IsStaff = user.IsInRole(RoleNames.Staff),
+            IsTeacher = user.IsInRole(RoleNames.Teacher),
+            IsStudent = user.IsInRole(RoleNames.Student)
         };
     }
 }

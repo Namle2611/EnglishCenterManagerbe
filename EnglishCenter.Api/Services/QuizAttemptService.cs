@@ -668,12 +668,77 @@ public class QuizAttemptService : IQuizAttemptService
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task FinalizeExpiredAttemptAsync(QuizAttempt attempt, DateTime submittedAt, Quiz quiz, CancellationToken cancellationToken)
+    public async Task<Dictionary<int, HashSet<int>>> ReconcileClassesStaleAttemptsAsync(
+        IReadOnlyCollection<int> classIds,
+        DateTime utcNow,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClassIds = classIds.Distinct().ToList();
+        var result = new Dictionary<int, HashSet<int>>();
+        foreach (var classId in normalizedClassIds)
+        {
+            result[classId] = new HashSet<int>();
+        }
+
+        if (normalizedClassIds.Count == 0)
+        {
+            return result;
+        }
+
+        var inProgressAttempts = await _quizRepository.GetInProgressAttemptsByClassIdsAsync(normalizedClassIds, cancellationToken);
+        var hasStaleMutations = false;
+        var questionsCache = new Dictionary<int, List<Question>>();
+
+        foreach (var att in inProgressAttempts)
+        {
+            var quiz = att.Quiz;
+            DateTime? durationDeadline = quiz.DurationMinutes.HasValue
+                ? att.StartedAt.AddMinutes(quiz.DurationMinutes.Value)
+                : null;
+            DateTime? quizEndDeadline = quiz.EndAt;
+            DateTime? effectiveDeadline = (durationDeadline.HasValue && quizEndDeadline.HasValue)
+                ? (durationDeadline.Value < quizEndDeadline.Value ? durationDeadline.Value : quizEndDeadline.Value)
+                : (durationDeadline ?? quizEndDeadline);
+
+            if (effectiveDeadline.HasValue && utcNow > effectiveDeadline.Value)
+            {
+                if (!questionsCache.TryGetValue(quiz.Id, out var questions))
+                {
+                    questions = await _quizRepository.GetQuestionsByQuizIdAsync(quiz.Id, cancellationToken);
+                    questionsCache[quiz.Id] = questions;
+                }
+
+                await FinalizeExpiredAttemptAsync(att, effectiveDeadline.Value, quiz, cancellationToken, questions);
+                hasStaleMutations = true;
+            }
+            else
+            {
+                if (result.TryGetValue(quiz.ClassId, out var liveSet))
+                {
+                    liveSet.Add(quiz.Id);
+                }
+            }
+        }
+
+        if (hasStaleMutations)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return result;
+    }
+
+    private async Task FinalizeExpiredAttemptAsync(
+        QuizAttempt attempt,
+        DateTime submittedAt,
+        Quiz quiz,
+        CancellationToken cancellationToken,
+        List<Question>? questions = null)
     {
         attempt.Status = QuizAttemptStatus.Expired;
         attempt.SubmittedAt = submittedAt;
 
-        var questions = await _quizRepository.GetQuestionsByQuizIdAsync(quiz.Id, cancellationToken);
+        questions ??= await _quizRepository.GetQuestionsByQuizIdAsync(quiz.Id, cancellationToken);
         var answerMap = attempt.QuizAnswers.ToDictionary(a => a.QuestionId);
 
         foreach (var qn in questions)

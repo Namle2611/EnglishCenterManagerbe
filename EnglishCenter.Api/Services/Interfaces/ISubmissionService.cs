@@ -33,4 +33,11 @@ public interface ISubmissionService
         UpdateSubmissionRequest request,
         AssignmentActor actor,
         CancellationToken cancellationToken = default);
+
+    Task<SubmissionDetailResponse> GradeAsync(
+        int assignmentId,
+        int submissionId,
+        GradeSubmissionRequest request,
+        AssignmentActor actor,
+        CancellationToken cancellationToken = default);
 }

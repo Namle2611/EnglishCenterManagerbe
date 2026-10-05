@@ -26,6 +26,7 @@ public interface IQuizRepository
     Task<bool> HasAttemptsAsync(int quizId, CancellationToken cancellationToken = default);
     Task<bool> HasLiveAttemptsAsync(int quizId, DateTime utcNow, CancellationToken cancellationToken = default);
     Task<List<QuizAttempt>> GetStaleInProgressAttemptsAsync(int quizId, DateTime utcNow, CancellationToken cancellationToken = default);
+    Task<List<QuizAttempt>> GetInProgressAttemptsByClassIdsAsync(IReadOnlyCollection<int> classIds, CancellationToken cancellationToken = default);
     Task<Question?> GetQuestionByIdAsync(int questionId, CancellationToken cancellationToken = default);
     Task<List<Question>> GetQuestionsByQuizIdAsync(int quizId, CancellationToken cancellationToken = default);
     Task AddAsync(Quiz quiz, CancellationToken cancellationToken = default);

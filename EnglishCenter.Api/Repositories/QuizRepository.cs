@@ -371,6 +371,23 @@ public class QuizRepository : IQuizRepository
         return stale;
     }
 
+    public async Task<List<QuizAttempt>> GetInProgressAttemptsByClassIdsAsync(
+        IReadOnlyCollection<int> classIds,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedClassIds = classIds.Distinct().ToList();
+        if (normalizedClassIds.Count == 0)
+        {
+            return new List<QuizAttempt>();
+        }
+
+        return await _context.QuizAttempts
+            .Include(qa => qa.Quiz)
+            .Include(qa => qa.QuizAnswers)
+            .Where(qa => normalizedClassIds.Contains(qa.Quiz.ClassId) && qa.Status == QuizAttemptStatus.InProgress)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Question?> GetQuestionByIdAsync(int questionId, CancellationToken cancellationToken = default)
     {
         return await _context.Questions

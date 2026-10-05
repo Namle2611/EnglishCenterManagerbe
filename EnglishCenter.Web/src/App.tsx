@@ -59,6 +59,10 @@ import { StudentQuizListPage } from './pages/quizzes/StudentQuizListPage';
 import { StudentQuizDetailPage } from './pages/quizzes/StudentQuizDetailPage';
 import { StudentQuizAttemptHistoryPage } from './pages/quizzes/StudentQuizAttemptHistoryPage';
 import { StudentQuizTakingPage } from './pages/quizzes/StudentQuizTakingPage';
+import { GradeManagementIndexPage } from './pages/grades/GradeManagementIndexPage';
+import { ClassGradebookPage } from './pages/grades/ClassGradebookPage';
+import { StudentGradeDetailPage } from './pages/grades/StudentGradeDetailPage';
+import { StudentGradesPage } from './pages/grades/StudentGradesPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -148,6 +152,9 @@ export const App: React.FC = () => {
               <Route path="/admin/quizzes/:quizId/questions" element={<QuestionManagementPage />} />
               <Route path="/admin/quizzes/:quizId/attempts" element={<QuizAttemptsManagementPage />} />
               <Route path="/admin/quiz-attempts/:attemptId" element={<ManagementAttemptDetailPage />} />
+              <Route path="/admin/grades" element={<GradeManagementIndexPage />} />
+              <Route path="/admin/classes/:classId/grades" element={<ClassGradebookPage />} />
+              <Route path="/admin/classes/:classId/grades/students/:studentId" element={<StudentGradeDetailPage />} />
             </Route>
 
             {/* Staff only */}
@@ -197,6 +204,9 @@ export const App: React.FC = () => {
               <Route path="/staff/quizzes/:quizId/questions" element={<QuestionManagementPage />} />
               <Route path="/staff/quizzes/:quizId/attempts" element={<QuizAttemptsManagementPage />} />
               <Route path="/staff/quiz-attempts/:attemptId" element={<ManagementAttemptDetailPage />} />
+              <Route path="/staff/grades" element={<GradeManagementIndexPage />} />
+              <Route path="/staff/classes/:classId/grades" element={<ClassGradebookPage />} />
+              <Route path="/staff/classes/:classId/grades/students/:studentId" element={<StudentGradeDetailPage />} />
             </Route>
 
             {/* Teacher only */}
@@ -218,6 +228,9 @@ export const App: React.FC = () => {
               <Route path="/teacher/quizzes/:quizId/questions" element={<QuestionManagementPage />} />
               <Route path="/teacher/quizzes/:quizId/attempts" element={<QuizAttemptsManagementPage />} />
               <Route path="/teacher/quiz-attempts/:attemptId" element={<ManagementAttemptDetailPage />} />
+              <Route path="/teacher/grades" element={<GradeManagementIndexPage />} />
+              <Route path="/teacher/classes/:classId/grades" element={<ClassGradebookPage />} />
+              <Route path="/teacher/classes/:classId/grades/students/:studentId" element={<StudentGradeDetailPage />} />
             </Route>
 
             {/* Student only */}
@@ -230,6 +243,8 @@ export const App: React.FC = () => {
               <Route path="/student/quizzes/:quizId" element={<StudentQuizDetailPage />} />
               <Route path="/student/quizzes/:quizId/attempts" element={<StudentQuizAttemptHistoryPage />} />
               <Route path="/student/quiz-attempts/:attemptId" element={<StudentQuizTakingPage />} />
+              <Route path="/student/grades" element={<StudentGradesPage />} />
+              <Route path="/student/grades/:classId" element={<StudentGradeDetailPage />} />
             </Route>
           </Route>
 
