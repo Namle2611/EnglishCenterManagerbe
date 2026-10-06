@@ -193,7 +193,10 @@ public class IdentitySeeder
             var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
             if (existing != null)
             {
-                existing.FullName = $"Nhân Viên {i:D2}";
+                if (string.IsNullOrWhiteSpace(existing.FullName) || existing.FullName.StartsWith("Nhân Viên "))
+                {
+                    existing.FullName = $"Nhân Viên {i:D2}";
+                }
                 existing.IsActive = true;
                 existing.PasswordHash = _passwordHasher.HashPassword(existing, pwd);
                 if (!await _context.UserRoles.AnyAsync(ur => ur.UserId == existing.Id && ur.RoleId == staffRole.Id))
@@ -240,7 +243,10 @@ public class IdentitySeeder
             var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
             if (existing != null)
             {
-                existing.FullName = $"Giáo Viên {i:D2}";
+                if (string.IsNullOrWhiteSpace(existing.FullName) || existing.FullName.StartsWith("Giáo Viên "))
+                {
+                    existing.FullName = $"Giáo Viên {i:D2}";
+                }
                 existing.IsActive = true;
                 existing.PasswordHash = _passwordHasher.HashPassword(existing, pwd);
                 if (!await _context.UserRoles.AnyAsync(ur => ur.UserId == existing.Id && ur.RoleId == teacherRole.Id))
@@ -252,7 +258,10 @@ public class IdentitySeeder
             {
                 var targetUser = teachers[i - 1].User;
                 targetUser.Email = email;
-                targetUser.FullName = $"Giáo Viên {i:D2}";
+                if (string.IsNullOrWhiteSpace(targetUser.FullName) || targetUser.FullName.StartsWith("Giáo Viên "))
+                {
+                    targetUser.FullName = $"Giáo Viên {i:D2}";
+                }
                 targetUser.IsActive = true;
                 targetUser.PasswordHash = _passwordHasher.HashPassword(targetUser, pwd);
             }
@@ -273,7 +282,10 @@ public class IdentitySeeder
             var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
             if (existing != null)
             {
-                existing.FullName = $"Học Viên {i:D2}";
+                if (string.IsNullOrWhiteSpace(existing.FullName) || existing.FullName.StartsWith("Học Viên "))
+                {
+                    existing.FullName = $"Học Viên {i:D2}";
+                }
                 existing.IsActive = true;
                 existing.PasswordHash = _passwordHasher.HashPassword(existing, pwd);
                 if (!await _context.UserRoles.AnyAsync(ur => ur.UserId == existing.Id && ur.RoleId == studentRole.Id))
@@ -285,7 +297,10 @@ public class IdentitySeeder
             {
                 var targetUser = students[i - 1].User;
                 targetUser.Email = email;
-                targetUser.FullName = $"Học Viên {i:D2}";
+                if (string.IsNullOrWhiteSpace(targetUser.FullName) || targetUser.FullName.StartsWith("Học Viên "))
+                {
+                    targetUser.FullName = $"Học Viên {i:D2}";
+                }
                 targetUser.IsActive = true;
                 targetUser.PasswordHash = _passwordHasher.HashPassword(targetUser, pwd);
             }
