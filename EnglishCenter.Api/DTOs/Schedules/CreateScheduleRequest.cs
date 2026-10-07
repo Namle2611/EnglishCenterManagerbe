@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EnglishCenter.Api.DTOs.Schedules;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class CreateScheduleRequest
 {
     [Required(ErrorMessage = "ClassId is required.")]

@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EnglishCenter.Api.DTOs.Enrollments;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class UpdateEnrollmentRequest
 {
     [Required(ErrorMessage = "TuitionAmount is required.")]

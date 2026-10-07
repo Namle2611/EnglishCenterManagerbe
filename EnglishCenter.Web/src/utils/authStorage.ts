@@ -1,21 +1,25 @@
 import type { User } from '../types/auth.types';
 
 const ACCESS_TOKEN_KEY = 'ec_access_token';
-const REFRESH_TOKEN_KEY = 'ec_refresh_token';
 const USER_KEY = 'ec_user';
 
+// Discard credentials persisted by releases before the HttpOnly cookie migration.
+localStorage.removeItem('ec_refresh_token');
+
+let sessionVersion = 0;
+
 export const authStorage = {
+  getSessionVersion(): number {
+    return sessionVersion;
+  },
   getAccessToken(): string | null {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   },
 
-  getRefreshToken(): string | null {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
-  },
-
-  setTokens(accessToken: string, refreshToken: string): void {
+  setAccessToken(accessToken: string): void {
+    sessionVersion++;
+    localStorage.removeItem('ec_refresh_token');
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   },
 
   getUser(): User | null {
@@ -37,8 +41,9 @@ export const authStorage = {
   },
 
   clear(): void {
+    sessionVersion++;
+    localStorage.removeItem('ec_refresh_token');
     localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   }
 };

@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EnglishCenter.Api.DTOs.Auth;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class LoginRequest
 {
     [Required(ErrorMessage = "Email is required.")]

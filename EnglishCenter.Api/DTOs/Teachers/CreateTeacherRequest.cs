@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using EnglishCenter.Api.Common;
 
 namespace EnglishCenter.Api.DTOs.Teachers;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class CreateTeacherRequest
 {
     [Required(ErrorMessage = "Teacher code is required.")]

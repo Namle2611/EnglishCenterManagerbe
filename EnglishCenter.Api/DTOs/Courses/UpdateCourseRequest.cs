@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using EnglishCenter.Api.Common.Attributes;
 
 namespace EnglishCenter.Api.DTOs.Courses;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class UpdateCourseRequest
 {
     private string _courseName = string.Empty;

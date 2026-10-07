@@ -6,6 +6,7 @@ using EnglishCenter.Api.Entities;
 using EnglishCenter.Api.Repositories.Interfaces;
 using EnglishCenter.Api.Security;
 using EnglishCenter.Api.Services.Interfaces;
+using EnglishCenter.Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EnglishCenter.Api.Services;
@@ -32,19 +33,19 @@ public class AuthService : IAuthService
         _passwordHasher = passwordHasher;
     }
 
-    public async Task<ApiResponse<LoginResponse>> LoginAsync(LoginRequest request)
+    public async Task<ApiResponse<AuthInternalResult>> LoginAsync(LoginRequest request)
     {
         var normalizedEmail = request.Email.Trim();
         var user = await _userRepository.GetWithRolesByEmailAsync(normalizedEmail);
 
         if (user == null || !_passwordHasher.VerifyPassword(user, user.PasswordHash, request.Password))
         {
-            return ApiResponse<LoginResponse>.Fail("Invalid email or password");
+            return ApiResponse<AuthInternalResult>.Fail("Invalid email or password");
         }
 
         if (!user.IsActive)
         {
-            return ApiResponse<LoginResponse>.Fail("Account is inactive");
+            return ApiResponse<AuthInternalResult>.Fail("Account is inactive");
         }
 
         var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
@@ -64,10 +65,10 @@ public class AuthService : IAuthService
 
         await _refreshTokenRepository.AddAsync(refreshTokenEntity);
 
-        var response = new LoginResponse
+        var response = new AuthInternalResult
         {
             AccessToken = accessToken,
-            RefreshToken = rawRefreshToken,
+            RawRefreshToken = rawRefreshToken,
             AccessTokenExpiresAt = accessExpiresAt,
             User = new UserDto
             {
@@ -78,12 +79,17 @@ public class AuthService : IAuthService
             }
         };
 
-        return ApiResponse<LoginResponse>.Ok(response, "Login successful");
+        return ApiResponse<AuthInternalResult>.Ok(response, "Login successful");
     }
 
-    public async Task<ApiResponse<RefreshTokenResponse>> RefreshTokenAsync(RefreshTokenRequest request)
+    public async Task<ApiResponse<AuthInternalResult>> RefreshTokenAsync(string rawRefreshToken)
     {
-        var tokenHash = _tokenService.HashToken(request.RefreshToken);
+        if (string.IsNullOrWhiteSpace(rawRefreshToken))
+        {
+            return ApiResponse<AuthInternalResult>.Fail("Invalid or expired refresh token");
+        }
+
+        var tokenHash = _tokenService.HashToken(rawRefreshToken);
 
         await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         try
@@ -97,7 +103,7 @@ public class AuthService : IAuthService
             if (storedToken == null || storedToken.RevokedAt != null || storedToken.ExpiresAt <= DateTime.UtcNow || !storedToken.User.IsActive)
             {
                 await transaction.RollbackAsync();
-                return ApiResponse<RefreshTokenResponse>.Fail("Invalid or expired refresh token");
+                return ApiResponse<AuthInternalResult>.Fail("Invalid or expired refresh token");
             }
 
             // Revoke old token
@@ -123,14 +129,14 @@ public class AuthService : IAuthService
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            var response = new RefreshTokenResponse
+            var response = new AuthInternalResult
             {
                 AccessToken = newAccessToken,
-                RefreshToken = newRawRefreshToken,
+                RawRefreshToken = newRawRefreshToken,
                 AccessTokenExpiresAt = accessExpiresAt
             };
 
-            return ApiResponse<RefreshTokenResponse>.Ok(response, "Token refreshed successfully");
+            return ApiResponse<AuthInternalResult>.Ok(response, "Token refreshed successfully");
         }
         catch
         {
@@ -182,8 +188,13 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task<ApiResponse> LogoutAsync(int userId, string rawRefreshToken)
+    public async Task<ApiResponse> LogoutAsync(int userId, string? rawRefreshToken)
     {
+        if (string.IsNullOrWhiteSpace(rawRefreshToken))
+        {
+            return ApiResponse.Ok("Logged out successfully.");
+        }
+
         var tokenHash = _tokenService.HashToken(rawRefreshToken);
         var storedToken = await _refreshTokenRepository.GetByHashAsync(tokenHash);
 

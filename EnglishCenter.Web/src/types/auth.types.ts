@@ -12,7 +12,6 @@ export type { ApiResponse } from './common.types';
 
 export interface LoginResponseData {
   accessToken: string;
-  refreshToken: string;
   accessTokenExpiresAt: string;
   user: {
     id: number;
@@ -24,7 +23,6 @@ export interface LoginResponseData {
 
 export interface RefreshTokenResponseData {
   accessToken: string;
-  refreshToken: string;
   accessTokenExpiresAt: string;
 }
 

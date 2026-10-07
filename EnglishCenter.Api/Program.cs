@@ -1,7 +1,10 @@
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using EnglishCenter.Api.Configuration;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using EnglishCenter.Api.Data;
 using EnglishCenter.Api.DTOs.Common;
 using EnglishCenter.Api.Hubs;
@@ -179,16 +182,125 @@ builder.Services.AddScoped<IGeminiQuizClient, GeminiQuizClient>();
 builder.Services.AddScoped<IQuizAiService, QuizAiService>();
 builder.Services.AddScoped<IdentitySeeder>();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    var knownProxies = builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>();
+    if (knownProxies != null)
+    {
+        foreach (var proxy in knownProxies)
+        {
+            options.KnownProxies.Add(System.Net.IPAddress.Parse(proxy));
+        }
+    }
+
+    var knownNetworks = builder.Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>();
+    if (knownNetworks != null)
+    {
+        foreach (var network in knownNetworks)
+        {
+            options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+        }
+    }
+});
+
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.IncludeSubDomains = false;
+    options.Preload = false;
+});
+
 // Configure CORS
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
+});
+
+// Configure Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    var loginPermit = builder.Configuration.GetValue<int>("RateLimiting:Login:PermitLimit", 5);
+    var loginWindow = builder.Configuration.GetValue<int>("RateLimiting:Login:WindowSeconds", 60);
+    var refreshPermit = builder.Configuration.GetValue<int>("RateLimiting:Refresh:PermitLimit", 10);
+    var refreshWindow = builder.Configuration.GetValue<int>("RateLimiting:Refresh:WindowSeconds", 60);
+    var changePassPermit = builder.Configuration.GetValue<int>("RateLimiting:ChangePassword:PermitLimit", 5);
+    var changePassWindow = builder.Configuration.GetValue<int>("RateLimiting:ChangePassword:WindowSeconds", 300);
+
+    options.AddPolicy("AuthLoginPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetSlidingWindowLimiter(ip, _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = loginPermit,
+            Window = TimeSpan.FromSeconds(loginWindow),
+            SegmentsPerWindow = 6,
+            QueueLimit = 0
+        });
+    });
+
+    options.AddPolicy("AuthRefreshPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetSlidingWindowLimiter(ip, _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = refreshPermit,
+            Window = TimeSpan.FromSeconds(refreshWindow),
+            SegmentsPerWindow = 6,
+            QueueLimit = 0
+        });
+    });
+
+    options.AddPolicy("ChangePasswordPolicy", context =>
+    {
+        var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string partitionKey = !string.IsNullOrEmpty(userId)
+            ? $"user_{userId}"
+            : $"anon_ip_{context.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
+
+        return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = changePassPermit,
+            Window = TimeSpan.FromSeconds(changePassWindow),
+            QueueLimit = 0
+        });
+    });
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+        int retryAfterSeconds;
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter) && retryAfter.TotalSeconds > 0)
+        {
+            retryAfterSeconds = (int)Math.Ceiling(retryAfter.TotalSeconds);
+        }
+        else
+        {
+            var policy = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName;
+            retryAfterSeconds = policy switch
+            {
+                "ChangePasswordPolicy" => changePassWindow,
+                "AuthRefreshPolicy" => refreshWindow,
+                _ => loginWindow
+            };
+        }
+
+        context.HttpContext.Response.Headers.RetryAfter = retryAfterSeconds.ToString();
+
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            ApiResponse.Fail("Too many requests. Please try again later."),
+            cancellationToken: cancellationToken);
+    };
 });
 
 builder.Services.AddControllers()
@@ -222,6 +334,8 @@ using (var scope = app.Services.CreateScope())
     await seeder.SeedAsync();
 }
 
+app.UseForwardedHeaders();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -234,12 +348,21 @@ if (app.Environment.IsDevelopment())
         return Results.Ok(new { status = canConnect ? "CONNECTED" : "FAILED" });
     });
 }
+else
+{
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 app.UseCors("AllowReact");
 
 app.UseAuthentication();
+
+app.UseRateLimiter();
+
 app.UseAuthorization();
 
 app.MapHub<NotificationHub>("/hubs/notifications");

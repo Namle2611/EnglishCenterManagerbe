@@ -4,8 +4,7 @@ import type {
   ChangePasswordPayload,
   CurrentUserResponseData,
   LoginCredentials,
-  LoginResponseData,
-  RefreshTokenResponseData
+  LoginResponseData
 } from '../types/auth.types';
 
 export const authService = {
@@ -13,14 +12,6 @@ export const authService = {
     const response = await axiosClient.post<ApiResponse<LoginResponseData>>(
       '/auth/login',
       credentials
-    );
-    return response.data;
-  },
-
-  async refreshToken(refreshToken: string): Promise<ApiResponse<RefreshTokenResponseData>> {
-    const response = await axiosClient.post<ApiResponse<RefreshTokenResponseData>>(
-      '/auth/refresh-token',
-      { refreshToken }
     );
     return response.data;
   },
@@ -40,10 +31,15 @@ export const authService = {
     return response.data;
   },
 
-  async logout(refreshToken: string): Promise<ApiResponse> {
+  async logout(): Promise<ApiResponse> {
     const response = await axiosClient.post<ApiResponse>(
       '/auth/logout',
-      { refreshToken }
+      {},
+      {
+        headers: {
+          'X-EC-CSRF': '1'
+        }
+      }
     );
     return response.data;
   }

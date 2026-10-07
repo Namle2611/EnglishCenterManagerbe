@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using EnglishCenter.Api.Common;
 
 namespace EnglishCenter.Api.DTOs.Students;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class UpdateStudentRequest
 {
     [Required(ErrorMessage = "Email is required.")]

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth.service';
 import type {
   ChangePasswordPayload,
@@ -11,7 +11,6 @@ import { authStorage } from '../utils/authStorage';
 export interface AuthContextType {
   user: User | null;
   accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<LoginResponseData>;
@@ -25,23 +24,24 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => authStorage.getUser());
   const [accessToken, setAccessToken] = useState<string | null>(() => authStorage.getAccessToken());
-  const [refreshToken, setRefreshToken] = useState<string | null>(() => authStorage.getRefreshToken());
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const authOperation = useRef(0);
 
   const restoreAuth = useCallback(async () => {
+    const operation = authOperation.current;
     const token = authStorage.getAccessToken();
-    const storedRefresh = authStorage.getRefreshToken();
 
-    if (!token && !storedRefresh) {
+    if (!token) {
+      authStorage.clear();
       setUser(null);
       setAccessToken(null);
-      setRefreshToken(null);
       setIsLoading(false);
       return;
     }
 
     try {
       const response = await authService.getMe();
+      if (operation !== authOperation.current) return;
       if (response.success && response.data) {
         const u = response.data;
         const currentUser: User = {
@@ -56,20 +56,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(currentUser);
         authStorage.setUser(currentUser);
         setAccessToken(authStorage.getAccessToken());
-        setRefreshToken(authStorage.getRefreshToken());
       } else {
         authStorage.clear();
         setUser(null);
         setAccessToken(null);
-        setRefreshToken(null);
       }
     } catch {
+      if (operation !== authOperation.current) return;
       authStorage.clear();
       setUser(null);
       setAccessToken(null);
-      setRefreshToken(null);
     } finally {
-      setIsLoading(false);
+      if (operation === authOperation.current) setIsLoading(false);
     }
   }, []);
 
@@ -78,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [restoreAuth]);
 
   const login = async (credentials: LoginCredentials): Promise<LoginResponseData> => {
+    const operation = ++authOperation.current;
     setIsLoading(true);
     try {
       const response = await authService.login(credentials);
@@ -85,8 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(response.message || 'Login failed');
       }
 
-      const { accessToken: newAccess, refreshToken: newRefresh, user: u } = response.data;
-      authStorage.setTokens(newAccess, newRefresh);
+      if (operation !== authOperation.current) {
+        throw new Error('Sign-in was superseded by another authentication action.');
+      }
+
+      const { accessToken: newAccess, user: u } = response.data;
+      authStorage.setAccessToken(newAccess);
 
       const loggedInUser: User = {
         id: u.id,
@@ -99,27 +102,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       authStorage.setUser(loggedInUser);
       setUser(loggedInUser);
       setAccessToken(newAccess);
-      setRefreshToken(newRefresh);
 
       return response.data;
     } finally {
-      setIsLoading(false);
+      if (operation === authOperation.current) setIsLoading(false);
     }
   };
 
   const logout = async (): Promise<void> => {
-    const currentRefresh = authStorage.getRefreshToken();
-    if (currentRefresh) {
-      try {
-        await authService.logout(currentRefresh);
-      } catch {
-        // Ignore errors on logout to ensure local clear
+    const operation = ++authOperation.current;
+    try {
+      await authService.logout();
+    } catch {
+      // Ignore errors on logout to ensure local clear
+    } finally {
+      if (operation === authOperation.current) {
+        authStorage.clear();
+        setUser(null);
+        setAccessToken(null);
+        setIsLoading(false);
       }
     }
-    authStorage.clear();
-    setUser(null);
-    setAccessToken(null);
-    setRefreshToken(null);
   };
 
   const changePassword = async (payload: ChangePasswordPayload): Promise<void> => {
@@ -136,7 +139,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         accessToken,
-        refreshToken,
         isAuthenticated: !!user && !!accessToken,
         isLoading,
         login,
@@ -145,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         restoreAuth
       }}
     >
-      {children}
+      <React.Fragment key={user?.id ?? 'signed-out'}>{children}</React.Fragment>
     </AuthContext.Provider>
   );
 };

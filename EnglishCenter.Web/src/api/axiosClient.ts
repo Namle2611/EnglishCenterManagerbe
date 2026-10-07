@@ -6,6 +6,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5137/api'
 
 export const axiosClient = axios.create({
   baseURL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -26,44 +27,53 @@ axiosClient.interceptors.request.use(
 // Concurrency control for Refresh Token Rotation
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
+let refreshSessionVersion = -1;
 
 /**
  * Shared token refresh coordination helper.
  * Reused across REST interceptors and SignalR accessTokenFactory.
  */
 export async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = authStorage.getRefreshToken();
-  if (!refreshToken) {
-    authStorage.clear();
-    return null;
-  }
-
-  if (isRefreshing && refreshPromise) {
+  const sessionVersion = authStorage.getSessionVersion();
+  if (isRefreshing && refreshPromise && refreshSessionVersion === sessionVersion) {
     return refreshPromise;
   }
 
   isRefreshing = true;
+  refreshSessionVersion = sessionVersion;
   refreshPromise = (async () => {
     try {
       const response = await axios.post<ApiResponse<RefreshTokenResponseData>>(
         `${baseURL}/auth/refresh-token`,
-        { refreshToken }
+        {},
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-EC-CSRF': '1'
+          }
+        }
       );
 
+      // A late response must not restore credentials after logout or replace a new login.
+      if (authStorage.getSessionVersion() !== sessionVersion) return null;
+
       if (response.data?.success && response.data.data) {
-        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-        authStorage.setTokens(accessToken, newRefreshToken);
+        const { accessToken } = response.data.data;
+        authStorage.setAccessToken(accessToken);
         return accessToken;
       }
 
       authStorage.clear();
       return null;
     } catch {
-      authStorage.clear();
+      if (authStorage.getSessionVersion() === sessionVersion) authStorage.clear();
       return null;
     } finally {
-      isRefreshing = false;
-      refreshPromise = null;
+      if (refreshSessionVersion === sessionVersion) {
+        isRefreshing = false;
+        refreshPromise = null;
+      }
     }
   })();
 

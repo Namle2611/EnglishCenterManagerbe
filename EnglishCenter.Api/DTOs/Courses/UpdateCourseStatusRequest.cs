@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using EnglishCenter.Api.Enums;
 
 namespace EnglishCenter.Api.DTOs.Courses;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class UpdateCourseStatusRequest : IValidatableObject
 {
     [Required(ErrorMessage = "Status is required.")]
