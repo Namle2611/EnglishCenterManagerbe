@@ -6,6 +6,10 @@ import { GradeSummaryCards } from '../../components/grades/GradeSummaryCards';
 import { GradeItemList } from '../../components/grades/GradeItemList';
 import { AssignmentGradeModal } from '../../components/grades/AssignmentGradeModal';
 import { getMembershipStatusLabel } from '../../utils/gradeHelper';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { LoadingState } from '../../components/common/LoadingState';
+import { ClassStatusBadge } from '../../components/classes/ClassStatusBadge';
 
 export const StudentGradeDetailPage: React.FC = () => {
   const { classId, studentId } = useParams<{ classId: string; studentId?: string }>();
@@ -98,6 +102,7 @@ export const StudentGradeDetailPage: React.FC = () => {
     void Promise.resolve().then(() => {
       fetchDetail();
     });
+
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -116,7 +121,6 @@ export const StudentGradeDetailPage: React.FC = () => {
   };
 
   const handleGradedSuccess = () => {
-    // Refresh authoritative backend data
     fetchDetail();
   };
 
@@ -128,139 +132,157 @@ export const StudentGradeDetailPage: React.FC = () => {
     ? '← Điểm của tôi'
     : '← Bảng điểm lớp';
 
+  const breadcrumbs = isStudentRoute
+    ? [
+        { label: 'Điểm của tôi', path: '/student/grades' },
+        { label: detail?.classCode ? `Lớp ${detail.classCode}` : 'Chi tiết điểm' }
+      ]
+    : [
+        { label: 'Quản lý bảng điểm', path: `${roleBaseUrl}/grades` },
+        {
+          label: detail?.classCode ? `Lớp ${detail.classCode}` : `Lớp #${classId}`,
+          path: `${roleBaseUrl}/classes/${classId}/grades`
+        },
+        { label: detail?.studentName || 'Chi tiết điểm' }
+      ];
+
   return (
-    <div className="student-grade-detail-page" style={{ padding: '1.5rem', maxWidth: '1280px', margin: '0 auto' }}>
-      {/* Breadcrumb Navigation */}
-      <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-        <Link to={backLink} style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}>
-          {backLinkLabel}
-        </Link>
-        <span style={{ color: '#9ca3af' }}>/</span>
-        <span style={{ color: '#4b5563' }}>Chi tiết điểm học viên</span>
-      </div>
+    <AppShell>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Page Header */}
+        <PageHeader
+          title={
+            detail
+              ? `${detail.studentName} (${detail.studentCode})`
+              : 'Chi tiết điểm học viên'
+          }
+          subtitle={
+            detail
+              ? `Lớp: ${detail.classCode} • Khóa học: ${detail.courseName}${
+                  detail.teacherName ? ` • Giáo viên: ${detail.teacherName}` : ''
+                }`
+              : undefined
+          }
+          breadcrumbs={breadcrumbs}
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              {detail && (
+                <>
+                  <span
+                    style={{
+                      padding: '0.25rem 0.625rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      backgroundColor: '#eff6ff',
+                      color: '#1e40af',
+                      border: '1px solid #bfdbfe'
+                    }}
+                  >
+                    {getMembershipStatusLabel(detail.membershipStatus)}
+                  </span>
+                  <ClassStatusBadge status={detail.classStatus} />
+                </>
+              )}
+              <Link
+                to={backLink}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.375rem',
+                  padding: '0.5rem 1rem',
+                  backgroundColor: 'var(--color-surface, #ffffff)',
+                  color: 'var(--color-text-secondary, #475569)',
+                  border: '1px solid var(--color-border, #cbd5e1)',
+                  borderRadius: 'var(--radius-md, 8px)',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  boxShadow: 'var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.05))',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {backLinkLabel}
+              </Link>
+            </div>
+          }
+        />
 
-      {/* Error message */}
-      {errorMessage && (
-        <div
-          role="alert"
-          style={{
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: 'var(--radius-md, 8px)',
-            color: '#b91c1c'
-          }}
-        >
-          {errorMessage}
-        </div>
-      )}
-
-      {/* Header Info */}
-      {detail && (
-        <>
+        {/* Error message */}
+        {errorMessage && (
           <div
+            role="alert"
             style={{
-              padding: '1.25rem',
-              backgroundColor: 'var(--color-surface, #ffffff)',
-              border: '1px solid var(--color-border, #e5e7eb)',
-              borderRadius: 'var(--radius-md, 8px)',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
-              marginBottom: '1.5rem'
+              padding: '1rem 1.25rem',
+              backgroundColor: '#fef2f2',
+              color: '#991b1b',
+              border: '1px solid #fecaca',
+              borderRadius: 'var(--radius-lg, 12px)',
+              fontSize: '0.875rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem'
             }}
           >
-            <div
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={fetchDetail}
               style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem'
+                padding: '0.375rem 0.75rem',
+                backgroundColor: '#ffffff',
+                color: '#991b1b',
+                border: '1px solid #fecaca',
+                borderRadius: 'var(--radius-md, 8px)',
+                fontWeight: 600,
+                fontSize: '0.8125rem',
+                cursor: 'pointer'
               }}
             >
-              <div>
-                <h1
-                  style={{
-                    margin: '0 0 0.35rem 0',
-                    fontSize: '1.4rem',
-                    fontWeight: 700,
-                    color: 'var(--color-text-primary, #111827)'
-                  }}
-                >
-                  {detail.studentName} ({detail.studentCode})
-                </h1>
-                <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary, #6b7280)', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                  <span>Lớp: <strong>{detail.classCode}</strong></span>
-                  <span>Khóa: <strong>{detail.courseName}</strong></span>
-                  {detail.teacherName && (
-                    <span>Giáo viên: <strong>{detail.teacherName}</strong></span>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <span
-                  style={{
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '9999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    backgroundColor: '#eff6ff',
-                    color: '#1e40af',
-                    border: '1px solid #bfdbfe'
-                  }}
-                >
-                  {getMembershipStatusLabel(detail.membershipStatus)}
-                </span>
-                <span
-                  style={{
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '9999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    backgroundColor: '#f3f4f6',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}
-                >
-                  {detail.classStatus}
-                </span>
-              </div>
-            </div>
+              Thử lại
+            </button>
           </div>
+        )}
 
-          {/* Reporting Summary Cards */}
-          <GradeSummaryCards
-            summary={detail.summary}
-            title="Tổng hợp kết quả học tập"
-          />
+        {/* Loading state */}
+        {isLoading && !detail && (
+          <LoadingState message="Đang tải chi tiết điểm học viên..." />
+        )}
 
-          {/* Grade Items List */}
-          <GradeItemList
-            items={detail.items}
-            userRole={isStudentRoute ? 'student' : roleBaseUrl.replace('/', '')}
-            onGradeItem={handleOpenGradeModal}
-            title="Chi tiết bài tập & bài kiểm tra"
-          />
-
-          {/* Modal for Management Direct Grading */}
-          {!isStudentRoute && (
-            <AssignmentGradeModal
-              isOpen={isGradeModalOpen}
-              item={selectedItemToGrade}
-              studentName={detail.studentName}
-              onClose={handleCloseGradeModal}
-              onGradedSuccess={handleGradedSuccess}
+        {/* Details & Grade items */}
+        {detail && (
+          <>
+            {/* Reporting Summary Cards */}
+            <GradeSummaryCards
+              summary={detail.summary}
+              title="Tổng hợp kết quả học tập"
             />
-          )}
-        </>
-      )}
 
-      {isLoading && !detail && (
-        <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>
-          Đang tải thông tin điểm...
-        </div>
-      )}
-    </div>
+            {/* Grade Items List */}
+            <GradeItemList
+              items={detail.items}
+              userRole={isStudentRoute ? 'student' : roleBaseUrl.replace('/', '')}
+              onGradeItem={handleOpenGradeModal}
+              title="Chi tiết bài tập & bài kiểm tra"
+            />
+
+            {/* Modal for Management Direct Grading */}
+            {!isStudentRoute && (
+              <AssignmentGradeModal
+                isOpen={isGradeModalOpen}
+                item={selectedItemToGrade}
+                studentName={detail.studentName}
+                onClose={handleCloseGradeModal}
+                onGradedSuccess={handleGradedSuccess}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </AppShell>
   );
 };

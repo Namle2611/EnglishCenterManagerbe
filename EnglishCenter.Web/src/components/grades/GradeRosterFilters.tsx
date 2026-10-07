@@ -63,44 +63,106 @@ export const GradeRosterFilters: React.FC<GradeRosterFiltersProps> = ({
     });
   };
 
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    onChange({
+      ...filters,
+      search: undefined,
+      membershipStatus: undefined,
+      page: 1
+    });
+  };
+
+  const hasActiveFilters = Boolean(searchTerm.trim() || filters.membershipStatus);
+
   return (
     <div
       className="grade-roster-filters"
       style={{
         display: 'flex',
         flexWrap: 'wrap',
-        gap: '0.75rem',
+        gap: '1rem',
         alignItems: 'center',
-        padding: '0.75rem',
+        padding: '1rem 1.25rem',
         backgroundColor: 'var(--color-surface, #ffffff)',
-        border: '1px solid var(--color-border, #e5e7eb)',
-        borderRadius: 'var(--radius-md, 8px)',
-        marginBottom: '1rem'
+        border: '1px solid var(--color-border, #e2e8f0)',
+        borderRadius: 'var(--radius-lg, 12px)',
+        boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))',
+        marginBottom: '1.25rem'
       }}
     >
-      {/* Search Input */}
-      <div style={{ flex: '1 1 200px', minWidth: '180px' }}>
+      {/* Search Input with Icon */}
+      <div style={{ flex: '1 1 240px', minWidth: '200px', position: 'relative' }}>
+        <span
+          style={{
+            position: 'absolute',
+            left: '0.875rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--color-text-muted, #94a3b8)',
+            fontSize: '0.95rem',
+            pointerEvents: 'none'
+          }}
+          aria-hidden="true"
+        >
+          🔍
+        </span>
         <input
           type="text"
           id="roster-search-input"
-          placeholder="Tìm theo mã học viên, tên..."
+          placeholder="Tìm theo mã học viên, họ tên..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           disabled={disabled}
           style={{
             width: '100%',
-            padding: '0.5rem 0.75rem',
+            padding: '0.625rem 2.25rem 0.625rem 2.375rem',
             fontSize: '0.875rem',
-            border: '1px solid var(--color-border, #d1d5db)',
-            borderRadius: 'var(--radius-md, 6px)',
+            borderRadius: 'var(--radius-md, 8px)',
+            border: '1px solid var(--color-border, #cbd5e1)',
+            backgroundColor: 'var(--color-canvas, #f8fafc)',
+            color: 'var(--color-text-primary, #0f172a)',
             outline: 'none',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-primary, #2563eb)';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-border, #cbd5e1)';
+            e.currentTarget.style.boxShadow = 'none';
           }}
         />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchTerm('');
+              onChange({ ...filters, search: undefined, page: 1 });
+            }}
+            aria-label="Xóa tìm kiếm"
+            style={{
+              position: 'absolute',
+              right: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              color: 'var(--color-text-muted, #94a3b8)',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              padding: '0.2rem'
+            }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Membership Status Filter */}
-      <div style={{ minWidth: '150px' }}>
+      <div style={{ minWidth: '170px' }}>
         <select
           id="roster-membership-select"
           aria-label="Lọc theo trạng thái học viên"
@@ -109,11 +171,12 @@ export const GradeRosterFilters: React.FC<GradeRosterFiltersProps> = ({
           disabled={disabled}
           style={{
             width: '100%',
-            padding: '0.5rem 0.75rem',
+            padding: '0.625rem 0.875rem',
             fontSize: '0.875rem',
-            border: '1px solid var(--color-border, #d1d5db)',
-            borderRadius: 'var(--radius-md, 6px)',
+            borderRadius: 'var(--radius-md, 8px)',
+            border: '1px solid var(--color-border, #cbd5e1)',
             backgroundColor: 'var(--color-surface, #ffffff)',
+            color: 'var(--color-text-primary, #0f172a)',
             outline: 'none',
             cursor: disabled ? 'not-allowed' : 'pointer'
           }}
@@ -126,7 +189,7 @@ export const GradeRosterFilters: React.FC<GradeRosterFiltersProps> = ({
       </div>
 
       {/* Sort By Filter */}
-      <div style={{ minWidth: '140px' }}>
+      <div style={{ minWidth: '150px' }}>
         <select
           id="roster-sortby-select"
           aria-label="Sắp xếp theo"
@@ -135,11 +198,12 @@ export const GradeRosterFilters: React.FC<GradeRosterFiltersProps> = ({
           disabled={disabled}
           style={{
             width: '100%',
-            padding: '0.5rem 0.75rem',
+            padding: '0.625rem 0.875rem',
             fontSize: '0.875rem',
-            border: '1px solid var(--color-border, #d1d5db)',
-            borderRadius: 'var(--radius-md, 6px)',
+            borderRadius: 'var(--radius-md, 8px)',
+            border: '1px solid var(--color-border, #cbd5e1)',
             backgroundColor: 'var(--color-surface, #ffffff)',
+            color: 'var(--color-text-primary, #0f172a)',
             outline: 'none',
             cursor: disabled ? 'not-allowed' : 'pointer'
           }}
@@ -159,20 +223,61 @@ export const GradeRosterFilters: React.FC<GradeRosterFiltersProps> = ({
           disabled={disabled}
           title={filters.isAscending !== false ? 'Đang tăng dần (A-Z)' : 'Đang giảm dần (Z-A)'}
           style={{
-            padding: '0.5rem 0.75rem',
+            padding: '0.625rem 0.875rem',
             fontSize: '0.875rem',
-            border: '1px solid var(--color-border, #d1d5db)',
-            borderRadius: 'var(--radius-md, 6px)',
+            fontWeight: 500,
+            border: '1px solid var(--color-border, #cbd5e1)',
+            borderRadius: 'var(--radius-md, 8px)',
             backgroundColor: 'var(--color-surface, #ffffff)',
+            color: 'var(--color-text-secondary, #475569)',
             cursor: disabled ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.35rem'
+            gap: '0.35rem',
+            transition: 'background-color 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            if (!disabled) e.currentTarget.style.backgroundColor = 'var(--color-surface-hover, #f8fafc)';
+          }}
+          onMouseLeave={(e) => {
+            if (!disabled) e.currentTarget.style.backgroundColor = 'var(--color-surface, #ffffff)';
           }}
         >
           <span>{filters.isAscending !== false ? '↑ Tăng dần' : '↓ Giảm dần'}</span>
         </button>
       </div>
+
+      {/* Clear Filters Button */}
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={handleResetFilters}
+          disabled={disabled}
+          style={{
+            padding: '0.625rem 1rem',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            color: 'var(--color-text-secondary, #475569)',
+            backgroundColor: 'transparent',
+            border: '1px solid var(--color-border, #cbd5e1)',
+            borderRadius: 'var(--radius-md, 8px)',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            transition: 'background-color 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            if (!disabled) e.currentTarget.style.backgroundColor = 'var(--color-surface-hover, #f8fafc)';
+          }}
+          onMouseLeave={(e) => {
+            if (!disabled) e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          <span>✕</span>
+          <span>Xóa bộ lọc</span>
+        </button>
+      )}
     </div>
   );
 };

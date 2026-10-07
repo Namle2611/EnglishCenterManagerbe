@@ -5,6 +5,10 @@ import { gradeService } from '../../services/grade.service';
 import { GradeRosterFilters } from '../../components/grades/GradeRosterFilters';
 import { GradeRosterTable } from '../../components/grades/GradeRosterTable';
 import type { ClassStudentStatus } from '../../types/assignment.types';
+import { AppShell } from '../../components/layout/AppShell';
+import { PageHeader } from '../../components/layout/PageHeader';
+import { LoadingState } from '../../components/common/LoadingState';
+import { ClassStatusBadge } from '../../components/classes/ClassStatusBadge';
 
 export const ClassGradebookPage: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
@@ -134,113 +138,113 @@ export const ClassGradebookPage: React.FC = () => {
   };
 
   return (
-    <div className="class-gradebook-page" style={{ padding: '1.5rem', maxWidth: '1280px', margin: '0 auto' }}>
-      {/* Breadcrumb & Navigation */}
-      <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-        <Link
-          to={`${roleBaseUrl}/grades`}
-          style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}
-        >
-          ← Danh sách lớp
-        </Link>
-        <span style={{ color: '#9ca3af' }}>/</span>
-        <span style={{ color: '#4b5563' }}>Bảng điểm lớp</span>
-      </div>
+    <AppShell>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Page Header */}
+        <PageHeader
+          title={`Bảng điểm lớp ${gradebook?.classCode || ''}`}
+          subtitle={
+            gradebook
+              ? `Khóa học: ${gradebook.courseName || '—'}${
+                  gradebook.teacherName ? ` • Giáo viên: ${gradebook.teacherName}` : ''
+                }`
+              : 'Xem và quản lý bảng điểm học viên của lớp học'
+          }
+          breadcrumbs={[
+            { label: 'Quản lý bảng điểm', path: `${roleBaseUrl}/grades` },
+            { label: gradebook?.classCode ? `Lớp ${gradebook.classCode}` : `Lớp #${classId}` }
+          ]}
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {gradebook?.classStatus && (
+                <ClassStatusBadge status={gradebook.classStatus} />
+              )}
+              <Link
+                to={`${roleBaseUrl}/grades`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.375rem',
+                  padding: '0.5rem 1rem',
+                  backgroundColor: 'var(--color-surface, #ffffff)',
+                  color: 'var(--color-text-secondary, #475569)',
+                  border: '1px solid var(--color-border, #cbd5e1)',
+                  borderRadius: 'var(--radius-md, 8px)',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  boxShadow: 'var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.05))',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                ← Danh sách lớp
+              </Link>
+            </div>
+          }
+        />
 
-      {/* Header Info */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '1.5rem',
-          paddingBottom: '1rem',
-          borderBottom: '1px solid var(--color-border, #e5e7eb)'
-        }}
-      >
-        <div>
-          <h1
+        {/* Error message */}
+        {errorMessage && (
+          <div
+            role="alert"
             style={{
-              margin: '0 0 0.35rem 0',
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: 'var(--color-text-primary, #111827)'
+              padding: '1rem 1.25rem',
+              backgroundColor: '#fef2f2',
+              color: '#991b1b',
+              border: '1px solid #fecaca',
+              borderRadius: 'var(--radius-lg, 12px)',
+              fontSize: '0.875rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem'
             }}
           >
-            Bảng điểm lớp {gradebook?.classCode || ''}
-          </h1>
-          <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary, #6b7280)', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-            {gradebook?.courseName && (
-              <span>Khóa học: <strong>{gradebook.courseName}</strong></span>
-            )}
-            {gradebook?.teacherName && (
-              <span>Giáo viên: <strong>{gradebook.teacherName}</strong></span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => fetchGradebook(currentFilters)}
+              style={{
+                padding: '0.375rem 0.75rem',
+                backgroundColor: '#ffffff',
+                color: '#991b1b',
+                border: '1px solid #fecaca',
+                borderRadius: 'var(--radius-md, 8px)',
+                fontWeight: 600,
+                fontSize: '0.8125rem',
+                cursor: 'pointer'
+              }}
+            >
+              Thử lại
+            </button>
           </div>
-        </div>
+        )}
 
-        {gradebook?.classStatus && (
-          <span
-            style={{
-              padding: '0.25rem 0.75rem',
-              borderRadius: '9999px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              backgroundColor:
-                gradebook.classStatus === 'Ongoing'
-                  ? '#ecfdf5'
-                  : gradebook.classStatus === 'Planned'
-                  ? '#eff6ff'
-                  : '#f3f4f6',
-              color:
-                gradebook.classStatus === 'Ongoing'
-                  ? '#065f46'
-                  : gradebook.classStatus === 'Planned'
-                  ? '#1e40af'
-                  : '#374151',
-              border: '1px solid rgba(0,0,0,0.08)'
-            }}
-          >
-            {gradebook.classStatus}
-          </span>
+        {/* Filters */}
+        <GradeRosterFilters
+          filters={currentFilters}
+          onChange={handleFilterChange}
+          disabled={isLoading && !gradebook}
+        />
+
+        {/* Loading state */}
+        {isLoading && !gradebook && (
+          <LoadingState message="Đang tải bảng điểm lớp học..." />
+        )}
+
+        {/* Roster Table */}
+        {gradebook && (
+          <GradeRosterTable
+            roster={gradebook.roster}
+            onSelectStudent={handleSelectStudent}
+            onPageChange={handlePageChange}
+            isLoading={isLoading}
+          />
         )}
       </div>
-
-      {/* Error message */}
-      {errorMessage && (
-        <div
-          role="alert"
-          style={{
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: 'var(--radius-md, 8px)',
-            color: '#b91c1c'
-          }}
-        >
-          {errorMessage}
-        </div>
-      )}
-
-      {/* Filters */}
-      <GradeRosterFilters
-        filters={currentFilters}
-        onChange={handleFilterChange}
-        disabled={isLoading && !gradebook}
-      />
-
-      {/* Roster Table */}
-      {gradebook && (
-        <GradeRosterTable
-          roster={gradebook.roster}
-          onSelectStudent={handleSelectStudent}
-          onPageChange={handlePageChange}
-          isLoading={isLoading}
-        />
-      )}
-    </div>
+    </AppShell>
   );
 };

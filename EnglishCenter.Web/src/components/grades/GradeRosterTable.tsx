@@ -26,10 +26,10 @@ export const GradeRosterTable: React.FC<GradeRosterTableProps> = ({
       className="grade-roster-container"
       style={{
         backgroundColor: 'var(--color-surface, #ffffff)',
-        border: '1px solid var(--color-border, #e5e7eb)',
-        borderRadius: 'var(--radius-md, 8px)',
+        border: '1px solid var(--color-border, #e2e8f0)',
+        borderRadius: 'var(--radius-lg, 12px)',
         overflow: 'hidden',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
+        boxShadow: 'var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05))'
       }}
     >
       {/* Scrollable table container */}
@@ -46,34 +46,34 @@ export const GradeRosterTable: React.FC<GradeRosterTableProps> = ({
           <thead>
             <tr
               style={{
-                backgroundColor: 'var(--color-surface-subtle, #f9fafb)',
-                borderBottom: '1px solid var(--color-border, #e5e7eb)',
-                color: 'var(--color-text-secondary, #4b5563)',
-                fontSize: '0.75rem',
+                backgroundColor: 'var(--color-surface-hover, #f8fafc)',
+                borderBottom: '1px solid var(--color-border, #e2e8f0)',
+                color: 'var(--color-text-secondary, #475569)',
+                fontSize: '0.8125rem',
                 textTransform: 'uppercase',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.025em'
               }}
             >
-              <th style={{ padding: '0.75rem 1rem' }}>Mã học viên</th>
-              <th style={{ padding: '0.75rem 1rem' }}>Tên học viên</th>
-              <th style={{ padding: '0.75rem 1rem' }}>Trạng thái</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Đã có điểm</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Chờ xử lý</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Điểm đạt / Tối đa</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Tỷ lệ điểm hiện có</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>Thao tác</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600 }}>Mã học viên</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600 }}>Tên học viên</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600 }}>Trạng thái</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600, textAlign: 'center' }}>Đã có điểm</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600, textAlign: 'center' }}>Chờ xử lý</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600, textAlign: 'right' }}>Điểm đạt / Tối đa</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600, textAlign: 'right' }}>Tỷ lệ điểm hiện có</th>
+              <th style={{ padding: '0.875rem 1rem', fontWeight: 600, textAlign: 'center' }}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={8} style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                <td colSpan={8} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-secondary, #64748b)' }}>
                   Đang tải danh sách học viên...
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={8} style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                <td colSpan={8} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-secondary, #64748b)' }}>
                   Không tìm thấy học viên nào phù hợp.
                 </td>
               </tr>
@@ -85,23 +85,40 @@ export const GradeRosterTable: React.FC<GradeRosterTableProps> = ({
                     key={student.studentId}
                     data-testid={`roster-row-${student.studentId}`}
                     style={{
-                      borderBottom: '1px solid var(--color-border, #f3f4f6)',
-                      transition: 'background-color 0.15s'
+                      borderBottom: '1px solid var(--color-border-subtle, #f1f5f9)',
+                      transition: 'background-color 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--color-surface-hover, #f8fafc)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                   >
-                    <td style={{ padding: '0.75rem 1rem', fontWeight: 600 }}>
-                      {student.studentCode}
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      {student.studentName}
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
+                    <td style={{ padding: '0.875rem 1rem' }}>
                       <span
                         style={{
+                          fontFamily: 'monospace',
+                          fontWeight: 700,
+                          color: 'var(--color-primary, #2563eb)',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        {student.studentCode}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.875rem 1rem', fontWeight: 600, color: 'var(--color-text-primary, #0f172a)' }}>
+                      {student.studentName}
+                    </td>
+                    <td style={{ padding: '0.875rem 1rem' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
                           fontSize: '0.75rem',
-                          padding: '0.15rem 0.5rem',
+                          padding: '0.2rem 0.625rem',
                           borderRadius: '9999px',
-                          fontWeight: 500,
+                          fontWeight: 600,
                           backgroundColor:
                             student.membershipStatus === 'Active'
                               ? '#ecfdf5'
@@ -126,50 +143,67 @@ export const GradeRosterTable: React.FC<GradeRosterTableProps> = ({
                         {membershipLabel}
                       </span>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                      {student.summary.visibleGradedItemCount}
+                    <td style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-primary, #0f172a)' }}>
+                        {student.summary.visibleGradedItemCount}
+                      </span>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                    <td style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
                       {student.summary.pendingItemCount > 0 ? (
                         <span style={{ color: '#d97706', fontWeight: 600 }}>
                           {student.summary.pendingItemCount}
                         </span>
                       ) : (
-                        <span style={{ color: '#9ca3af' }}>0</span>
+                        <span style={{ color: 'var(--color-text-muted, #94a3b8)' }}>0</span>
                       )}
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                      <strong>{student.summary.visibleEarnedPoints}</strong> / {student.summary.visiblePossiblePoints}
+                    <td style={{ padding: '0.875rem 1rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                      <strong style={{ color: 'var(--color-text-primary, #0f172a)' }}>
+                        {student.summary.visibleEarnedPoints}
+                      </strong>{' '}
+                      / {student.summary.visiblePossiblePoints}
                     </td>
                     <td
                       style={{
-                        padding: '0.75rem 1rem',
+                        padding: '0.875rem 1rem',
                         textAlign: 'right',
                         fontWeight: 700,
-                        color: '#1d4ed8',
+                        color: 'var(--color-primary, #2563eb)',
                         fontVariantNumeric: 'tabular-nums'
                       }}
                     >
                       {formatPercentage(student.summary.visiblePercentage)}
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                    <td style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
                       <button
                         type="button"
                         id={`btn-view-student-${student.studentId}`}
+                        data-testid={`btn-view-grade-detail-${student.studentId}`}
                         onClick={() => onSelectStudent(student.studentId)}
                         style={{
-                          padding: '0.35rem 0.75rem',
-                          fontSize: '0.8rem',
-                          fontWeight: 500,
-                          color: '#2563eb',
-                          backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                          border: '1px solid rgba(37, 99, 235, 0.2)',
-                          borderRadius: 'var(--radius-sm, 4px)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          padding: '0.375rem 0.875rem',
+                          fontSize: '0.8125rem',
+                          fontWeight: 600,
+                          color: 'var(--color-primary, #2563eb)',
+                          backgroundColor: 'var(--color-primary-subtle, #eff6ff)',
+                          border: '1px solid var(--color-primary-border, #bfdbfe)',
+                          borderRadius: 'var(--radius-md, 6px)',
                           cursor: 'pointer',
-                          minHeight: '36px'
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--color-primary, #2563eb)';
+                          e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--color-primary-subtle, #eff6ff)';
+                          e.currentTarget.style.color = 'var(--color-primary, #2563eb)';
                         }}
                       >
-                        Xem chi tiết
+                        Xem chi tiết →
                       </button>
                     </td>
                   </tr>
@@ -188,15 +222,16 @@ export const GradeRosterTable: React.FC<GradeRosterTableProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0.75rem 1rem',
-            borderTop: '1px solid var(--color-border, #e5e7eb)',
+            padding: '0.875rem 1.25rem',
+            borderTop: '1px solid var(--color-border, #e2e8f0)',
             fontSize: '0.875rem',
-            color: 'var(--color-text-secondary, #6b7280)',
-            backgroundColor: 'var(--color-surface-subtle, #f9fafb)'
+            color: 'var(--color-text-secondary, #475569)',
+            backgroundColor: 'var(--color-surface-hover, #f8fafc)'
           }}
         >
           <div>
-            Hiển thị trang <strong>{page}</strong> / <strong>{totalPages}</strong> ({totalItems} học viên)
+            Hiển thị trang <strong style={{ color: 'var(--color-text-primary, #0f172a)' }}>{page}</strong> /{' '}
+            <strong style={{ color: 'var(--color-text-primary, #0f172a)' }}>{totalPages}</strong> ({totalItems} học viên)
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
@@ -205,17 +240,19 @@ export const GradeRosterTable: React.FC<GradeRosterTableProps> = ({
               disabled={!hasPreviousPage || isLoading}
               onClick={() => onPageChange(page - 1)}
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.8rem',
-                borderRadius: 'var(--radius-sm, 4px)',
-                border: '1px solid var(--color-border, #d1d5db)',
+                padding: '0.4rem 0.875rem',
+                fontSize: '0.8125rem',
+                fontWeight: 500,
+                borderRadius: 'var(--radius-md, 6px)',
+                border: '1px solid var(--color-border, #cbd5e1)',
                 backgroundColor: 'var(--color-surface, #ffffff)',
+                color: 'var(--color-text-secondary, #475569)',
                 cursor: !hasPreviousPage || isLoading ? 'not-allowed' : 'pointer',
                 opacity: !hasPreviousPage || isLoading ? 0.5 : 1,
-                minHeight: '36px'
+                transition: 'background-color 0.15s ease'
               }}
             >
-              ◀ Trang trước
+              ← Trang trước
             </button>
             <button
               type="button"
@@ -223,17 +260,19 @@ export const GradeRosterTable: React.FC<GradeRosterTableProps> = ({
               disabled={!hasNextPage || isLoading}
               onClick={() => onPageChange(page + 1)}
               style={{
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.8rem',
-                borderRadius: 'var(--radius-sm, 4px)',
-                border: '1px solid var(--color-border, #d1d5db)',
+                padding: '0.4rem 0.875rem',
+                fontSize: '0.8125rem',
+                fontWeight: 500,
+                borderRadius: 'var(--radius-md, 6px)',
+                border: '1px solid var(--color-border, #cbd5e1)',
                 backgroundColor: 'var(--color-surface, #ffffff)',
+                color: 'var(--color-text-secondary, #475569)',
                 cursor: !hasNextPage || isLoading ? 'not-allowed' : 'pointer',
                 opacity: !hasNextPage || isLoading ? 0.5 : 1,
-                minHeight: '36px'
+                transition: 'background-color 0.15s ease'
               }}
             >
-              Trang sau ▶
+              Trang sau →
             </button>
           </div>
         </div>
