@@ -1,0 +1,7 @@
+**/[Bb]in/
+**/[Oo]bj/
+EnglishCenter.Tests/artifacts/
+*.user
+*.suo
+.vs/
+.idea/

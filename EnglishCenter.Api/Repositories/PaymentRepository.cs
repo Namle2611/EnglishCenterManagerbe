@@ -23,7 +23,7 @@ public class PaymentRepository : IPaymentRepository
             .AsNoTracking()
             .AsQueryable();
 
-        // 1. Search across StudentCode, StudentName, CourseCode, CourseName, ClassCode, TransactionCode, Note
+        // 1. Search across StudentCode, StudentName, CourseCode, CourseName, ClassCode, TransactionCode, PaymentCode, Note
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
             var search = query.Search.Trim();
@@ -34,6 +34,7 @@ public class PaymentRepository : IPaymentRepository
                 p.Enrollment.Course.CourseName.Contains(search) ||
                 (p.Enrollment.ClassStudent != null && p.Enrollment.ClassStudent.Class.ClassCode.Contains(search)) ||
                 (p.TransactionCode != null && p.TransactionCode.Contains(search)) ||
+                (p.PaymentCode != null && p.PaymentCode.Contains(search)) ||
                 (p.Note != null && p.Note.Contains(search)));
         }
 
@@ -133,7 +134,9 @@ public class PaymentRepository : IPaymentRepository
                 PaymentMethod = p.PaymentMethod,
                 TransactionCode = p.TransactionCode,
                 Status = p.Status,
-                Note = p.Note
+                Note = p.Note,
+                PaymentCode = p.PaymentCode,
+                PaidAt = p.PaidAt
             })
             .ToListAsync(cancellationToken);
 
@@ -164,7 +167,13 @@ public class PaymentRepository : IPaymentRepository
                 PaymentMethod = p.PaymentMethod,
                 TransactionCode = p.TransactionCode,
                 Status = p.Status,
-                Note = p.Note
+                Note = p.Note,
+                PaymentCode = p.PaymentCode,
+                SePayTransactionId = p.SePayTransactionId,
+                SePayReferenceCode = p.SePayReferenceCode,
+                ReceivedAmount = p.ReceivedAmount,
+                PaidAt = p.PaidAt,
+                CreatedAt = p.CreatedAt
             })
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -182,11 +191,22 @@ public class PaymentRepository : IPaymentRepository
             .FirstOrDefaultAsync(e => e.Id == enrollmentId, cancellationToken);
     }
 
+    public async Task<Enrollment?> GetEnrollmentWithStudentAsync(int enrollmentId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Enrollments
+            .Include(e => e.Student)
+                .ThenInclude(s => s.User)
+            .Include(e => e.Course)
+            .Include(e => e.ClassStudent)
+                .ThenInclude(cs => cs!.Class)
+            .FirstOrDefaultAsync(e => e.Id == enrollmentId, cancellationToken);
+    }
+
     public async Task<decimal> GetEffectivePaidAmountAsync(int enrollmentId, int? excludePaymentId = null, CancellationToken cancellationToken = default)
     {
         return await _context.Payments
             .Where(p => p.EnrollmentId == enrollmentId &&
-                        p.Status == PaymentStatus.Completed &&
+                        (p.Status == PaymentStatus.Completed || p.Status == PaymentStatus.Paid) &&
                         (!excludePaymentId.HasValue || p.Id != excludePaymentId.Value))
             .SumAsync(p => (decimal?)p.Amount, cancellationToken) ?? 0m;
     }
@@ -208,7 +228,7 @@ public class PaymentRepository : IPaymentRepository
             .ToListAsync(cancellationToken);
 
         var effectivePaid = payments
-            .Where(p => p.Status == PaymentStatus.Completed)
+            .Where(p => p.Status == PaymentStatus.Completed || p.Status == PaymentStatus.Paid)
             .Sum(p => p.Amount);
 
         var pendingPaid = payments
@@ -226,7 +246,7 @@ public class PaymentRepository : IPaymentRepository
             PendingPaidAmount = pendingPaid,
             RemainingAmount = remaining,
             IsFullyPaid = isFullyPaid,
-            CompletedPaymentCount = payments.Count(p => p.Status == PaymentStatus.Completed),
+            CompletedPaymentCount = payments.Count(p => p.Status == PaymentStatus.Completed || p.Status == PaymentStatus.Paid),
             TotalPaymentCount = payments.Count,
             EnrollmentStatus = enrollment.Status
         };
@@ -238,6 +258,56 @@ public class PaymentRepository : IPaymentRepository
             .AnyAsync(p => p.TransactionCode == transactionCode &&
                            (!excludePaymentId.HasValue || p.Id != excludePaymentId.Value),
                       cancellationToken);
+    }
+
+    public async Task<bool> ExistsByPaymentCodeAsync(string paymentCode, int? excludePaymentId = null, CancellationToken cancellationToken = default)
+    {
+        return await _context.Payments
+            .AnyAsync(p => p.PaymentCode == paymentCode &&
+                           (!excludePaymentId.HasValue || p.Id != excludePaymentId.Value),
+                      cancellationToken);
+    }
+
+    public async Task<Payment?> GetByPaymentCodeAsync(string paymentCode, CancellationToken cancellationToken = default)
+    {
+        return await _context.Payments
+            .Include(p => p.Enrollment)
+                .ThenInclude(e => e.Student)
+                    .ThenInclude(s => s.User)
+            .Include(p => p.Enrollment)
+                .ThenInclude(e => e.Course)
+            .FirstOrDefaultAsync(p => p.PaymentCode == paymentCode, cancellationToken);
+    }
+
+    public async Task<Payment?> GetBySePayTransactionIdAsync(long transactionId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Payments
+            .FirstOrDefaultAsync(p => p.SePayTransactionId == transactionId, cancellationToken);
+    }
+
+    public async Task<Payment?> GetPendingSePayPaymentForEnrollmentAsync(int enrollmentId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Payments
+            .Where(p => p.EnrollmentId == enrollmentId &&
+                        p.Status == PaymentStatus.Pending &&
+                        p.PaymentMethod == PaymentMethod.SePay)
+            .OrderByDescending(p => p.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<List<Enrollment>> GetStudentEnrollmentsWithDetailsAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Enrollments
+            .AsNoTracking()
+            .Include(e => e.Course)
+            .Include(e => e.ClassStudent)
+                .ThenInclude(cs => cs!.Class)
+            .Include(e => e.Payments)
+            .Include(e => e.Student)
+                .ThenInclude(s => s.User)
+            .Where(e => e.StudentId == studentId && e.Status != EnrollmentStatus.Cancelled)
+            .OrderByDescending(e => e.EnrollmentDate)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Payment payment, CancellationToken cancellationToken = default)

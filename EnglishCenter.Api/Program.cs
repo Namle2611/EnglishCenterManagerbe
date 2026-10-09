@@ -178,6 +178,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationRealtimePublisher, NotificationRealtimePublisher>();
 builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection(GeminiOptions.SectionName));
+builder.Services.Configure<SePayOptions>(builder.Configuration.GetSection(SePayOptions.SectionName));
 builder.Services.AddScoped<IGeminiQuizClient, GeminiQuizClient>();
 builder.Services.AddScoped<IQuizAiService, QuizAiService>();
 builder.Services.AddScoped<IdentitySeeder>();
@@ -375,6 +376,12 @@ var otpHashKey = builder.Configuration["Otp:HashKey"];
 if (!builder.Environment.IsDevelopment() && (string.IsNullOrWhiteSpace(otpHashKey) || otpHashKey.Contains("DevOnly_") || otpHashKey.Contains("DefaultSecureDevelopmentOtpKey")))
 {
     throw new InvalidOperationException("CRITICAL: Otp:HashKey configuration is missing or insecure for non-development environment.");
+}
+
+var sePayWebhookSecret = builder.Configuration["SePay:WebhookSecret"];
+if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(sePayWebhookSecret))
+{
+    throw new InvalidOperationException("CRITICAL: SePay:WebhookSecret configuration is missing for non-development environment.");
 }
 
 var app = builder.Build();

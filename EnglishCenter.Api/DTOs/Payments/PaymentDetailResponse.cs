@@ -22,4 +22,12 @@ public class PaymentDetailResponse
     public string? TransactionCode { get; set; }
     public PaymentStatus Status { get; set; }
     public string? Note { get; set; }
+
+    // SePay metadata
+    public string? PaymentCode { get; set; }
+    public long? SePayTransactionId { get; set; }
+    public string? SePayReferenceCode { get; set; }
+    public decimal? ReceivedAmount { get; set; }
+    public DateTime? PaidAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

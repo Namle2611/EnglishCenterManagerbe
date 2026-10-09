@@ -67,6 +67,8 @@ import { ClassGradebookPage } from './pages/grades/ClassGradebookPage';
 import { StudentGradeDetailPage } from './pages/grades/StudentGradeDetailPage';
 import { StudentGradesPage } from './pages/grades/StudentGradesPage';
 import { NotificationIndexPage } from './pages/notifications/NotificationIndexPage';
+import { StudentTuitionPage } from './pages/student/StudentTuitionPage';
+import { StudentPaymentQrPage } from './pages/student/StudentPaymentQrPage';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
 import { getRoleHomeRoute } from './utils/roleHelper';
@@ -246,6 +248,8 @@ export const App: React.FC = () => {
             {/* Student only */}
             <Route element={<RoleRoute requiredRole="STUDENT" />}>
               <Route path="/student" element={<StudentDashboard />} />
+              <Route path="/student/payments" element={<StudentTuitionPage />} />
+              <Route path="/student/payments/:enrollmentId" element={<StudentPaymentQrPage />} />
               <Route path="/student/assignments" element={<StudentAssignmentsPage />} />
               <Route path="/student/assignments/:assignmentId" element={<StudentAssignmentDetailPage />} />
               <Route path="/student/submissions/:submissionId" element={<StudentSubmissionDetailPage />} />

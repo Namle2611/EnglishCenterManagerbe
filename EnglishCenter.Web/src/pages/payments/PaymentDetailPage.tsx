@@ -418,6 +418,26 @@ export const PaymentDetailPage: React.FC = () => {
               <span style={labelStyle}>Mã tham chiếu / TransactionCode:</span>
               <span className="font-mono">{payment.transactionCode || 'Không có'}</span>
             </div>
+            {payment.paymentCode && (
+              <div style={infoRowStyle}>
+                <span style={labelStyle}>Mã thanh toán (PaymentCode):</span>
+                <span className="font-mono" style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+                  {payment.paymentCode}
+                </span>
+              </div>
+            )}
+            {payment.paidAt && (
+              <div style={infoRowStyle}>
+                <span style={labelStyle}>Thời điểm xác nhận thanh toán:</span>
+                <span>{formatAuditDateTime(payment.paidAt)}</span>
+              </div>
+            )}
+            {payment.sePayTransactionId && (
+              <div style={infoRowStyle}>
+                <span style={labelStyle}>Mã GD SePay:</span>
+                <span className="font-mono">#{payment.sePayTransactionId}</span>
+              </div>
+            )}
             <div style={infoRowStyle}>
               <span style={labelStyle}>Trạng thái:</span>
               <PaymentStatusBadge status={payment.status} />

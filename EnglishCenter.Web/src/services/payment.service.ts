@@ -5,7 +5,10 @@ import type {
   PaymentDetail,
   PaymentFilterParams,
   PaymentListItem,
+  PaymentStatusResponse,
   PaymentSummary,
+  SePayPaymentDetail,
+  StudentTuitionEnrollment,
   UpdatePaymentPayload,
   UpdatePaymentStatusPayload
 } from '../types/payment.types';
@@ -61,5 +64,37 @@ export const paymentService = {
 
   async deletePayment(id: number): Promise<void> {
     await axiosClient.delete(`/payments/${id}`);
+  },
+
+  // Student SePay VietQR APIs
+  async getStudentTuitions(signal?: AbortSignal): Promise<ApiResponse<StudentTuitionEnrollment[]>> {
+    const response = await axiosClient.get<ApiResponse<StudentTuitionEnrollment[]>>('/payments/student/tuition', {
+      signal
+    });
+    return response.data;
+  },
+
+  async createOrGetSePayPayment(enrollmentId: number, signal?: AbortSignal): Promise<ApiResponse<SePayPaymentDetail>> {
+    const response = await axiosClient.post<ApiResponse<SePayPaymentDetail>>(
+      `/payments/enrollments/${enrollmentId}/sepay`,
+      {},
+      { signal }
+    );
+    return response.data;
+  },
+
+  async getStudentSePayPayment(enrollmentId: number, signal?: AbortSignal): Promise<ApiResponse<SePayPaymentDetail>> {
+    const response = await axiosClient.get<ApiResponse<SePayPaymentDetail>>(
+      `/payments/enrollments/${enrollmentId}/sepay`,
+      { signal }
+    );
+    return response.data;
+  },
+
+  async getPaymentStatus(paymentId: number, signal?: AbortSignal): Promise<ApiResponse<PaymentStatusResponse>> {
+    const response = await axiosClient.get<ApiResponse<PaymentStatusResponse>>(`/payments/${paymentId}/status`, {
+      signal
+    });
+    return response.data;
   }
 };

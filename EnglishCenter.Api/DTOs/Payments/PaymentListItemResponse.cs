@@ -20,4 +20,8 @@ public class PaymentListItemResponse
     public string? TransactionCode { get; set; }
     public PaymentStatus Status { get; set; }
     public string? Note { get; set; }
+
+    // SePay metadata
+    public string? PaymentCode { get; set; }
+    public DateTime? PaidAt { get; set; }
 }

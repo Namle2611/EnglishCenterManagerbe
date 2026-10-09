@@ -33,6 +33,26 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .IsUnique()
             .HasFilter("[TransactionCode] IS NOT NULL");
 
+        builder.Property(p => p.PaymentCode)
+            .HasMaxLength(50);
+
+        builder.HasIndex(p => p.PaymentCode)
+            .IsUnique()
+            .HasFilter("[PaymentCode] IS NOT NULL");
+
+        builder.HasIndex(p => p.SePayTransactionId)
+            .IsUnique()
+            .HasFilter("[SePayTransactionId] IS NOT NULL");
+
+        builder.Property(p => p.SePayReferenceCode)
+            .HasMaxLength(100);
+
+        builder.Property(p => p.ReceivedAmount)
+            .HasPrecision(18, 2);
+
+        builder.Property(p => p.CreatedAt)
+            .HasDefaultValueSql("GETUTCDATE()");
+
         builder.Property(p => p.Note)
             .HasMaxLength(500);
 

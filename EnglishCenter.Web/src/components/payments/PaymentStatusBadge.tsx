@@ -29,6 +29,13 @@ const statusConfig: Record<PaymentStatus, StatusVisualConfig> = {
     border: 'var(--status-active-border)',
     dotColor: 'var(--status-active-text)'
   },
+  Paid: {
+    label: PAYMENT_STATUS_LABELS.Paid,
+    bg: 'var(--status-active-bg)',
+    color: 'var(--status-active-text)',
+    border: 'var(--status-active-border)',
+    dotColor: 'var(--status-active-text)'
+  },
   Failed: {
     label: PAYMENT_STATUS_LABELS.Failed,
     bg: 'var(--status-danger-bg)',

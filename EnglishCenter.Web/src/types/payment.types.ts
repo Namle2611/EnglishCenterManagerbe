@@ -1,8 +1,8 @@
 import type { ManagementQueryParams } from './common.types';
 import type { EnrollmentStatus } from './enrollment.types';
 
-export type PaymentStatus = 'Pending' | 'Completed' | 'Failed' | 'Cancelled';
-export type PaymentMethod = 'Cash' | 'BankTransfer' | 'Online';
+export type PaymentStatus = 'Pending' | 'Completed' | 'Paid' | 'Failed' | 'Cancelled';
+export type PaymentMethod = 'Cash' | 'BankTransfer' | 'Online' | 'SePay';
 
 export interface PaymentListItem {
   id: number;
@@ -21,6 +21,8 @@ export interface PaymentListItem {
   transactionCode?: string | null;
   status: PaymentStatus;
   note?: string | null;
+  paymentCode?: string | null;
+  paidAt?: string | null;
 }
 
 export interface PaymentDetail {
@@ -42,6 +44,12 @@ export interface PaymentDetail {
   transactionCode?: string | null;
   status: PaymentStatus;
   note?: string | null;
+  paymentCode?: string | null;
+  sePayTransactionId?: number | null;
+  sePayReferenceCode?: string | null;
+  receivedAmount?: number | null;
+  paidAt?: string | null;
+  createdAt?: string;
 }
 
 export interface PaymentSummary {
@@ -88,4 +96,45 @@ export interface PaymentFilterParams extends ManagementQueryParams {
   dateTo?: string;
   minAmount?: number;
   maxAmount?: number;
+}
+
+export interface SePayPaymentDetail {
+  paymentId: number;
+  enrollmentId: number;
+  paymentCode: string;
+  amount: number;
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  qrUrl: string;
+  status: string;
+  createdAt: string;
+  paidAt?: string | null;
+  courseName: string;
+  classCode?: string | null;
+  studentName: string;
+  studentCode: string;
+}
+
+export interface PaymentStatusResponse {
+  paymentId: number;
+  status: string;
+  paidAt?: string | null;
+  amount: number;
+  paymentCode?: string | null;
+}
+
+export interface StudentTuitionEnrollment {
+  enrollmentId: number;
+  courseId: number;
+  courseCode: string;
+  courseName: string;
+  classId?: number | null;
+  classCode?: string | null;
+  tuitionAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  status: EnrollmentStatus;
+  isFullyPaid: boolean;
+  activePayment?: SePayPaymentDetail | null;
 }

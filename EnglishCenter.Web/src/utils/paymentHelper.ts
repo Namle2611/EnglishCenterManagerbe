@@ -11,12 +11,14 @@ export const VALID_PAYMENT_SORT_FIELDS = [
   'studentcode',
   'studentname',
   'coursename',
-  'transactioncode'
+  'transactioncode',
+  'paymentcode'
 ];
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   Pending: 'Chờ xử lý',
   Completed: 'Hoàn tất',
+  Paid: 'Đã thanh toán',
   Failed: 'Thất bại',
   Cancelled: 'Đã hủy'
 };
@@ -24,7 +26,8 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   Cash: 'Tiền mặt',
   BankTransfer: 'Chuyển khoản',
-  Online: 'Trực tuyến'
+  Online: 'Trực tuyến',
+  SePay: 'VietQR (SePay)'
 };
 
 export const PAYMENT_PAGE_SIZES = [10, 20, 50] as const;
@@ -200,10 +203,10 @@ export function normalizePaymentQueryParams(searchParams: URLSearchParams): Paym
     studentId: !isNaN(rawStudentId) && rawStudentId > 0 ? rawStudentId : undefined,
     courseId: !isNaN(rawCourseId) && rawCourseId > 0 ? rawCourseId : undefined,
     classId: !isNaN(rawClassId) && rawClassId > 0 ? rawClassId : undefined,
-    status: ['Pending', 'Completed', 'Failed', 'Cancelled'].includes(rawStatus || '')
+    status: ['Pending', 'Completed', 'Paid', 'Failed', 'Cancelled'].includes(rawStatus || '')
       ? rawStatus!
       : undefined,
-    paymentMethod: ['Cash', 'BankTransfer', 'Online'].includes(rawPaymentMethod || '')
+    paymentMethod: ['Cash', 'BankTransfer', 'Online', 'SePay'].includes(rawPaymentMethod || '')
       ? rawPaymentMethod!
       : undefined,
     dateFrom,
