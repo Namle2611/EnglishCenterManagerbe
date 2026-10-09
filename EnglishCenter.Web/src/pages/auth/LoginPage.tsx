@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getRoleHomeRoute } from '../../utils/roleHelper';
 
@@ -106,6 +106,13 @@ export const LoginPage: React.FC = () => {
             {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
+
+        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem' }}>
+          <span style={{ color: 'var(--color-text-secondary)' }}>Chưa có tài khoản? </span>
+          <Link to="/register" style={{ color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'none' }}>
+            Đăng ký ngay
+          </Link>
+        </div>
       </div>
     </div>
   );

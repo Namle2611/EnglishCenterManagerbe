@@ -181,6 +181,11 @@ builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection(Gemin
 builder.Services.AddScoped<IGeminiQuizClient, GeminiQuizClient>();
 builder.Services.AddScoped<IQuizAiService, QuizAiService>();
 builder.Services.AddScoped<IdentitySeeder>();
+builder.Services.AddSingleton<IOtpCodeGenerator, DefaultOtpCodeGenerator>();
+builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<IRegistrationRequestRepository, RegistrationRequestRepository>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -235,6 +240,12 @@ builder.Services.AddRateLimiter(options =>
     var refreshWindow = builder.Configuration.GetValue<int>("RateLimiting:Refresh:WindowSeconds", 60);
     var changePassPermit = builder.Configuration.GetValue<int>("RateLimiting:ChangePassword:PermitLimit", 5);
     var changePassWindow = builder.Configuration.GetValue<int>("RateLimiting:ChangePassword:WindowSeconds", 300);
+    var registerPermit = builder.Configuration.GetValue<int>("RateLimiting:Register:PermitLimit", 5);
+    var registerWindow = builder.Configuration.GetValue<int>("RateLimiting:Register:WindowSeconds", 60);
+    var verifyOtpPermit = builder.Configuration.GetValue<int>("RateLimiting:VerifyOtp:PermitLimit", 10);
+    var verifyOtpWindow = builder.Configuration.GetValue<int>("RateLimiting:VerifyOtp:WindowSeconds", 60);
+    var resendOtpPermit = builder.Configuration.GetValue<int>("RateLimiting:ResendOtp:PermitLimit", 5);
+    var resendOtpWindow = builder.Configuration.GetValue<int>("RateLimiting:ResendOtp:WindowSeconds", 60);
 
     options.AddPolicy("AuthLoginPolicy", context =>
     {
@@ -243,6 +254,42 @@ builder.Services.AddRateLimiter(options =>
         {
             PermitLimit = loginPermit,
             Window = TimeSpan.FromSeconds(loginWindow),
+            SegmentsPerWindow = 6,
+            QueueLimit = 0
+        });
+    });
+
+    options.AddPolicy("AuthRegisterPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetSlidingWindowLimiter(ip, _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = registerPermit,
+            Window = TimeSpan.FromSeconds(registerWindow),
+            SegmentsPerWindow = 6,
+            QueueLimit = 0
+        });
+    });
+
+    options.AddPolicy("AuthVerifyOtpPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetSlidingWindowLimiter(ip, _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = verifyOtpPermit,
+            Window = TimeSpan.FromSeconds(verifyOtpWindow),
+            SegmentsPerWindow = 6,
+            QueueLimit = 0
+        });
+    });
+
+    options.AddPolicy("AuthResendOtpPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetSlidingWindowLimiter(ip, _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = resendOtpPermit,
+            Window = TimeSpan.FromSeconds(resendOtpWindow),
             SegmentsPerWindow = 6,
             QueueLimit = 0
         });
@@ -291,6 +338,9 @@ builder.Services.AddRateLimiter(options =>
             {
                 "ChangePasswordPolicy" => changePassWindow,
                 "AuthRefreshPolicy" => refreshWindow,
+                "AuthRegisterPolicy" => registerWindow,
+                "AuthVerifyOtpPolicy" => verifyOtpWindow,
+                "AuthResendOtpPolicy" => resendOtpWindow,
                 _ => loginWindow
             };
         }
@@ -321,7 +371,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var otpHashKey = builder.Configuration["Otp:HashKey"];
+if (!builder.Environment.IsDevelopment() && (string.IsNullOrWhiteSpace(otpHashKey) || otpHashKey.Contains("DevOnly_") || otpHashKey.Contains("DefaultSecureDevelopmentOtpKey")))
+{
+    throw new InvalidOperationException("CRITICAL: Otp:HashKey configuration is missing or insecure for non-development environment.");
+}
 
 var app = builder.Build();
 
@@ -332,6 +386,16 @@ using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
     await seeder.SeedAsync();
+}
+
+if (args.Contains("--reset-seed"))
+{
+    using var resetScope = app.Services.CreateScope();
+    var db = resetScope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var hasher = resetScope.ServiceProvider.GetRequiredService<IPasswordHasherService>();
+    await RealisticDataSeeder.ResetAndSeedRealisticDataAsync(db, hasher);
+    Console.WriteLine("SEEDED_REALISTIC_DATA_COMPLETE");
+    return;
 }
 
 app.UseForwardedHeaders();
@@ -346,6 +410,12 @@ if (app.Environment.IsDevelopment())
     {
         var canConnect = await db.Database.CanConnectAsync();
         return Results.Ok(new { status = canConnect ? "CONNECTED" : "FAILED" });
+    });
+
+    app.MapPost("/api/dev/reset-seed", async (AppDbContext db, IPasswordHasherService hasher) =>
+    {
+        await RealisticDataSeeder.ResetAndSeedRealisticDataAsync(db, hasher);
+        return Results.Ok(new { message = "Database reset and seeded with realistic data successfully." });
     });
 }
 else

@@ -15,12 +15,67 @@ public class AuthController : ControllerBase
 {
     private const string RefreshCookieName = "ec_refresh_token";
     private readonly IAuthService _authService;
+    private readonly IRegistrationService _registrationService;
     private readonly IWebHostEnvironment _environment;
 
-    public AuthController(IAuthService authService, IWebHostEnvironment environment)
+    public AuthController(
+        IAuthService authService,
+        IRegistrationService registrationService,
+        IWebHostEnvironment environment)
     {
         _authService = authService;
+        _registrationService = registrationService;
         _environment = environment;
+    }
+
+    [HttpPost("register")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthRegisterPolicy")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _registrationService.RegisterAsync(request, cancellationToken);
+        if (!result.Success)
+        {
+            if (result.Message.Contains("đã được sử dụng") || result.Message.Contains("đã hoàn tất") || result.Message.Contains("chờ quản trị viên"))
+            {
+                return Conflict(result);
+            }
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("register/verify-otp")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthVerifyOtpPolicy")]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _registrationService.VerifyOtpAsync(request, cancellationToken);
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("register/resend-otp")]
+    [AllowAnonymous]
+    [EnableRateLimiting("AuthResendOtpPolicy")]
+    public async Task<IActionResult> ResendOtp([FromBody] ResendOtpRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _registrationService.ResendOtpAsync(request, cancellationToken);
+        if (!result.Success)
+        {
+            if (result.Message.Contains("giây"))
+            {
+                return StatusCode(StatusCodes.Status429TooManyRequests, result);
+            }
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     [HttpPost("login")]

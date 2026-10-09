@@ -45,6 +45,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     if (user?.roles.includes('ADMIN')) {
       return [
         { label: 'Tổng quan', path: '/admin', icon: '📊' },
+        { label: 'Yêu cầu đăng ký', path: '/admin/registration-requests', icon: '📋' },
         { label: 'Quản lý học viên', path: '/admin/students', icon: '🎓' },
         { label: 'Quản lý giáo viên', path: '/admin/teachers', icon: '👨‍🏫' },
         { label: 'Quản lý khóa học', path: '/admin/courses', icon: '📚' },

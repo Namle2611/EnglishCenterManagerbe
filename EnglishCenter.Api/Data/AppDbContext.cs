@@ -35,6 +35,7 @@ public class AppDbContext : DbContext
     public DbSet<QuizAnswer> QuizAnswers => Set<QuizAnswer>();
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<AccountRegistrationRequest> AccountRegistrationRequests => Set<AccountRegistrationRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

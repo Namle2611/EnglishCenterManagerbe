@@ -16,6 +16,17 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Quick Action Navigation Grid */}
       <div style={navGridStyle}>
+        <Link to="/admin/registration-requests" style={navCardStyle}>
+          <div style={navIconContainerStyle}>📋</div>
+          <div style={navContentStyle}>
+            <h2 style={navTitleStyle}>Yêu cầu đăng ký</h2>
+            <p style={navDescriptionStyle}>
+              Xét duyệt hồ sơ ứng tuyển của Giáo viên và Nhân viên, phê duyệt hoặc từ chối cấp tài khoản
+            </p>
+          </div>
+          <span style={navArrowStyle}>&rarr;</span>
+        </Link>
+
         <Link to="/admin/students" style={navCardStyle}>
           <div style={navIconContainerStyle}>🎓</div>
           <div style={navContentStyle}>

@@ -5,6 +5,9 @@ import { useAuth } from './hooks/useAuth';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { ChangePasswordPage } from './pages/auth/ChangePasswordPage';
 import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
+import { VerifyOtpPage } from './pages/auth/VerifyOtpPage';
+import { RegistrationRequestsPage } from './pages/admin/RegistrationRequestsPage';
 import { StaffDashboard } from './pages/staff/StaffDashboard';
 import { StudentDashboard } from './pages/student/StudentDashboard';
 import { StudentCreatePage } from './pages/students/StudentCreatePage';
@@ -92,8 +95,10 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public route */}
+          {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register/verify-email" element={<VerifyOtpPage />} />
 
           {/* Root redirect */}
           <Route path="/" element={<RootRedirect />} />
@@ -105,6 +110,7 @@ export const App: React.FC = () => {
             {/* Admin only */}
             <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/registration-requests" element={<RegistrationRequestsPage />} />
               <Route path="/admin/students" element={<StudentListPage />} />
               <Route path="/admin/students/new" element={<StudentCreatePage />} />
               <Route path="/admin/students/:id" element={<StudentDetailPage />} />
