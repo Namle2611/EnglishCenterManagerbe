@@ -9,7 +9,9 @@ using EnglishCenter.Api.Enums;
 using EnglishCenter.Api.Repositories.Interfaces;
 using EnglishCenter.Api.Security;
 using EnglishCenter.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace EnglishCenter.Api.Services;
@@ -23,6 +25,7 @@ public class RegistrationService : IRegistrationService
     private readonly IEmailService _emailService;
     private readonly IPasswordHasherService _passwordHasher;
     private readonly ILogger<RegistrationService> _logger;
+    private readonly IWebHostEnvironment _environment;
 
     public RegistrationService(
         AppDbContext context,
@@ -31,7 +34,8 @@ public class RegistrationService : IRegistrationService
         IOtpService otpService,
         IEmailService emailService,
         IPasswordHasherService passwordHasher,
-        ILogger<RegistrationService> logger)
+        ILogger<RegistrationService> logger,
+        IWebHostEnvironment environment)
     {
         _context = context;
         _registrationRepository = registrationRepository;
@@ -40,6 +44,7 @@ public class RegistrationService : IRegistrationService
         _emailService = emailService;
         _passwordHasher = passwordHasher;
         _logger = logger;
+        _environment = environment;
     }
 
     public async Task<ApiResponse<RegisterResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)

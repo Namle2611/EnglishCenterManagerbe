@@ -224,7 +224,7 @@ export const VerifyOtpPage: React.FC = () => {
                 const val = e.target.value.replace(/\D/g, '');
                 setOtp(val);
               }}
-              placeholder="004271"
+              placeholder="------"
               disabled={isSubmitting}
               autoComplete="one-time-code"
               required
